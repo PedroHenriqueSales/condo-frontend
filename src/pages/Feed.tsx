@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "../components/Badge";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
@@ -95,7 +95,7 @@ export function Feed() {
   }
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen bg-bg pb-20">
       <Navbar />
       <div className="mx-auto max-w-5xl px-4 py-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -177,6 +177,15 @@ export function Feed() {
           ) : null}
         </div>
       </div>
+
+      <Link
+        to="/ads/new"
+        aria-label="Criar anúncio"
+        className="fixed bottom-6 right-6 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg transition hover:bg-primary-strong active:scale-95 sm:bottom-8 sm:right-8 sm:h-16 sm:w-16"
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 0)" }}
+      >
+        <span className="text-2xl font-light leading-none sm:text-3xl">+</span>
+      </Link>
     </div>
   );
 }

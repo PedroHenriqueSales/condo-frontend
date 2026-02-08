@@ -28,6 +28,8 @@ export function CreateAd() {
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [success, setSuccess] = useState(false);
 
   const adType = useMemo(() => uiToAdType[uiType], [uiType]);
 
@@ -35,6 +37,7 @@ export function CreateAd() {
     e.preventDefault();
     if (!activeCommunityId) return;
     setError(null);
+    setFieldErrors({});
     setBusy(true);
     try {
       const p = price.trim() ? Number(price.replace(",", ".")) : undefined;
@@ -45,9 +48,16 @@ export function CreateAd() {
         price: Number.isFinite(p as any) ? p : undefined,
         communityId: activeCommunityId,
       });
-      nav("/feed", { replace: true });
+      setSuccess(true);
+      setTimeout(() => nav("/feed", { replace: true }), 1500);
     } catch (err: any) {
-      setError(err?.response?.data?.error ?? "Falha ao criar anúncio.");
+      const data = err?.response?.data;
+      if (data?.errors && typeof data.errors === "object") {
+        setFieldErrors(data.errors);
+        setError(Object.values(data.errors).join(" "));
+      } else {
+        setError(data?.error ?? "Falha ao criar anúncio.");
+      }
     } finally {
       setBusy(false);
     }
@@ -61,12 +71,17 @@ export function CreateAd() {
 
         <Card>
           <form className="space-y-4" onSubmit={onSubmit}>
-            <Input
-              label="Título"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
+            <div>
+              <Input
+                label="Título"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+              {fieldErrors.title ? (
+                <div className="mt-1 text-sm text-danger">{fieldErrors.title}</div>
+              ) : null}
+            </div>
 
             <label className="block">
               <div className="mb-1 text-sm font-medium text-text">Descrição</div>
@@ -76,6 +91,9 @@ export function CreateAd() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Descreva o item/serviço..."
               />
+              {fieldErrors.description ? (
+                <div className="mt-1 text-sm text-danger">{fieldErrors.description}</div>
+              ) : null}
             </label>
 
             <label className="block">
@@ -89,25 +107,36 @@ export function CreateAd() {
                 <option value="ALUGUEL">Aluguel</option>
                 <option value="SERVICOS">Serviços</option>
               </select>
+              {fieldErrors.type ? (
+                <div className="mt-1 text-sm text-danger">{fieldErrors.type}</div>
+              ) : null}
             </label>
 
-            <Input
-              label="Preço (opcional)"
-              inputMode="decimal"
-              placeholder="Ex.: 50.00"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-            />
+            <div>
+              <Input
+                label="Preço (opcional)"
+                inputMode="decimal"
+                placeholder="Ex.: 50.00"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+              />
+              {fieldErrors.price ? (
+                <div className="mt-1 text-sm text-danger">{fieldErrors.price}</div>
+              ) : null}
+            </div>
 
             <div className="rounded-xl border border-border bg-surface/60 p-3 text-xs text-muted">
               Fotos: podem ser adicionadas depois (mock no MVP).
             </div>
 
+            {success ? (
+              <div className="text-sm font-medium text-primary-strong">Anúncio publicado! Redirecionando...</div>
+            ) : null}
             {error ? <div className="text-sm text-danger">{error}</div> : null}
 
             <div className="flex flex-col gap-2 sm:flex-row">
-              <Button type="submit" disabled={busy}>
-                {busy ? "Publicando..." : "Publicar"}
+              <Button type="submit" disabled={busy || success}>
+                {busy ? "Publicando..." : success ? "Publicado" : "Publicar"}
               </Button>
               <Button type="button" variant="ghost" onClick={() => nav("/feed")}>
                 Cancelar
