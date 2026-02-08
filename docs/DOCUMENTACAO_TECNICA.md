@@ -1,8 +1,8 @@
-# Documentação Técnica — Frontend ComuMinha
+# Documentação Técnica — Frontend Aquidolado
 
 ## 1. Visão geral
 
-O frontend do ComuMinha é uma **SPA** em **React 19** com **TypeScript** e **Vite 7**. Utiliza Context API para estado global, Tailwind CSS para estilos e Axios para comunicação com a API REST.
+O frontend do Aquidolado é uma **SPA** em **React 19** com **TypeScript** e **Vite 7**. Utiliza Context API para estado global, Tailwind CSS para estilos e Axios para comunicação com a API REST.
 
 ## 2. Arquitetura
 
@@ -65,11 +65,12 @@ Página
 | `/` | IndexRedirect | Redireciona conforme estado |
 | `/login` | Login | Público |
 | `/register` | Register | Público |
-| `/gate` | CondominiumGate | RequireAuth |
+| `/gate` | CondominiumGate | RequireAuth (aceita `?code=` para pré-preencher o código) |
 | `/feed` | Feed | RequireAuth + RequireCommunity |
 | `/ads/new` | CreateAd | RequireAuth + RequireCommunity |
 | `/ads/:id` | AdDetail | RequireAuth + RequireCommunity |
 | `/my-ads` | MyAds | RequireAuth + RequireCommunity |
+| `/communities` | MyCommunities | RequireAuth + RequireCommunity |
 | `*` | Navigate to `/` | Fallback |
 
 ### 3.2 Guards
@@ -84,13 +85,13 @@ Página
 
 - **Estado:** `token`, `user` (id, email, name)
 - **Ações:** `login`, `register`, `logout`
-- **Persistência:** `localStorage` (`comuminha.token`, `comuminha.authState`)
+- **Persistência:** `localStorage` (`aquidolado.token`, `aquidolado.authState`)
 
 ### 4.2 CondominiumContext
 
 - **Estado:** `communities`, `activeCommunityId`, `isLoading`
 - **Ações:** `refresh`, `setActiveCommunityId`, `clear`
-- **Persistência:** `localStorage` (`comuminha.activeCommunityId`)
+- **Persistência:** `localStorage` (`aquidolado.activeCommunityId`)
 
 ## 5. Serviços e API
 
@@ -148,11 +149,13 @@ Tipos TypeScript alinhados ao backend:
 
 | Componente | Descrição |
 |------------|-----------|
+| `AdPlaceholder` | Placeholder com logo quando anúncio não tem imagem |
 | `Badge` | Badge para tipo/status de anúncio |
-| `Button` | Botão com variantes (primary, secondary, danger) |
+| `Button` | Botão com variantes (primary, ghost, danger) |
 | `Card` | Card para anúncios e layouts |
 | `Input` | Input com label e erro |
-| `Navbar` | Barra de navegação com usuário e condomínio |
+| `Navbar` | Barra de navegação com Compartilhar e Minhas comunidades |
+| `ShareCommunityModal` | Modal para compartilhar código (QR code, copiar, WhatsApp) |
 | `Tabs` | Abas para filtros (ex.: Feed) |
 
 ## 8. Páginas
@@ -166,6 +169,7 @@ Tipos TypeScript alinhados ao backend:
 | **CreateAd** | Formulário de novo anúncio |
 | **AdDetail** | Detalhes do anúncio + botão contato |
 | **MyAds** | Meus anúncios + encerrar |
+| **MyCommunities** | Lista de comunidades + compartilhar código (QR code, copiar, WhatsApp) |
 
 ## 9. Build e deploy
 

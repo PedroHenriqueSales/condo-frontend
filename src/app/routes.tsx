@@ -5,9 +5,12 @@ import { Login } from "../pages/Login";
 import { Register } from "../pages/Register";
 import { CondominiumGate } from "../pages/CondominiumGate";
 import { Feed } from "../pages/Feed";
+import { MyCommunities } from "../pages/MyCommunities";
 import { AdDetail } from "../pages/AdDetail";
 import { CreateAd } from "../pages/CreateAd";
+import { EditAd } from "../pages/EditAd";
 import { MyAds } from "../pages/MyAds";
+import { MyAccount } from "../pages/MyAccount";
 
 function RequireAuth() {
   const { token } = useAuth();
@@ -43,10 +46,13 @@ export function AppRoutes() {
 
       <Route element={<RequireAuth />}>
         <Route path="/gate" element={<CondominiumGate />} />
+        <Route path="/my-account" element={<MyAccount />} />
 
         <Route element={<RequireCommunity />}>
           <Route path="/feed" element={<Feed />} />
+          <Route path="/communities" element={<MyCommunities />} />
           <Route path="/ads/new" element={<CreateAd />} />
+          <Route path="/ads/:id/edit" element={<EditAd />} />
           <Route path="/ads/:id" element={<AdDetail />} />
           <Route path="/my-ads" element={<MyAds />} />
         </Route>

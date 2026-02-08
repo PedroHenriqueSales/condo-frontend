@@ -1,4 +1,4 @@
-// Contratos do backend ComuMinha (Spring Boot)
+// Contratos do backend Aquidolado (Spring Boot)
 // Observação: os endpoints retornam Page<T> (Spring Data).
 
 export type JwtToken = string;
@@ -24,6 +24,18 @@ export type LoginRequest = {
   password: string;
 };
 
+export type UserProfileResponse = {
+  id: number;
+  email: string;
+  name: string;
+  whatsapp: string | null;
+};
+
+export type UpdateProfileRequest = {
+  name: string;
+  whatsapp?: string;
+};
+
 export type CommunityResponse = {
   id: number;
   name: string;
@@ -43,7 +55,7 @@ export type JoinCommunityRequest = {
 // Backend enum: SALE_TRADE, RENT, SERVICE
 export type AdType = "SALE_TRADE" | "RENT" | "SERVICE";
 
-export type AdStatus = "ACTIVE" | "CLOSED";
+export type AdStatus = "ACTIVE" | "PAUSED" | "CLOSED";
 
 export type AdResponse = {
   id: number;
@@ -57,6 +69,7 @@ export type AdResponse = {
   userWhatsapp: string | null;
   communityId: number;
   createdAt: string; // Instant ISO
+  imageUrls?: string[];
 };
 
 export type CreateAdRequest = {
@@ -65,6 +78,13 @@ export type CreateAdRequest = {
   type: AdType;
   price?: number;
   communityId: number;
+};
+
+export type UpdateAdRequest = {
+  title: string;
+  description?: string;
+  type: AdType;
+  price?: number;
 };
 
 export type EventType =

@@ -1,4 +1,4 @@
-# ComuMinha Frontend
+# Aquidolado Frontend
 
 Interface web para anúncios entre moradores de condomínio. MVP minimalista com foco em usabilidade e responsividade.
 

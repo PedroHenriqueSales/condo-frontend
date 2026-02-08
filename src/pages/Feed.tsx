@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { AdPlaceholder } from "../components/AdPlaceholder";
 import { Badge } from "../components/Badge";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
@@ -8,6 +9,8 @@ import { Tabs } from "../components/Tabs";
 import { useCondominium } from "../hooks/useCondominium";
 import type { AdResponse, AdType } from "../services/contracts";
 import { AdTypeLabels } from "../services/contracts";
+import { formatPriceCompact, formatPublishedAt } from "../utils/format";
+import { buildContactUrl } from "../utils/whatsapp";
 import * as AdsService from "../services/ads.service";
 import * as MetricsService from "../services/metrics.service";
 
@@ -18,6 +21,8 @@ const tabToAdType: Record<UiTab, AdType> = {
   ALUGUEL: "RENT",
   SERVICOS: "SERVICE",
 };
+
+const TAB_ORDER: UiTab[] = ["VENDA", "ALUGUEL", "SERVICOS"];
 
 export function Feed() {
   const nav = useNavigate();
@@ -31,6 +36,36 @@ export function Feed() {
   const [error, setError] = useState<string | null>(null);
 
   const adType = useMemo(() => tabToAdType[tab], [tab]);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+
+  const goToTab = useCallback((direction: "prev" | "next") => {
+    setTab((current) => {
+      const idx = TAB_ORDER.indexOf(current);
+      if (direction === "next" && idx < TAB_ORDER.length - 1) return TAB_ORDER[idx + 1];
+      if (direction === "prev" && idx > 0) return TAB_ORDER[idx - 1];
+      return current;
+    });
+  }, []);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (!touchStart.current) return;
+      const end = e.changedTouches[0];
+      const deltaX = end.clientX - touchStart.current.x;
+      const deltaY = end.clientY - touchStart.current.y;
+      touchStart.current = null;
+      const minSwipe = 50;
+      if (Math.abs(deltaX) > minSwipe && Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX < 0) goToTab("next");
+        else goToTab("prev");
+      }
+    },
+    [goToTab]
+  );
 
   async function load(reset: boolean) {
     if (!activeCommunityId) return;
@@ -82,7 +117,7 @@ export function Feed() {
     }
 
     // Abre imediatamente (evita bloqueio de popup no Safari iOS)
-    window.open(`https://wa.me/${digits}`, "_blank", "noopener,noreferrer");
+    window.open(buildContactUrl(ad.userWhatsapp, ad.title), "_blank", "noopener,noreferrer");
 
     try {
       await MetricsService.registerContactClick({
@@ -97,17 +132,25 @@ export function Feed() {
   return (
     <div className="min-h-screen bg-bg pb-20">
       <Navbar />
-      <div className="mx-auto max-w-5xl px-4 py-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Tabs<UiTab>
-            value={tab}
-            onChange={setTab}
-            options={[
-              { value: "VENDA", label: "Venda" },
-              { value: "ALUGUEL", label: "Aluguel" },
-              { value: "SERVICOS", label: "Serviços" },
-            ]}
-          />
+      <div
+        className="mx-auto max-w-5xl px-4 py-6"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className="flex flex-col gap-3">
+          <div className="flex w-full justify-center">
+            <div className="w-full max-w-sm">
+              <Tabs<UiTab>
+                value={tab}
+                onChange={setTab}
+                options={[
+                  { value: "VENDA", label: "Venda" },
+                  { value: "ALUGUEL", label: "Aluguel" },
+                  { value: "SERVICOS", label: "Serviços" },
+                ]}
+              />
+            </div>
+          </div>
 
           <input
             className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 sm:w-72"
@@ -127,34 +170,56 @@ export function Feed() {
                 className="w-full rounded-2xl p-4 text-left hover:bg-surface/60"
                 onClick={() => nav(`/ads/${ad.id}`)}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
+                <div className="flex items-start gap-3">
+                  {ad.imageUrls?.length ? (
+                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-surface">
+                      <img
+                        src={ad.imageUrls[0]}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <AdPlaceholder compact className="h-20 w-20" />
+                  )}
+                  <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold">{ad.title}</div>
                     <div className="mt-1 max-h-10 overflow-hidden text-sm text-muted">
                       {ad.description ?? "Sem descrição"}
                     </div>
                   </div>
-                  <Badge tone="primary">{AdTypeLabels[ad.type]}</Badge>
+                  <div className="flex flex-shrink-0 flex-col items-end gap-1">
+                    <Badge tone="primary">{AdTypeLabels[ad.type]}</Badge>
+                    {ad.price != null ? (
+                      <span className="whitespace-nowrap text-sm font-semibold text-primary-strong">
+                        {formatPriceCompact(Number(ad.price))}
+                      </span>
+                    ) : (
+                      <span className="whitespace-nowrap text-xs text-muted">A consultar</span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="mt-3 flex items-center justify-between gap-3">
-                  <div className="text-xs text-muted">
+                  <div className="min-w-0 shrink text-xs text-muted">
                     por <span className="font-medium text-text">{ad.userName}</span>
+                    {ad.createdAt ? (
+                      <span className="ml-2">• {formatPublishedAt(ad.createdAt)}</span>
+                    ) : null}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onContactClick(ad);
-                      }}
-                    >
-                      Entrar em contato
-                    </Button>
-                  </div>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    className="shrink-0 whitespace-nowrap"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onContactClick(ad);
+                    }}
+                  >
+                    Entrar em contato
+                  </Button>
                 </div>
               </button>
             </Card>

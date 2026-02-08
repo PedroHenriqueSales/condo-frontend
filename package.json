@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:mobile": "vite --mode mobile",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
@@ -20,6 +21,7 @@
   },
   "dependencies": {
     "axios": "^1.13.4",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.0"

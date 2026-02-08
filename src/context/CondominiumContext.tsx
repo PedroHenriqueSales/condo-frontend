@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CommunityResponse } from "../services/contracts";
 import * as CondominiumService from "../services/condominium.service";
 
@@ -11,7 +11,7 @@ type CondominiumContextValue = {
   clear: () => void;
 };
 
-const ACTIVE_COMMUNITY_KEY = "comuminha.activeCommunityId";
+const ACTIVE_COMMUNITY_KEY = "aquidolado.activeCommunityId";
 
 export const CondominiumContext = createContext<CondominiumContextValue | null>(null);
 
@@ -19,17 +19,23 @@ export function CondominiumProvider({ children }: { children: React.ReactNode })
   const [communities, setCommunities] = useState<CommunityResponse[]>([]);
   const [activeCommunityId, setActiveCommunityIdState] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const activeCommunityIdRef = useRef<number | null>(null);
+  activeCommunityIdRef.current = activeCommunityId;
 
   useEffect(() => {
     const raw = localStorage.getItem(ACTIVE_COMMUNITY_KEY);
     if (raw) {
       const parsed = Number(raw);
-      if (!Number.isNaN(parsed)) setActiveCommunityIdState(parsed);
+      if (!Number.isNaN(parsed)) {
+        setActiveCommunityIdState(parsed);
+        activeCommunityIdRef.current = parsed;
+      }
     }
   }, []);
 
   const setActiveCommunityId = useCallback((id: number) => {
     setActiveCommunityIdState(id);
+    activeCommunityIdRef.current = id;
     localStorage.setItem(ACTIVE_COMMUNITY_KEY, String(id));
   }, []);
 
@@ -41,19 +47,24 @@ export function CondominiumProvider({ children }: { children: React.ReactNode })
 
       if (list.length === 0) {
         setActiveCommunityIdState(null);
+        activeCommunityIdRef.current = null;
         localStorage.removeItem(ACTIVE_COMMUNITY_KEY);
         return;
       }
 
       // Se a comunidade ativa não existir mais, seleciona a primeira.
-      const stillValid = activeCommunityId && list.some((c) => c.id === activeCommunityId);
+      const current = activeCommunityIdRef.current;
+      const stillValid = current && list.some((c) => c.id === current);
       if (!stillValid) {
-        setActiveCommunityId(list[0].id);
+        const firstId = list[0].id;
+        setActiveCommunityIdState(firstId);
+        activeCommunityIdRef.current = firstId;
+        localStorage.setItem(ACTIVE_COMMUNITY_KEY, String(firstId));
       }
     } finally {
       setIsLoading(false);
     }
-  }, [activeCommunityId, setActiveCommunityId]);
+  }, []); // Sem dependências - usa ref para activeCommunityId
 
   const clear = useCallback(() => {
     setCommunities([]);

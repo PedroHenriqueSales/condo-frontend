@@ -18,9 +18,10 @@ type AuthContextValue = AuthState & {
   login: (payload: LoginRequest) => Promise<void>;
   register: (payload: RegisterRequest) => Promise<void>;
   logout: () => void;
+  updateUser: (updates: Partial<AuthUser>) => void;
 };
 
-const AUTH_STATE_KEY = "comuminha.authState";
+const AUTH_STATE_KEY = "aquidolado.authState";
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -78,9 +79,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setState({ token: null, user: null });
   }, []);
 
+  const updateUser = useCallback((updates: Partial<AuthUser>) => {
+    setState((s) => {
+      if (!s.user) return s;
+      const next = { ...s, user: { ...s.user, ...updates } };
+      localStorage.setItem(AUTH_STATE_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ ...state, login, register, logout }),
-    [state, login, register, logout]
+    () => ({ ...state, login, register, logout, updateUser }),
+    [state, login, register, logout, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

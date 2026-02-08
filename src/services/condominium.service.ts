@@ -24,3 +24,12 @@ export async function joinCommunity(
   return data;
 }
 
+export async function getCommunityById(id: number): Promise<CommunityResponse> {
+  const { data } = await api.get<CommunityResponse>(`/communities/${id}`);
+  return data;
+}
+
+export async function leaveCommunity(communityId: number): Promise<void> {
+  await api.delete(`/communities/${communityId}/leave`);
+}
+

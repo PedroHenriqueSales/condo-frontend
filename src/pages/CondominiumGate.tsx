@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
@@ -9,6 +9,7 @@ import * as CondominiumService from "../services/condominium.service";
 
 export function CondominiumGate() {
   const nav = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     communities,
     activeCommunityId,
@@ -17,7 +18,8 @@ export function CondominiumGate() {
     setActiveCommunityId,
   } = useCondominium();
 
-  const [accessCode, setAccessCode] = useState("");
+  const codeFromUrl = searchParams.get("code") ?? "";
+  const [accessCode, setAccessCode] = useState(codeFromUrl);
   const [newName, setNewName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<"join" | "create" | null>(null);

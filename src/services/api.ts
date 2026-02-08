@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const TOKEN_KEY = "comuminha.token";
+const TOKEN_KEY = "aquidolado.token";
 
 export function getStoredToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);

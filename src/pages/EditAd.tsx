@@ -1,11 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
 import { Navbar } from "../components/Navbar";
-import { useCondominium } from "../hooks/useCondominium";
+import { useAuth } from "../hooks/useAuth";
 import type { AdType } from "../services/contracts";
 import * as AdsService from "../services/ads.service";
 
@@ -17,61 +17,140 @@ const uiToAdType: Record<UiType, AdType> = {
   SERVICOS: "SERVICE",
 };
 
-export function CreateAd() {
+const adTypeToUi: Record<AdType, UiType> = {
+  SALE_TRADE: "VENDA",
+  RENT: "ALUGUEL",
+  SERVICE: "SERVICOS",
+};
+
+export function EditAd() {
+  const { id } = useParams<{ id: string }>();
   const nav = useNavigate();
-  const { activeCommunityId } = useCondominium();
+  const { user } = useAuth();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [uiType, setUiType] = useState<UiType>("VENDA");
   const [price, setPrice] = useState("");
-  const [images, setImages] = useState<File[]>([]);
+  const [currentImageUrls, setCurrentImageUrls] = useState<string[]>([]);
+  const [newImages, setNewImages] = useState<File[]>([]);
 
+  const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState(false);
+  const [forbidden, setForbidden] = useState(false);
 
   const adType = useMemo(() => uiToAdType[uiType], [uiType]);
 
+  useEffect(() => {
+    if (!id) return;
+    const adId = Number(id);
+    if (Number.isNaN(adId)) {
+      setLoading(false);
+      setForbidden(true);
+      return;
+    }
+    AdsService.getAdById(adId)
+      .then((ad) => {
+        if (ad.userId !== user?.id) {
+          setForbidden(true);
+          return;
+        }
+        if (ad.status === "CLOSED") {
+          setError("Não é possível editar anúncios encerrados.");
+          setForbidden(true);
+          return;
+        }
+        setTitle(ad.title);
+        setDescription(ad.description ?? "");
+        setUiType(adTypeToUi[ad.type]);
+        setPrice(ad.price != null ? String(ad.price) : "");
+        setCurrentImageUrls(ad.imageUrls ?? []);
+      })
+      .catch((err: any) => {
+        setError(err?.response?.data?.error ?? "Anúncio não encontrado.");
+        setForbidden(true);
+      })
+      .finally(() => setLoading(false));
+  }, [id, user?.id]);
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!activeCommunityId) return;
+    if (!id) return;
+    const adId = Number(id);
+    if (Number.isNaN(adId)) return;
+
     setError(null);
     setFieldErrors({});
     setBusy(true);
     try {
       const p = price.trim() ? Number(price.replace(",", ".")) : undefined;
-      await AdsService.createAd(
+      await AdsService.updateAd(
+        adId,
         {
           title: title.trim(),
           description: description.trim() || undefined,
           type: adType,
           price: Number.isFinite(p as any) ? p : undefined,
-          communityId: activeCommunityId,
         },
-        images.length ? images.slice(0, 3) : undefined
+        newImages.length ? newImages.slice(0, 3) : undefined
       );
       setSuccess(true);
-      setTimeout(() => nav("/feed", { replace: true }), 1500);
+      setTimeout(() => nav("/my-ads", { replace: true }), 1500);
     } catch (err: any) {
       const data = err?.response?.data;
       if (data?.errors && typeof data.errors === "object") {
         setFieldErrors(data.errors);
         setError(Object.values(data.errors).join(" "));
       } else {
-        setError(data?.error ?? "Falha ao criar anúncio.");
+        setError(data?.error ?? "Falha ao salvar alterações.");
       }
     } finally {
       setBusy(false);
     }
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-bg">
+        <Navbar />
+        <div className="mx-auto max-w-3xl px-4 py-6">
+          <div className="text-sm text-muted">Carregando...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (forbidden) {
+    return (
+      <div className="min-h-screen bg-bg">
+        <Navbar />
+        <div className="mx-auto max-w-3xl px-4 py-6">
+          <Card>
+            {error ? <div className="text-sm text-danger">{error}</div> : null}
+            <Link to="/my-ads">
+              <Button variant="ghost" className="mt-4">
+                Voltar para Meus anúncios
+              </Button>
+            </Link>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-bg">
       <Navbar />
       <div className="mx-auto max-w-3xl px-4 py-6">
-        <div className="mb-4 text-2xl font-semibold">Criar anúncio</div>
+        <div className="mb-4 flex items-center gap-3">
+          <Link className="text-sm font-medium text-primary-strong hover:underline" to="/my-ads">
+            ← Voltar
+          </Link>
+          <div className="text-2xl font-semibold">Editar anúncio</div>
+        </div>
 
         <Card>
           <form className="space-y-4" onSubmit={onSubmit}>
@@ -130,29 +209,22 @@ export function CreateAd() {
             </div>
 
             <label className="block">
-              <div className="mb-1 text-sm font-medium text-text">Fotos (até 3, opcional)</div>
+              <div className="mb-1 text-sm font-medium text-text">Fotos (até 3)</div>
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 multiple
                 className="hidden"
-                id="ad-images"
+                id="edit-ad-images"
                 onChange={(e) => {
                   const files = Array.from(e.target.files ?? []).slice(0, 3);
-                  setImages(files);
+                  setNewImages(files);
                 }}
               />
-              <label
-                htmlFor="ad-images"
-                className="flex min-h-24 cursor-pointer flex-wrap gap-2 rounded-xl border border-dashed border-border bg-surface/60 p-3 transition hover:border-primary/50"
-              >
-                {images.length === 0 ? (
-                  <span className="flex items-center text-sm text-muted">
-                    Clique para selecionar imagens (JPEG, PNG ou WebP, máx. 5MB cada)
-                  </span>
-                ) : (
-                  images.map((f, i) => (
-                    <div key={i} className="relative h-20 w-20 overflow-hidden rounded-lg bg-surface">
+              <div className="flex min-h-24 flex-wrap gap-2 rounded-xl border border-border bg-surface/60 p-3">
+                {newImages.length > 0 ? (
+                  newImages.map((f, i) => (
+                    <div key={`new-${i}`} className="relative h-20 w-20 overflow-hidden rounded-lg bg-surface">
                       <img
                         src={URL.createObjectURL(f)}
                         alt=""
@@ -160,30 +232,41 @@ export function CreateAd() {
                       />
                       <button
                         type="button"
-                        onClick={(ev) => {
-                          ev.preventDefault();
-                          setImages((prev) => prev.filter((_, j) => j !== i));
-                        }}
+                        onClick={() => setNewImages((prev) => prev.filter((_, j) => j !== i))}
                         className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-xs text-white"
                       >
                         ×
                       </button>
                     </div>
                   ))
+                ) : (
+                  <>
+                    {currentImageUrls.map((url, i) => (
+                      <div key={i} className="h-20 w-20 overflow-hidden rounded-lg bg-surface">
+                        <img src={url} alt="" className="h-full w-full object-cover" />
+                      </div>
+                    ))}
+                    <label
+                      htmlFor="edit-ad-images"
+                      className="flex h-20 w-20 cursor-pointer items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted transition hover:border-primary/50"
+                    >
+                      Trocar fotos
+                    </label>
+                  </>
                 )}
-              </label>
+              </div>
             </label>
 
             {success ? (
-              <div className="text-sm font-medium text-primary-strong">Anúncio publicado! Redirecionando...</div>
+              <div className="text-sm font-medium text-primary-strong">Alterações salvas! Redirecionando...</div>
             ) : null}
             {error ? <div className="text-sm text-danger">{error}</div> : null}
 
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button type="submit" disabled={busy || success}>
-                {busy ? "Publicando..." : success ? "Publicado" : "Publicar"}
+                {busy ? "Salvando..." : success ? "Salvo" : "Salvar alterações"}
               </Button>
-              <Button type="button" variant="ghost" onClick={() => nav("/feed")}>
+              <Button type="button" variant="ghost" onClick={() => nav("/my-ads")}>
                 Cancelar
               </Button>
             </div>
@@ -193,4 +276,3 @@ export function CreateAd() {
     </div>
   );
 }
-
