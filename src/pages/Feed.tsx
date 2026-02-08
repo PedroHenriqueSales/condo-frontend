@@ -1,0 +1,183 @@
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Badge } from "../components/Badge";
+import { Button } from "../components/Button";
+import { Card } from "../components/Card";
+import { Navbar } from "../components/Navbar";
+import { Tabs } from "../components/Tabs";
+import { useCondominium } from "../hooks/useCondominium";
+import type { AdResponse, AdType } from "../services/contracts";
+import { AdTypeLabels } from "../services/contracts";
+import * as AdsService from "../services/ads.service";
+import * as MetricsService from "../services/metrics.service";
+
+type UiTab = "VENDA" | "ALUGUEL" | "SERVICOS";
+
+const tabToAdType: Record<UiTab, AdType> = {
+  VENDA: "SALE_TRADE",
+  ALUGUEL: "RENT",
+  SERVICOS: "SERVICE",
+};
+
+export function Feed() {
+  const nav = useNavigate();
+  const { activeCommunityId } = useCondominium();
+  const [tab, setTab] = useState<UiTab>("VENDA");
+  const [search, setSearch] = useState("");
+  const [items, setItems] = useState<AdResponse[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const adType = useMemo(() => tabToAdType[tab], [tab]);
+
+  async function load(reset: boolean) {
+    if (!activeCommunityId) return;
+    setError(null);
+    setLoading(true);
+    try {
+      const nextPage = reset ? 0 : page;
+      const res = await AdsService.getAdsByType({
+        communityId: activeCommunityId,
+        type: adType,
+        search: search.trim() ? search.trim() : undefined,
+        page: nextPage,
+        size: 20,
+      });
+
+      setItems((prev) => (reset ? res.content : [...prev, ...res.content]));
+      setHasMore(!res.last);
+      setPage(res.number + 1);
+    } catch (err: any) {
+      setError(err?.response?.data?.error ?? "Falha ao carregar anúncios.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Recarrega ao trocar aba ou busca
+  useEffect(() => {
+    setItems([]);
+    setPage(0);
+    setHasMore(true);
+    const t = setTimeout(() => {
+      load(true);
+    }, 250);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adType, activeCommunityId, search]);
+
+  async function onContactClick(ad: AdResponse) {
+    if (!activeCommunityId) return;
+
+    if (!ad.userWhatsapp) {
+      alert("Este anúncio não possui WhatsApp cadastrado.");
+      return;
+    }
+    const digits = ad.userWhatsapp.replace(/[^\d]/g, "");
+    if (!digits) {
+      alert("WhatsApp inválido.");
+      return;
+    }
+
+    // Abre imediatamente (evita bloqueio de popup no Safari iOS)
+    window.open(`https://wa.me/${digits}`, "_blank", "noopener,noreferrer");
+
+    try {
+      await MetricsService.registerContactClick({
+        adId: ad.id,
+        communityId: activeCommunityId,
+      });
+    } catch {
+      // MVP: não bloqueia contato se a métrica falhar
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-bg">
+      <Navbar />
+      <div className="mx-auto max-w-5xl px-4 py-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <Tabs<UiTab>
+            value={tab}
+            onChange={setTab}
+            options={[
+              { value: "VENDA", label: "Venda" },
+              { value: "ALUGUEL", label: "Aluguel" },
+              { value: "SERVICOS", label: "Serviços" },
+            ]}
+          />
+
+          <input
+            className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 sm:w-72"
+            placeholder="Buscar anúncios..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        {error ? <div className="mt-4 text-sm text-danger">{error}</div> : null}
+
+        <div className="mt-4 grid gap-3">
+          {items.map((ad) => (
+            <Card key={ad.id} className="p-0">
+              <button
+                type="button"
+                className="w-full rounded-2xl p-4 text-left hover:bg-surface/60"
+                onClick={() => nav(`/ads/${ad.id}`)}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-semibold">{ad.title}</div>
+                    <div className="mt-1 max-h-10 overflow-hidden text-sm text-muted">
+                      {ad.description ?? "Sem descrição"}
+                    </div>
+                  </div>
+                  <Badge tone="primary">{AdTypeLabels[ad.type]}</Badge>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <div className="text-xs text-muted">
+                    por <span className="font-medium text-text">{ad.userName}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onContactClick(ad);
+                      }}
+                    >
+                      Entrar em contato
+                    </Button>
+                  </div>
+                </div>
+              </button>
+            </Card>
+          ))}
+
+          {!loading && items.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted shadow-soft">
+              Nenhum anúncio encontrado.
+            </div>
+          ) : null}
+        </div>
+
+        <div className="mt-4 flex justify-center">
+          {hasMore ? (
+            <Button variant="ghost" disabled={loading} onClick={() => load(false)}>
+              {loading ? "Carregando..." : "Carregar mais"}
+            </Button>
+          ) : items.length ? (
+            <div className="text-xs text-muted">Fim da lista</div>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
