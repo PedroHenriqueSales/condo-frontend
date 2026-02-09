@@ -10,6 +10,7 @@ import { useCondominium } from "../hooks/useCondominium";
 import type { AdResponse, AdType } from "../services/contracts";
 import { AdTypeLabels } from "../services/contracts";
 import { formatPriceCompact, formatPublishedAt } from "../utils/format";
+import { resolveImageUrl } from "../utils/imageUrl";
 import { buildContactUrl } from "../utils/whatsapp";
 import * as AdsService from "../services/ads.service";
 import * as MetricsService from "../services/metrics.service";
@@ -174,7 +175,7 @@ export function Feed() {
                   {ad.imageUrls?.length ? (
                     <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-surface">
                       <img
-                        src={ad.imageUrls[0]}
+                        src={resolveImageUrl(ad.imageUrls[0])}
                         alt=""
                         className="h-full w-full object-cover"
                       />

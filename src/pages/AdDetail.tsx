@@ -10,6 +10,7 @@ import { useCondominium } from "../hooks/useCondominium";
 import type { AdResponse } from "../services/contracts";
 import { AdTypeLabels } from "../services/contracts";
 import { formatPrice, formatPublishedAt } from "../utils/format";
+import { resolveImageUrl } from "../utils/imageUrl";
 import { buildContactUrl } from "../utils/whatsapp";
 import * as AdsService from "../services/ads.service";
 import * as MetricsService from "../services/metrics.service";
@@ -103,7 +104,7 @@ export function AdDetail() {
                 {ad.imageUrls.map((url, i) => (
                   <img
                     key={i}
-                    src={url}
+                    src={resolveImageUrl(url)}
                     alt=""
                     className="max-h-48 flex-shrink-0 rounded-lg object-cover"
                   />

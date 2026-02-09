@@ -8,6 +8,7 @@ import { Navbar } from "../components/Navbar";
 import type { AdResponse } from "../services/contracts";
 import { AdTypeLabels } from "../services/contracts";
 import { formatPriceCompact, formatPublishedAt } from "../utils/format";
+import { resolveImageUrl } from "../utils/imageUrl";
 import * as AdsService from "../services/ads.service";
 
 export function MyAds() {
@@ -89,7 +90,7 @@ export function MyAds() {
                 {ad.imageUrls?.length ? (
                   <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-surface">
                     <img
-                      src={ad.imageUrls[0]}
+                      src={resolveImageUrl(ad.imageUrls[0])}
                       alt=""
                       className="h-full w-full object-cover"
                     />

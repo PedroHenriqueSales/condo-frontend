@@ -39,6 +39,11 @@ src/
 │   ├── condominium.service.ts
 │   ├── contracts.ts  # Tipos TS espelhando backend
 │   └── metrics.service.ts
+├── utils/            # Utilitários
+│   ├── format.ts
+│   ├── imageUrl.ts   # resolveImageUrl (URLs de imagens em homolog/prod)
+│   ├── share.ts
+│   └── whatsapp.ts
 ├── styles/
 │   └── tokens.css    # Variáveis CSS (cores, tema)
 ├── style.css         # Estilos globais
@@ -97,7 +102,9 @@ Página
 
 ### 5.1 api.ts
 
-- Cliente **Axios** com `baseURL: "/api"`
+- Cliente **Axios** com `baseURL` dinâmico:
+  - **Dev:** `"/api"` (proxy Vite)
+  - **Homologação/produção:** `${VITE_API_URL}/api` quando `VITE_API_URL` está definida
 - **Interceptor:** adiciona `Authorization: Bearer <token>` em todas as requisições
 - Funções: `getStoredToken`, `setStoredToken`
 
@@ -179,9 +186,30 @@ Tipos TypeScript alinhados ao backend:
 - `npm run build` — `tsc && vite build`
 - `npm run preview` — preview do build
 
-### 9.2 Produção
+### 9.2 Deploy (homologação)
 
-- Configurar `baseURL` da API se o backend estiver em domínio diferente
+O frontend usa **Vercel** com custo zero. Em homologação, frontend e backend estão em domínios diferentes.
+
+**Variáveis de ambiente (Vercel):**
+
+- `VITE_API_URL` — URL base do backend, sem `/api` (ex.: `https://aquidolado-api.onrender.com`)
+
+**Arquivos de exemplo:**
+
+- `.env.example` — documenta `VITE_API_URL` para homologação
+
+**URLs de imagens:**
+
+- O backend retorna paths relativos (`/uploads/ads/xxx.jpg`). Em homologação, usamos `resolveImageUrl()` em `utils/imageUrl.ts` para resolver para o domínio do backend quando `VITE_API_URL` está definida.
+- Usado em: Feed, AdDetail, MyAds, EditAd.
+
+**CORS:**
+
+- O backend deve ter `CORS_ALLOWED_ORIGINS` com a URL do frontend Vercel.
+
+### 9.3 Produção
+
+- Definir `VITE_API_URL` na Vercel com a URL do backend em produção
 - Garantir que o backend tenha CORS configurado para o domínio do frontend
 
 ## 10. Dependências principais

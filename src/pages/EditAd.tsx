@@ -8,6 +8,7 @@ import { Navbar } from "../components/Navbar";
 import { useAuth } from "../hooks/useAuth";
 import type { AdType } from "../services/contracts";
 import * as AdsService from "../services/ads.service";
+import { resolveImageUrl } from "../utils/imageUrl";
 
 type UiType = "VENDA" | "ALUGUEL" | "SERVICOS";
 
@@ -243,7 +244,7 @@ export function EditAd() {
                   <>
                     {currentImageUrls.map((url, i) => (
                       <div key={i} className="h-20 w-20 overflow-hidden rounded-lg bg-surface">
-                        <img src={url} alt="" className="h-full w-full object-cover" />
+                        <img src={resolveImageUrl(url)} alt="" className="h-full w-full object-cover" />
                       </div>
                     ))}
                     <label
