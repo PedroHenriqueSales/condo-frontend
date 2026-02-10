@@ -1,133 +1,86 @@
-// Contratos do backend Aquidolado (Spring Boot)
-// Observação: os endpoints retornam Page<T> (Spring Data).
+/** Resposta de comunidade (lista e detalhe). Detalhe inclui createdByName e memberNames. */
+export interface CommunityResponse {
+  id: number;
+  name: string;
+  accessCode: string;
+  createdAt: string;
+  createdById: number;
+  createdByName?: string;
+  memberNames?: string[];
+}
 
-export type JwtToken = string;
+export interface CreateCommunityRequest {
+  name: string;
+}
 
-export type AuthResponse = {
-  token: JwtToken;
-  type: "Bearer" | string;
+export interface JoinCommunityRequest {
+  accessCode: string;
+}
+
+// Auth
+export interface AuthResponse {
+  token: string;
+  type?: string;
   userId: number;
   email: string;
   name: string;
-};
+}
 
-export type RegisterRequest = {
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
   whatsapp?: string;
   address?: string;
-};
+}
 
-export type LoginRequest = {
-  email: string;
-  password: string;
-};
-
-export type UserProfileResponse = {
-  id: number;
-  email: string;
-  name: string;
-  whatsapp: string | null;
-};
-
-export type UpdateProfileRequest = {
-  name: string;
-  whatsapp?: string;
-};
-
-export type CommunityResponse = {
-  id: number;
-  name: string;
-  accessCode: string;
-  createdAt: string; // Instant ISO
-  createdById: number;
-};
-
-export type CreateCommunityRequest = {
-  name: string;
-};
-
-export type JoinCommunityRequest = {
-  accessCode: string;
-};
-
-// Backend enum: SALE_TRADE, RENT, SERVICE
+// Ads
 export type AdType = "SALE_TRADE" | "RENT" | "SERVICE";
-
 export type AdStatus = "ACTIVE" | "PAUSED" | "CLOSED";
 
-export type AdResponse = {
+export interface AdResponse {
   id: number;
   title: string;
-  description: string | null;
+  description?: string;
   type: AdType;
-  price: number | null;
+  price?: number;
   status: AdStatus;
   userId: number;
-  userName: string;
-  userWhatsapp: string | null;
+  userName?: string;
+  userWhatsapp?: string;
   communityId: number;
-  createdAt: string; // Instant ISO
+  createdAt: string;
   imageUrls?: string[];
-};
+}
 
-export type CreateAdRequest = {
+export interface CreateAdRequest {
   title: string;
   description?: string;
   type: AdType;
   price?: number;
   communityId: number;
-};
+}
 
-export type UpdateAdRequest = {
+export interface UpdateAdRequest {
   title: string;
   description?: string;
   type: AdType;
   price?: number;
-};
+}
 
-export type EventType =
-  | "LOGIN"
-  | "REGISTER"
-  | "CREATE_AD"
-  | "CONTACT_CLICK"
-  | "REPORT_AD";
-
-export type EventLogRequest = {
-  eventType: EventType;
-  communityId?: number;
-};
-
-export type ContactClickRequest = {
-  adId: number;
-  communityId: number;
-};
-
-export type ReportReason =
-  | "INAPPROPRIATE_CONTENT"
-  | "SPAM"
-  | "FRAUD"
-  | "WRONG_CATEGORY"
-  | "ALREADY_SOLD"
-  | "OTHER";
-
-export type ReportRequest = {
-  adId: number;
-  reason: ReportReason;
-};
-
-export type Page<T> = {
+export interface Page<T> {
   content: T[];
   totalElements: number;
   totalPages: number;
   size: number;
-  number: number; // página atual (0-based)
-  first: boolean;
-  last: boolean;
-  numberOfElements: number;
-  empty: boolean;
-};
+  number: number;
+  last?: boolean;
+}
 
 export const AdTypeLabels: Record<AdType, string> = {
   SALE_TRADE: "Venda",
@@ -135,3 +88,28 @@ export const AdTypeLabels: Record<AdType, string> = {
   SERVICE: "Serviços",
 };
 
+// Users
+export interface UserProfileResponse {
+  id: number;
+  email: string;
+  name: string;
+  whatsapp?: string;
+}
+
+export interface UpdateProfileRequest {
+  name: string;
+  whatsapp?: string;
+}
+
+// Metrics / events
+export interface ContactClickRequest {
+  adId: number;
+  communityId: number;
+}
+
+export type EventType = string;
+
+export interface EventLogRequest {
+  eventType: EventType;
+  communityId?: number;
+}
