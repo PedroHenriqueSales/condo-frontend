@@ -35,7 +35,7 @@ export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
-  whatsapp?: string;
+  whatsapp: string;
   address?: string;
 }
 
@@ -94,11 +94,13 @@ export interface UserProfileResponse {
   email: string;
   name: string;
   whatsapp?: string;
+  address?: string;
 }
 
 export interface UpdateProfileRequest {
   name: string;
-  whatsapp?: string;
+  whatsapp: string;
+  address?: string;
 }
 
 // Metrics / events

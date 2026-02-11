@@ -6,6 +6,7 @@ import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Navbar } from "../components/Navbar";
 import { Tabs } from "../components/Tabs";
+import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
 import type { AdResponse, AdType } from "../services/contracts";
 import { AdTypeLabels } from "../services/contracts";
@@ -27,6 +28,7 @@ const TAB_ORDER: UiTab[] = ["VENDA", "ALUGUEL", "SERVICOS"];
 
 export function Feed() {
   const nav = useNavigate();
+  const { user } = useAuth();
   const { activeCommunityId } = useCondominium();
   const [tab, setTab] = useState<UiTab>("VENDA");
   const [search, setSearch] = useState("");
@@ -208,19 +210,21 @@ export function Feed() {
                       <span className="ml-2">• {formatPublishedAt(ad.createdAt)}</span>
                     ) : null}
                   </div>
-                  <Button
-                    type="button"
-                    variant="primary"
-                    size="sm"
-                    className="shrink-0 whitespace-nowrap"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onContactClick(ad);
-                    }}
-                  >
-                    Entrar em contato
-                  </Button>
+                  {user && ad.userId !== user.id ? (
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      className="shrink-0 whitespace-nowrap"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onContactClick(ad);
+                      }}
+                    >
+                      Entrar em contato
+                    </Button>
+                  ) : null}
                 </div>
               </button>
             </Card>

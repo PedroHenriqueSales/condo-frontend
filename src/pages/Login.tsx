@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
@@ -8,11 +8,20 @@ import { useAuth } from "../hooks/useAuth";
 
 export function Login() {
   const nav = useNavigate();
-  const { login } = useAuth();
+  const location = useLocation();
+  const { token, login } = useAuth();
+  const from = (location.state as { from?: { pathname: string; search: string } } | null)?.from;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (token) {
+      const target = from ? `${from.pathname}${from.search ?? ""}` : "/feed";
+      nav(target, { replace: true });
+    }
+  }, [token, from, nav]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -20,7 +29,8 @@ export function Login() {
     setIsLoading(true);
     try {
       await login({ email, password });
-      nav("/gate", { replace: true });
+      const target = from ? `${from.pathname}${from.search ?? ""}` : "/gate";
+      nav(target, { replace: true });
     } catch (err: any) {
       setError(err?.response?.data?.error ?? "Falha no login. Verifique suas credenciais.");
     } finally {

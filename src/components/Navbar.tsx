@@ -1,22 +1,14 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { useCondominium } from "../hooks/useCondominium";
 import logoIcon from "../assets/logo-icon.png";
 import logoName from "../assets/logo-name.png";
 import { Button } from "./Button";
-import { ShareCommunityModal } from "./ShareCommunityModal";
 
 export function Navbar() {
   const { pathname } = useLocation();
   const { user, logout } = useAuth();
-  const { communities, activeCommunityId } = useCondominium();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
-
-  const activeCommunity = activeCommunityId
-    ? communities.find((c) => c.id === activeCommunityId)
-    : null;
 
   const item = (to: string, label: string, closeOnClick = false) => {
     const active = pathname === to || pathname.startsWith(to + "/");
@@ -49,11 +41,6 @@ export function Navbar() {
           {item("/my-ads", "Meus anúncios")}
           {item("/communities", "Minhas comunidades")}
           {item("/my-account", "Minha conta")}
-          {activeCommunity ? (
-            <Button variant="ghost" size="sm" onClick={() => setShareOpen(true)}>
-              Compartilhar
-            </Button>
-          ) : null}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -89,18 +76,6 @@ export function Navbar() {
             {item("/my-ads", "Meus anúncios", true)}
             {item("/communities", "Minhas comunidades", true)}
             {item("/my-account", "Minha conta", true)}
-            {activeCommunity ? (
-              <button
-                type="button"
-                className="block rounded-xl px-3 py-2.5 text-left text-sm font-medium text-muted hover:bg-surface/60"
-                onClick={() => {
-                  setMenuOpen(false);
-                  setShareOpen(true);
-                }}
-              >
-                Compartilhar comunidade
-              </button>
-            ) : null}
             <button
               type="button"
               className="mt-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-muted hover:bg-surface/60"
@@ -113,13 +88,6 @@ export function Navbar() {
             </button>
           </nav>
         </div>
-      ) : null}
-
-      {shareOpen && activeCommunity ? (
-        <ShareCommunityModal
-          community={activeCommunity}
-          onClose={() => setShareOpen(false)}
-        />
       ) : null}
     </div>
   );

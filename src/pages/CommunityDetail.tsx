@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Navbar } from "../components/Navbar";
+import { ShareCommunityModal } from "../components/ShareCommunityModal";
 import { useCondominium } from "../hooks/useCondominium";
 import * as CondominiumService from "../services/condominium.service";
 import type { CommunityResponse } from "../services/contracts";
@@ -24,6 +25,7 @@ export function CommunityDetail() {
   const [error, setError] = useState<string | null>(null);
   const [leaveBusy, setLeaveBusy] = useState(false);
   const [leaveError, setLeaveError] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     const rawId = id ?? "";
@@ -124,6 +126,13 @@ export function CommunityDetail() {
                 </div>
               )}
             </dl>
+            <Button
+              variant="ghost"
+              className="mt-3 w-full sm:w-auto"
+              onClick={() => setShareOpen(true)}
+            >
+              Compartilhar comunidade
+            </Button>
           </Card>
 
           <Card>
@@ -153,6 +162,13 @@ export function CommunityDetail() {
           </Button>
         </div>
       </div>
+
+      {shareOpen && (
+        <ShareCommunityModal
+          community={community}
+          onClose={() => setShareOpen(false)}
+        />
+      )}
     </div>
   );
 }

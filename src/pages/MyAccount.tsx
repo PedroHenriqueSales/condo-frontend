@@ -12,6 +12,7 @@ export function MyAccount() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [address, setAddress] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -28,6 +29,7 @@ export function MyAccount() {
         setName(profile.name);
         setEmail(profile.email);
         setWhatsapp(profile.whatsapp ?? "");
+        setAddress(profile.address ?? "");
       } catch (err: any) {
         setError(err?.response?.data?.error ?? "Falha ao carregar perfil.");
       } finally {
@@ -46,9 +48,11 @@ export function MyAccount() {
     try {
       const profile = await UsersService.updateProfile({
         name: name.trim(),
-        whatsapp: whatsapp.trim() ? whatsapp.trim() : undefined,
+        whatsapp: whatsapp.trim(),
+        address: address.trim() || null,
       });
       updateUser({ name: profile.name });
+      setAddress(profile.address ?? "");
       setSuccess(true);
     } catch (err: any) {
       const data = err?.response?.data;
@@ -69,7 +73,7 @@ export function MyAccount() {
       <div className="mx-auto max-w-md px-4 py-6">
         <div className="mb-4 text-2xl font-semibold">Minha conta</div>
         <p className="mb-4 text-sm text-muted">
-          Edite seu nome e telefone. O email não pode ser alterado.
+          Edite seu nome, telefone e endereço. O email não pode ser alterado.
         </p>
 
         {loading ? (
@@ -94,10 +98,18 @@ export function MyAccount() {
               <Input
                 label="WhatsApp (telefone)"
                 inputMode="tel"
-                placeholder="Ex.: +55 11 99999-9999"
+                placeholder="Ex.: 11 99999-9999 ou +55 11 99999-9999"
                 value={whatsapp}
                 onChange={(e) => setWhatsapp(e.target.value)}
                 error={fieldErrors.whatsapp}
+                required
+              />
+              <Input
+                label="Endereço (opcional)"
+                placeholder="Ex.: Rua, número, bairro, cidade"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                error={fieldErrors.address}
               />
 
               {error ? <div className="text-sm text-danger">{error}</div> : null}

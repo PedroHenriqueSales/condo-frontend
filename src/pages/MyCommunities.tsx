@@ -6,7 +6,7 @@ import { useCondominium } from "../hooks/useCondominium";
 
 export function MyCommunities() {
   const nav = useNavigate();
-  const { communities, isLoading } = useCondominium();
+  const { communities, isLoading, activeCommunityId, setActiveCommunityId } = useCondominium();
 
   return (
     <div className="min-h-screen bg-bg pb-20">
@@ -27,12 +27,21 @@ export function MyCommunities() {
           <ul className="flex flex-col gap-3">
             {communities.map((c) => (
               <li key={c.id}>
-                <Card className="flex flex-row flex-wrap items-center justify-between gap-3">
+                <Card
+                  className="flex cursor-pointer flex-row flex-wrap items-center justify-between gap-3 transition hover:bg-surface/80"
+                  onClick={() => {
+                    if (c.id !== activeCommunityId) setActiveCommunityId(c.id);
+                    nav("/feed");
+                  }}
+                >
                   <span className="font-medium text-text">{c.name}</span>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => nav(`/communities/${c.id}`)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      nav(`/communities/${c.id}`);
+                    }}
                   >
                     Detalhe
                   </Button>

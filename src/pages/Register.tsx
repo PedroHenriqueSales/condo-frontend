@@ -14,6 +14,7 @@ export function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [address, setAddress] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,10 +25,11 @@ export function Register() {
     setIsLoading(true);
     try {
       await register({
-        name,
-        email,
+        name: name.trim(),
+        email: email.trim(),
         password,
-        whatsapp: whatsapp.trim() ? whatsapp.trim() : undefined,
+        whatsapp: whatsapp.trim(),
+        address: address.trim() ? address.trim() : undefined,
       });
       nav("/gate", { replace: true });
     } catch (err: any) {
@@ -73,11 +75,18 @@ export function Register() {
               minLength={6}
             />
             <Input
-              label="WhatsApp (opcional)"
+              label="WhatsApp (telefone)"
               inputMode="tel"
-              placeholder="Ex.: +55 11 99999-9999"
+              placeholder="Ex.: 11 99999-9999 ou +55 11 99999-9999"
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value)}
+              required
+            />
+            <Input
+              label="Endereço (opcional)"
+              placeholder="Ex.: Rua, número, bairro, cidade"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
             />
 
             {error ? <div className="text-sm text-danger">{error}</div> : null}

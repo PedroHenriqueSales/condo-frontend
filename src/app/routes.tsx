@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
 import { AdDetail } from "../pages/AdDetail";
@@ -15,7 +15,10 @@ import { Register } from "../pages/Register";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { token } = useAuth();
-  if (!token) return <Navigate to="/login" replace />;
+  const location = useLocation();
+  if (!token) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
   return <>{children}</>;
 }
 
