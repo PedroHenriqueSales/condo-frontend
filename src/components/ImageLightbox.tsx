@@ -8,11 +8,22 @@ type Props = {
 
 export function ImageLightbox({ imageUrl, onClose }: Props) {
   useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = originalOverflow;
     };
   }, []);
+
+  useEffect(() => {
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [onClose]);
+
+  if (typeof document === "undefined") return null;
 
   const modalContent = (
     <div
@@ -21,12 +32,14 @@ export function ImageLightbox({ imageUrl, onClose }: Props) {
       role="dialog"
       aria-modal="true"
       aria-label="Imagem ampliada"
+      style={{ zIndex: 9999 }}
     >
       <button
         type="button"
         onClick={onClose}
-        className="absolute right-4 top-4 rounded-lg bg-white/10 p-2 text-white hover:bg-white/20"
+        className="absolute right-4 top-4 z-[10000] rounded-lg bg-white/10 p-2 text-white hover:bg-white/20 transition"
         aria-label="Fechar"
+        style={{ zIndex: 10000 }}
       >
         ✕
       </button>
@@ -35,6 +48,9 @@ export function ImageLightbox({ imageUrl, onClose }: Props) {
         alt=""
         className="max-h-full max-w-full object-contain"
         onClick={(e) => e.stopPropagation()}
+        onError={(e) => {
+          console.error("Erro ao carregar imagem:", imageUrl);
+        }}
       />
     </div>
   );
