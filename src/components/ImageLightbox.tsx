@@ -48,7 +48,7 @@ export function ImageLightbox({ imageUrl, onClose }: Props) {
         alt=""
         className="max-h-full max-w-full object-contain"
         onClick={(e) => e.stopPropagation()}
-        onError={(e) => {
+        onError={() => {
           console.error("Erro ao carregar imagem:", imageUrl);
         }}
       />
