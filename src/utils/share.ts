@@ -1,6 +1,8 @@
 /**
- * Utilitários para compartilhar comunidade (código de acesso).
+ * Utilitários para compartilhar comunidade (código de acesso) e anúncios.
  */
+import type { AdType } from "../services/contracts";
+import { AdTypeLabels } from "../services/contracts";
 
 export function buildShareUrl(accessCode: string): string {
   const base = typeof window !== "undefined" ? window.location.origin : "";
@@ -10,6 +12,20 @@ export function buildShareUrl(accessCode: string): string {
 export function buildShareWhatsAppUrl(accessCode: string, communityName: string): string {
   const url = buildShareUrl(accessCode);
   const message = `Entra na nossa comunidade "${communityName}" no Aquidolado!\n\nUse o código: ${accessCode}\n\nOu acesse: ${url}`;
+  return `https://wa.me/?text=${encodeURIComponent(message)}`;
+}
+
+export function buildAdShareUrl(adId: number): string {
+  const base = typeof window !== "undefined" ? window.location.origin : "";
+  return `${base}/ads/${adId}`;
+}
+
+export function buildAdShareWhatsAppUrl(ad: { id: number; title: string; type: AdType; price?: number }): string {
+  const url = buildAdShareUrl(ad.id);
+  const typeLabel = AdTypeLabels[ad.type];
+  const priceText = ad.price != null ? `Preço: R$ ${ad.price.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "Valor a consultar";
+  
+  const message = `Olha esse anúncio no Aquidolado!\n\n${ad.title}\nTipo: ${typeLabel}\n${priceText}\n\n${url}`;
   return `https://wa.me/?text=${encodeURIComponent(message)}`;
 }
 

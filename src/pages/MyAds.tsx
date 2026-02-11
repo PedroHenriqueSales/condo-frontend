@@ -85,7 +85,11 @@ export function MyAds() {
 
         <div className="mt-4 grid gap-3">
           {items.map((ad) => (
-            <Card key={ad.id}>
+            <Card
+              key={ad.id}
+              className="cursor-pointer transition hover:bg-surface/60"
+              onClick={() => nav(`/ads/${ad.id}`)}
+            >
               <div className="flex items-start gap-3">
                 {ad.imageUrls?.length ? (
                   <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-surface">
@@ -121,7 +125,7 @@ export function MyAds() {
                 </span>
               </div>
 
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
                 {(ad.status === "ACTIVE" || ad.status === "PAUSED") ? (
                   <Button
                     variant="ghost"
