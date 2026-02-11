@@ -24,7 +24,10 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
 function RequireCommunity({ children }: { children: React.ReactNode }) {
   const { communities, activeCommunityId } = useCondominium();
-  if (!communities.length || !activeCommunityId) return <Navigate to="/gate" replace />;
+  const location = useLocation();
+  if (!communities.length || !activeCommunityId) {
+    return <Navigate to="/gate" state={{ from: location }} replace />;
+  }
   return <>{children}</>;
 }
 

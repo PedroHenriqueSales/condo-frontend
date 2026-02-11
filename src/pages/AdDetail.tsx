@@ -65,7 +65,9 @@ export function AdDetail() {
 
   function onShare() {
     if (!ad) return;
-    window.open(buildAdShareWhatsAppUrl(ad), "_blank", "noopener,noreferrer");
+    const whatsappUrl = buildAdShareWhatsAppUrl(ad);
+    // Abre imediatamente (evita bloqueio de popup no Safari iOS)
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   }
 
   const WhatsAppIcon = () => (

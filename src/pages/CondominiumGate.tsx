@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
@@ -10,8 +10,10 @@ import * as CondominiumService from "../services/condominium.service";
 
 export function CondominiumGate() {
   const nav = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { logout } = useAuth();
+  const from = (location.state as { from?: { pathname: string; search: string } } | null)?.from;
   const {
     communities,
     activeCommunityId,
@@ -37,9 +39,10 @@ export function CondominiumGate() {
 
   useEffect(() => {
     if (communities.length && activeCommunityId) {
-      nav("/feed", { replace: true });
+      const target = from ? `${from.pathname}${from.search ?? ""}` : "/feed";
+      nav(target, { replace: true });
     }
-  }, [communities.length, activeCommunityId, nav]);
+  }, [communities.length, activeCommunityId, from, nav]);
 
   async function onJoin(e: FormEvent) {
     e.preventDefault();
@@ -49,7 +52,8 @@ export function CondominiumGate() {
       const c = await CondominiumService.joinCommunity({ accessCode: accessCode.trim() });
       setActiveCommunityId(c.id);
       await refresh();
-      nav("/feed", { replace: true });
+      const target = from ? `${from.pathname}${from.search ?? ""}` : "/feed";
+      nav(target, { replace: true });
     } catch (err: any) {
       setError(err?.response?.data?.error ?? "Código inválido.");
     } finally {

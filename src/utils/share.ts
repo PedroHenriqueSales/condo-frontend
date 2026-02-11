@@ -23,10 +23,13 @@ export function buildAdShareUrl(adId: number): string {
 export function buildAdShareWhatsAppUrl(ad: { id: number; title: string; type: AdType; price?: number }): string {
   const url = buildAdShareUrl(ad.id);
   const typeLabel = AdTypeLabels[ad.type];
-  const priceText = ad.price != null ? `Preço: R$ ${ad.price.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "Valor a consultar";
+  const priceText = ad.price != null 
+    ? `Preço: R$ ${ad.price.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
+    : "Valor a consultar";
   
   const message = `Olha esse anúncio no Aquidolado!\n\n${ad.title}\nTipo: ${typeLabel}\n${priceText}\n\n${url}`;
-  return `https://wa.me/?text=${encodeURIComponent(message)}`;
+  const encodedMessage = encodeURIComponent(message);
+  return `https://api.whatsapp.com/send?text=${encodedMessage}`;
 }
 
 export async function copyToClipboard(text: string): Promise<boolean> {
