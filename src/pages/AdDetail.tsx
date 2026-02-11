@@ -4,6 +4,7 @@ import { AdPlaceholder } from "../components/AdPlaceholder";
 import { Badge } from "../components/Badge";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
+import { ImageLightbox } from "../components/ImageLightbox";
 import { Navbar } from "../components/Navbar";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
@@ -25,6 +26,7 @@ export function AdDetail() {
   const [ad, setAd] = useState<AdResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   useEffect(() => {
     const adId = Number(id);
@@ -126,7 +128,8 @@ export function AdDetail() {
                     key={i}
                     src={resolveImageUrl(url)}
                     alt=""
-                    className="max-h-48 flex-shrink-0 rounded-lg object-cover"
+                    className="max-h-48 cursor-pointer flex-shrink-0 rounded-lg object-cover transition hover:opacity-90"
+                    onClick={() => setLightboxImage(resolveImageUrl(url))}
                   />
                 ))}
               </div>
@@ -163,6 +166,10 @@ export function AdDetail() {
           </Card>
         ) : null}
       </div>
+
+      {lightboxImage && (
+        <ImageLightbox imageUrl={lightboxImage} onClose={() => setLightboxImage(null)} />
+      )}
     </div>
   );
 }
