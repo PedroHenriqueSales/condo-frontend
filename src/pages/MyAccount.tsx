@@ -49,7 +49,7 @@ export function MyAccount() {
       const profile = await UsersService.updateProfile({
         name: name.trim(),
         whatsapp: whatsapp.trim(),
-        address: address.trim() || null,
+        address: address.trim() || undefined,
       });
       updateUser({ name: profile.name });
       setAddress(profile.address ?? "");
