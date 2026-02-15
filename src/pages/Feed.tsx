@@ -13,20 +13,21 @@ import type { AdResponse, AdType } from "../services/contracts";
 import { AdTypeLabels } from "../services/contracts";
 import { formatPriceCompact, formatPublishedAt } from "../utils/format";
 import { resolveImageUrl } from "../utils/imageUrl";
-import { buildContactUrl } from "../utils/whatsapp";
+import { buildContactUrl, buildRecommendationContactUrl } from "../utils/whatsapp";
 import * as AdsService from "../services/ads.service";
 import * as MetricsService from "../services/metrics.service";
 
-type UiTab = "VENDA" | "ALUGUEL" | "SERVICOS" | "DOACAO";
+type UiTab = "VENDA" | "ALUGUEL" | "SERVICOS" | "DOACAO" | "INDICACOES";
 
 const tabToAdType: Record<UiTab, AdType> = {
   VENDA: "SALE_TRADE",
   ALUGUEL: "RENT",
   SERVICOS: "SERVICE",
   DOACAO: "DONATION",
+  INDICACOES: "RECOMMENDATION",
 };
 
-const TAB_ORDER: UiTab[] = ["VENDA", "ALUGUEL", "SERVICOS", "DOACAO"];
+const TAB_ORDER: UiTab[] = ["VENDA", "ALUGUEL", "SERVICOS", "DOACAO", "INDICACOES"];
 
 export function Feed() {
   const nav = useNavigate();
@@ -111,18 +112,34 @@ export function Feed() {
   async function onContactClick(ad: AdResponse) {
     if (!activeCommunityId) return;
 
-    if (!ad.userWhatsapp) {
-      alert("Este anúncio não possui WhatsApp cadastrado.");
-      return;
+    if (ad.type === "RECOMMENDATION") {
+      if (!ad.recommendedContact?.trim()) {
+        alert("Esta indicação não possui WhatsApp cadastrado.");
+        return;
+      }
+      const digits = ad.recommendedContact.replace(/[^\d]/g, "");
+      if (!digits) {
+        alert("WhatsApp inválido.");
+        return;
+      }
+      const url = buildRecommendationContactUrl(
+        ad.recommendedContact,
+        ad.serviceType ?? "serviço",
+        ad.title
+      );
+      window.open(url, "_blank", "noopener,noreferrer");
+    } else {
+      if (!ad.userWhatsapp) {
+        alert("Este anúncio não possui WhatsApp cadastrado.");
+        return;
+      }
+      const digits = ad.userWhatsapp.replace(/[^\d]/g, "");
+      if (!digits) {
+        alert("WhatsApp inválido.");
+        return;
+      }
+      window.open(buildContactUrl(ad.userWhatsapp, ad.title), "_blank", "noopener,noreferrer");
     }
-    const digits = ad.userWhatsapp.replace(/[^\d]/g, "");
-    if (!digits) {
-      alert("WhatsApp inválido.");
-      return;
-    }
-
-    // Abre imediatamente (evita bloqueio de popup no Safari iOS)
-    window.open(buildContactUrl(ad.userWhatsapp, ad.title), "_blank", "noopener,noreferrer");
 
     try {
       await MetricsService.registerContactClick({
@@ -153,6 +170,7 @@ export function Feed() {
                   { value: "ALUGUEL", label: "Aluguel" },
                   { value: "SERVICOS", label: "Serviços" },
                   { value: "DOACAO", label: "Doação" },
+                  { value: "INDICACOES", label: "Indicações" },
                 ]}
               />
             </div>
@@ -177,7 +195,9 @@ export function Feed() {
                 onClick={() => nav(`/ads/${ad.id}`)}
               >
                 <div className="flex items-start gap-3">
-                  {ad.imageUrls?.length ? (
+                  {ad.type === "RECOMMENDATION" ? (
+                    <AdPlaceholder compact className="h-20 w-20" />
+                  ) : ad.imageUrls?.length ? (
                     <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-surface">
                       <img
                         src={resolveImageUrl(ad.imageUrls[0])}
@@ -196,10 +216,17 @@ export function Feed() {
                         stopPropagation
                       />
                     </div>
+                    {ad.type === "RECOMMENDATION" && ad.serviceType ? (
+                      <div className="mt-0.5 text-xs text-primary-strong">{ad.serviceType}</div>
+                    ) : null}
                   </div>
                   <div className="flex flex-shrink-0 flex-col items-end gap-1">
                     <Badge tone="primary">{AdTypeLabels[ad.type]}</Badge>
-                    {ad.type === "DONATION" ? (
+                    {ad.type === "RECOMMENDATION" ? (
+                      <span className="whitespace-nowrap text-xs text-muted">
+                        +{ad.likeCount ?? 0} −{ad.dislikeCount ?? 0}
+                      </span>
+                    ) : ad.type === "DONATION" ? (
                       <span className="whitespace-nowrap text-xs text-muted">Doação</span>
                     ) : ad.price != null ? (
                       <span className="whitespace-nowrap text-sm font-semibold text-primary-strong">
@@ -218,7 +245,7 @@ export function Feed() {
                       <span className="ml-2">• {formatPublishedAt(ad.createdAt)}</span>
                     ) : null}
                   </div>
-                  {user && ad.userId !== user.id ? (
+                  {user && ad.userId !== user.id && (ad.type !== "RECOMMENDATION" || !!ad.recommendedContact?.trim()) ? (
                     <Button
                       type="button"
                       variant="primary"

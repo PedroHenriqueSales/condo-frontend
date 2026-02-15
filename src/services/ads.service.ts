@@ -1,5 +1,14 @@
 import { api } from "./api";
-import type { AdResponse, AdType, CreateAdRequest, Page, UpdateAdRequest } from "./contracts";
+import type {
+  AdResponse,
+  AdType,
+  CommentResponse,
+  CreateAdRequest,
+  CreateCommentRequest,
+  Page,
+  ReactionKind,
+  UpdateAdRequest,
+} from "./contracts";
 
 export async function getAdsByType(params: {
   communityId: number;
@@ -86,5 +95,37 @@ export async function listMyAds(params?: {
     },
   });
   return data;
+}
+
+// Indicações: reações e comentários
+export async function setReaction(adId: number, kind: ReactionKind): Promise<void> {
+  await api.post(`/ads/${adId}/reaction`, { kind });
+}
+
+export async function removeReaction(adId: number): Promise<void> {
+  await api.delete(`/ads/${adId}/reaction`);
+}
+
+export async function getComments(
+  adId: number,
+  params?: { page?: number; size?: number }
+): Promise<Page<CommentResponse>> {
+  const { data } = await api.get<Page<CommentResponse>>(`/ads/${adId}/comments`, {
+    params: { page: params?.page ?? 0, size: params?.size ?? 50 },
+  });
+  return data;
+}
+
+export async function createComment(adId: number, payload: CreateCommentRequest): Promise<CommentResponse> {
+  const { data } = await api.post<CommentResponse>(`/ads/${adId}/comments`, payload);
+  return data;
+}
+
+export async function toggleCommentLike(adId: number, commentId: number): Promise<void> {
+  await api.post(`/ads/${adId}/comments/${commentId}/like`);
+}
+
+export async function deleteComment(adId: number, commentId: number): Promise<void> {
+  await api.delete(`/ads/${adId}/comments/${commentId}`);
 }
 

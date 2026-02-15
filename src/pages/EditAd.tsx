@@ -10,13 +10,14 @@ import type { AdType } from "../services/contracts";
 import * as AdsService from "../services/ads.service";
 import { resolveImageUrl } from "../utils/imageUrl";
 
-type UiType = "VENDA" | "ALUGUEL" | "SERVICOS" | "DOACAO";
+type UiType = "VENDA" | "ALUGUEL" | "SERVICOS" | "DOACAO" | "INDICACOES";
 
 const uiToAdType: Record<UiType, AdType> = {
   VENDA: "SALE_TRADE",
   ALUGUEL: "RENT",
   SERVICOS: "SERVICE",
   DOACAO: "DONATION",
+  INDICACOES: "RECOMMENDATION",
 };
 
 const adTypeToUi: Record<AdType, UiType> = {
@@ -24,6 +25,7 @@ const adTypeToUi: Record<AdType, UiType> = {
   RENT: "ALUGUEL",
   SERVICE: "SERVICOS",
   DONATION: "DOACAO",
+  RECOMMENDATION: "INDICACOES",
 };
 
 export function EditAd() {
@@ -35,6 +37,8 @@ export function EditAd() {
   const [description, setDescription] = useState("");
   const [uiType, setUiType] = useState<UiType>("VENDA");
   const [price, setPrice] = useState("");
+  const [recommendedContact, setRecommendedContact] = useState("");
+  const [serviceType, setServiceType] = useState("");
   const [currentImageUrls, setCurrentImageUrls] = useState<string[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
 
@@ -70,6 +74,8 @@ export function EditAd() {
         setDescription(ad.description ?? "");
         setUiType(adTypeToUi[ad.type]);
         setPrice(ad.price != null ? String(ad.price) : "");
+        setRecommendedContact(ad.recommendedContact ?? "");
+        setServiceType(ad.serviceType ?? "");
         setCurrentImageUrls(ad.imageUrls ?? []);
       })
       .catch((err: any) => {
@@ -89,7 +95,9 @@ export function EditAd() {
     setFieldErrors({});
     setBusy(true);
     try {
-      const p = adType === "DONATION" ? undefined : (price.trim() ? Number(price.replace(",", ".")) : undefined);
+      const p = (adType === "DONATION" || adType === "RECOMMENDATION")
+        ? undefined
+        : (price.trim() ? Number(price.replace(",", ".")) : undefined);
       await AdsService.updateAd(
         adId,
         {
@@ -97,8 +105,10 @@ export function EditAd() {
           description: description.trim() || undefined,
           type: adType,
           price: Number.isFinite(p as any) ? p : undefined,
+          recommendedContact: adType === "RECOMMENDATION" ? recommendedContact.trim() || undefined : undefined,
+          serviceType: adType === "RECOMMENDATION" ? serviceType.trim() || undefined : undefined,
         },
-        newImages.length ? newImages.slice(0, 5) : undefined
+        adType === "RECOMMENDATION" ? undefined : (newImages.length ? newImages.slice(0, 5) : undefined)
       );
       setSuccess(true);
       setTimeout(() => nav("/my-ads", { replace: true }), 1500);
@@ -195,13 +205,41 @@ export function EditAd() {
                 <option value="ALUGUEL">Aluguel</option>
                 <option value="SERVICOS">Serviços</option>
                 <option value="DOACAO">Doação</option>
+                <option value="INDICACOES">Indicações</option>
               </select>
               {fieldErrors.type ? (
                 <div className="mt-1 text-sm text-danger">{fieldErrors.type}</div>
               ) : null}
             </label>
 
-            {uiType !== "DOACAO" ? (
+            {uiType === "INDICACOES" ? (
+              <>
+                <div>
+                  <Input
+                    label="WhatsApp do indicado"
+                    placeholder="Ex.: (11) 99999-9999"
+                    value={recommendedContact}
+                    onChange={(e) => setRecommendedContact(e.target.value)}
+                    required
+                  />
+                  {fieldErrors.recommendedContact ? (
+                    <div className="mt-1 text-sm text-danger">{fieldErrors.recommendedContact}</div>
+                  ) : null}
+                </div>
+                <div>
+                  <Input
+                    label="Tipo de serviço"
+                    placeholder="Ex.: Encanador, Eletricista"
+                    value={serviceType}
+                    onChange={(e) => setServiceType(e.target.value)}
+                    required
+                  />
+                  {fieldErrors.serviceType ? (
+                    <div className="mt-1 text-sm text-danger">{fieldErrors.serviceType}</div>
+                  ) : null}
+                </div>
+              </>
+            ) : uiType !== "DOACAO" ? (
               <div>
                 <Input
                   label="Preço (opcional)"
@@ -216,6 +254,7 @@ export function EditAd() {
               </div>
             ) : null}
 
+            {uiType !== "INDICACOES" ? (
             <label className="block">
               <div className="mb-1 text-sm font-medium text-text">Fotos (até 5)</div>
               <input
@@ -264,6 +303,7 @@ export function EditAd() {
                 )}
               </div>
             </label>
+            ) : null}
 
             {success ? (
               <div className="text-sm font-medium text-primary-strong">Alterações salvas! Redirecionando...</div>

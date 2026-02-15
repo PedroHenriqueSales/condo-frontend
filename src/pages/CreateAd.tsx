@@ -9,13 +9,14 @@ import { useCondominium } from "../hooks/useCondominium";
 import type { AdType } from "../services/contracts";
 import * as AdsService from "../services/ads.service";
 
-type UiType = "VENDA" | "ALUGUEL" | "SERVICOS" | "DOACAO";
+type UiType = "VENDA" | "ALUGUEL" | "SERVICOS" | "DOACAO" | "INDICACOES";
 
 const uiToAdType: Record<UiType, AdType> = {
   VENDA: "SALE_TRADE",
   ALUGUEL: "RENT",
   SERVICOS: "SERVICE",
   DOACAO: "DONATION",
+  INDICACOES: "RECOMMENDATION",
 };
 
 export function CreateAd() {
@@ -26,6 +27,8 @@ export function CreateAd() {
   const [description, setDescription] = useState("");
   const [uiType, setUiType] = useState<UiType>("VENDA");
   const [price, setPrice] = useState("");
+  const [recommendedContact, setRecommendedContact] = useState("");
+  const [serviceType, setServiceType] = useState("");
   const [images, setImages] = useState<File[]>([]);
 
   const [busy, setBusy] = useState(false);
@@ -42,7 +45,9 @@ export function CreateAd() {
     setFieldErrors({});
     setBusy(true);
     try {
-      const p = adType === "DONATION" ? undefined : (price.trim() ? Number(price.replace(",", ".")) : undefined);
+      const p = (adType === "DONATION" || adType === "RECOMMENDATION")
+        ? undefined
+        : (price.trim() ? Number(price.replace(",", ".")) : undefined);
       await AdsService.createAd(
         {
           title: title.trim(),
@@ -50,8 +55,10 @@ export function CreateAd() {
           type: adType,
           price: Number.isFinite(p as any) ? p : undefined,
           communityId: activeCommunityId,
+          recommendedContact: adType === "RECOMMENDATION" ? recommendedContact.trim() || undefined : undefined,
+          serviceType: adType === "RECOMMENDATION" ? serviceType.trim() || undefined : undefined,
         },
-        images.length ? images.slice(0, 5) : undefined
+        adType === "RECOMMENDATION" ? undefined : (images.length ? images.slice(0, 5) : undefined)
       );
       setSuccess(true);
       setTimeout(() => nav("/feed", { replace: true }), 1500);
@@ -114,13 +121,41 @@ export function CreateAd() {
                 <option value="ALUGUEL">Aluguel</option>
                 <option value="SERVICOS">Serviços</option>
                 <option value="DOACAO">Doação</option>
+                <option value="INDICACOES">Indicações</option>
               </select>
               {fieldErrors.type ? (
                 <div className="mt-1 text-sm text-danger">{fieldErrors.type}</div>
               ) : null}
             </label>
 
-            {uiType !== "DOACAO" ? (
+            {uiType === "INDICACOES" ? (
+              <>
+                <div>
+                  <Input
+                    label="WhatsApp do indicado"
+                    placeholder="Ex.: (11) 99999-9999"
+                    value={recommendedContact}
+                    onChange={(e) => setRecommendedContact(e.target.value)}
+                    required
+                  />
+                  {fieldErrors.recommendedContact ? (
+                    <div className="mt-1 text-sm text-danger">{fieldErrors.recommendedContact}</div>
+                  ) : null}
+                </div>
+                <div>
+                  <Input
+                    label="Tipo de serviço"
+                    placeholder="Ex.: Encanador, Eletricista"
+                    value={serviceType}
+                    onChange={(e) => setServiceType(e.target.value)}
+                    required
+                  />
+                  {fieldErrors.serviceType ? (
+                    <div className="mt-1 text-sm text-danger">{fieldErrors.serviceType}</div>
+                  ) : null}
+                </div>
+              </>
+            ) : uiType !== "DOACAO" ? (
               <div>
                 <Input
                   label="Preço (opcional)"
@@ -135,6 +170,7 @@ export function CreateAd() {
               </div>
             ) : null}
 
+            {uiType !== "INDICACOES" ? (
             <label className="block">
               <div className="mb-1 text-sm font-medium text-text">Fotos (até 5, opcional)</div>
               <input
@@ -179,6 +215,7 @@ export function CreateAd() {
                 )}
               </label>
             </label>
+            ) : null}
 
             {success ? (
               <div className="text-sm font-medium text-primary-strong">Anúncio publicado! Redirecionando...</div>

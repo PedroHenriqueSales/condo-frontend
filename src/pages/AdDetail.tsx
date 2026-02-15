@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AdPlaceholder } from "../components/AdPlaceholder";
 import { Badge } from "../components/Badge";
@@ -9,12 +9,12 @@ import { Navbar } from "../components/Navbar";
 import { TextWithLinks } from "../components/TextWithLinks";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
-import type { AdResponse } from "../services/contracts";
+import type { AdResponse, CommentResponse } from "../services/contracts";
 import { AdTypeLabels } from "../services/contracts";
 import { formatPrice, formatPublishedAt } from "../utils/format";
 import { resolveImageUrl } from "../utils/imageUrl";
 import { buildAdShareWhatsAppUrl } from "../utils/share";
-import { buildContactUrl } from "../utils/whatsapp";
+import { buildContactUrl, buildRecommendationContactUrl } from "../utils/whatsapp";
 import * as AdsService from "../services/ads.service";
 import * as MetricsService from "../services/metrics.service";
 
@@ -28,6 +28,19 @@ export function AdDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const [comments, setComments] = useState<CommentResponse[]>([]);
+  const [commentText, setCommentText] = useState("");
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null);
+
+  const fetchAd = useCallback(() => {
+    const adId = Number(id);
+    if (!adId) return;
+    AdsService.getAdById(adId)
+      .then(setAd)
+      .catch((err: any) => setError(err?.response?.data?.error ?? "Falha ao carregar anúncio."));
+  }, [id]);
 
   useEffect(() => {
     const adId = Number(id);
@@ -43,21 +56,49 @@ export function AdDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  useEffect(() => {
+    if (!ad?.id || ad.type !== "RECOMMENDATION") {
+      setComments([]);
+      return;
+    }
+    setLoadingComments(true);
+    AdsService.getComments(ad.id, { page: 0, size: 100 })
+      .then((res) => setComments(res.content))
+      .catch(() => setComments([]))
+      .finally(() => setLoadingComments(false));
+  }, [ad?.id, ad?.type]);
+
   async function onContact() {
     if (!ad || !activeCommunityId) return;
 
-    if (!ad.userWhatsapp) {
-      alert("Este anúncio não possui WhatsApp cadastrado.");
-      return;
+    if (ad.type === "RECOMMENDATION") {
+      if (!ad.recommendedContact?.trim()) {
+        alert("Esta indicação não possui WhatsApp cadastrado.");
+        return;
+      }
+      const digits = ad.recommendedContact.replace(/[^\d]/g, "");
+      if (!digits) {
+        alert("WhatsApp inválido.");
+        return;
+      }
+      const url = buildRecommendationContactUrl(
+        ad.recommendedContact,
+        ad.serviceType ?? "serviço",
+        ad.title
+      );
+      window.open(url, "_blank", "noopener,noreferrer");
+    } else {
+      if (!ad.userWhatsapp) {
+        alert("Este anúncio não possui WhatsApp cadastrado.");
+        return;
+      }
+      const digits = ad.userWhatsapp.replace(/[^\d]/g, "");
+      if (!digits) {
+        alert("WhatsApp inválido.");
+        return;
+      }
+      window.open(buildContactUrl(ad.userWhatsapp, ad.title), "_blank", "noopener,noreferrer");
     }
-    const digits = ad.userWhatsapp.replace(/[^\d]/g, "");
-    if (!digits) {
-      alert("WhatsApp inválido.");
-      return;
-    }
-
-    // Abre imediatamente (evita bloqueio de popup no Safari iOS)
-    window.open(buildContactUrl(ad.userWhatsapp, ad.title), "_blank", "noopener,noreferrer");
 
     try {
       await MetricsService.registerContactClick({ adId: ad.id, communityId: activeCommunityId });
@@ -71,6 +112,79 @@ export function AdDetail() {
     const whatsappUrl = buildAdShareWhatsAppUrl(ad);
     // Abre imediatamente (evita bloqueio de popup no Safari iOS)
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+  }
+
+  async function onReaction(kind: "LIKE" | "DISLIKE") {
+    if (!ad || ad.type !== "RECOMMENDATION") return;
+    try {
+      if (ad.currentUserReaction === kind) {
+        await AdsService.removeReaction(ad.id);
+      } else {
+        await AdsService.setReaction(ad.id, kind);
+      }
+      fetchAd();
+    } catch {
+      // ignore
+    }
+  }
+
+  async function onRemoveReaction() {
+    if (!ad || ad.type !== "RECOMMENDATION") return;
+    try {
+      await AdsService.removeReaction(ad.id);
+      fetchAd();
+    } catch {
+      // ignore
+    }
+  }
+
+  async function onSubmitComment(e: React.FormEvent) {
+    e.preventDefault();
+    if (!ad || ad.type !== "RECOMMENDATION" || !commentText.trim()) return;
+    setSubmittingComment(true);
+    try {
+      await AdsService.createComment(ad.id, { text: commentText.trim() });
+      setCommentText("");
+      const res = await AdsService.getComments(ad.id, { page: 0, size: 100 });
+      setComments(res.content);
+    } catch {
+      // ignore
+    } finally {
+      setSubmittingComment(false);
+    }
+  }
+
+  async function onToggleCommentLike(commentId: number) {
+    if (!ad || ad.type !== "RECOMMENDATION") return;
+    try {
+      await AdsService.toggleCommentLike(ad.id, commentId);
+      setComments((prev) =>
+        prev.map((c) => {
+          if (c.id !== commentId) return c;
+          return {
+            ...c,
+            currentUserLiked: !c.currentUserLiked,
+            likeCount: c.likeCount + (c.currentUserLiked ? -1 : 1),
+          };
+        })
+      );
+    } catch {
+      // ignore
+    }
+  }
+
+  async function onDeleteComment(commentId: number) {
+    if (!ad || ad.type !== "RECOMMENDATION") return;
+    if (!window.confirm("Excluir este comentário?")) return;
+    setDeletingCommentId(commentId);
+    try {
+      await AdsService.deleteComment(ad.id, commentId);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+    } catch {
+      // ignore
+    } finally {
+      setDeletingCommentId(null);
+    }
   }
 
   const WhatsAppIcon = () => (
@@ -112,7 +226,9 @@ export function AdDetail() {
               </div>
               <div className="flex flex-shrink-0 flex-col items-end gap-1">
                 <Badge tone="primary">{AdTypeLabels[ad.type]}</Badge>
-                {ad.type === "DONATION" ? (
+                {ad.type === "RECOMMENDATION" ? (
+                  <span className="text-sm text-muted">Indicação</span>
+                ) : ad.type === "DONATION" ? (
                   <span className="text-sm text-muted">Doação</span>
                 ) : ad.price != null ? (
                   <span className="whitespace-nowrap text-lg font-semibold text-primary-strong">
@@ -124,7 +240,18 @@ export function AdDetail() {
               </div>
             </div>
 
-            {ad.imageUrls?.length ? (
+            {ad.type === "RECOMMENDATION" && (ad.recommendedContact || ad.serviceType) ? (
+              <div className="mt-4 rounded-xl border border-border bg-surface/50 p-3 text-sm">
+                {ad.serviceType ? (
+                  <div className="font-medium text-text">Tipo de serviço: {ad.serviceType}</div>
+                ) : null}
+                {ad.recommendedContact ? (
+                  <div className="mt-1 text-muted">WhatsApp: {ad.recommendedContact}</div>
+                ) : null}
+              </div>
+            ) : null}
+
+            {ad.type !== "RECOMMENDATION" && ad.imageUrls?.length ? (
               <div className="mt-4 flex gap-2 overflow-x-auto rounded-xl">
                 {ad.imageUrls.map((url, i) => (
                   <img
@@ -136,18 +263,153 @@ export function AdDetail() {
                   />
                 ))}
               </div>
-            ) : (
+            ) : ad.type !== "RECOMMENDATION" ? (
               <div className="mt-4 flex justify-center">
                 <AdPlaceholder />
               </div>
+            ) : null}
+
+            {ad.type === "RECOMMENDATION" ? (
+              <>
+                <div className="mt-4 rounded-xl border border-border bg-surface/40 p-4">
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">Descrição</h3>
+                  <div className="whitespace-pre-wrap text-sm text-text">
+                    <TextWithLinks text={ad.description ?? "Sem descrição."} />
+                  </div>
+                </div>
+
+                {ad.userId !== user?.id ? (
+                  <div className="mt-4 rounded-xl border border-border bg-surface/40 p-4">
+                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
+                      Você também indica este serviço?
+                    </h3>
+                    <p className="mb-3 text-xs text-muted">
+                      Conhece o indicado? Diga se você também recomenda ou não.
+                    </p>
+                    <div className="flex flex-wrap items-center gap-4">
+                      <button
+                        type="button"
+                        onClick={() => (ad.currentUserReaction === "LIKE" ? onRemoveReaction() : onReaction("LIKE"))}
+                        className={
+                          "flex flex-col items-center gap-0.5 rounded-lg px-3 py-2 text-base transition " +
+                          (ad.currentUserReaction === "LIKE"
+                            ? "bg-primary/20 text-primary-strong"
+                            : "hover:bg-surface text-muted hover:text-text")
+                        }
+                        title="Também indico — conheço e recomendo"
+                      >
+                        <span className="text-lg leading-none">👍</span>
+                        <span className="text-xs">Também indico</span>
+                        {(ad.likeCount ?? 0) > 0 ? (
+                          <span className="text-xs text-muted">{(ad.likeCount ?? 0)}</span>
+                        ) : null}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          ad.currentUserReaction === "DISLIKE" ? onRemoveReaction() : onReaction("DISLIKE")
+                        }
+                        className={
+                          "flex flex-col items-center gap-0.5 rounded-lg px-3 py-2 text-base transition " +
+                          (ad.currentUserReaction === "DISLIKE"
+                            ? "bg-primary/20 text-primary-strong"
+                            : "hover:bg-surface text-muted hover:text-text")
+                        }
+                        title="Não indico — não recomendo"
+                      >
+                        <span className="text-lg leading-none">👎</span>
+                        <span className="text-xs">Não indico</span>
+                        {(ad.dislikeCount ?? 0) > 0 ? (
+                          <span className="text-xs text-muted">{(ad.dislikeCount ?? 0)}</span>
+                        ) : null}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="mt-4 rounded-xl border border-border bg-surface/40 p-4">
+                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">Comentários</h3>
+                  <form onSubmit={onSubmitComment} className="mb-4 flex flex-col gap-2">
+                    <textarea
+                      className="min-h-[80px] w-full resize-y rounded-xl border border-border bg-surface px-3 py-2 text-sm shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+                      placeholder="Escreva um comentário..."
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      maxLength={500}
+                      rows={2}
+                    />
+                    <Button
+                      type="submit"
+                      disabled={submittingComment || !commentText.trim()}
+                      size="sm"
+                      variant="primary"
+                      className="w-fit self-end px-3 py-1.5 text-xs"
+                    >
+                      {submittingComment ? "..." : "Enviar"}
+                    </Button>
+                  </form>
+                  {loadingComments ? (
+                    <div className="text-sm text-muted">Carregando comentários...</div>
+                  ) : comments.length === 0 ? (
+                    <div className="text-sm text-muted">Nenhum comentário ainda.</div>
+                  ) : (
+                    <ul className="space-y-3">
+                      {comments.map((c) => (
+                        <li key={c.id} className="rounded-lg border border-border bg-surface/60 p-3 text-sm">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="font-medium text-text">{c.userName}</div>
+                            {c.userId === user?.id ? (
+                              <button
+                                type="button"
+                                onClick={() => onDeleteComment(c.id)}
+                                disabled={deletingCommentId === c.id}
+                                className="rounded p-1 text-muted transition hover:bg-danger/15 hover:text-danger disabled:opacity-50"
+                                title="Excluir comentário"
+                                aria-label="Excluir comentário"
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <line x1="18" y1="6" x2="6" y2="18" />
+                                  <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                              </button>
+                            ) : null}
+                          </div>
+                          <div className="mt-1 whitespace-pre-wrap text-text">{c.text}</div>
+                          <div className="mt-2 flex items-center gap-3 text-xs text-muted">
+                            <span>{formatPublishedAt(c.createdAt)}</span>
+                            {c.userId !== user?.id ? (
+                              <button
+                                type="button"
+                                onClick={() => onToggleCommentLike(c.id)}
+                                className={
+                                  "flex items-center gap-1 font-medium transition " +
+                                  (c.currentUserLiked ? "text-primary-strong" : "hover:text-primary-strong")
+                                }
+                              >
+                                {c.currentUserLiked ? "✓ " : ""}Curtir{c.likeCount > 0 ? ` (${c.likeCount})` : ""}
+                              </button>
+                            ) : (
+                              <span>Curtir{c.likeCount > 0 ? ` (${c.likeCount})` : ""}</span>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="mt-4 whitespace-pre-wrap text-sm text-text">
+                <TextWithLinks text={ad.description ?? "Sem descrição."} />
+              </div>
             )}
 
-            <div className="mt-4 whitespace-pre-wrap text-sm text-text">
-              <TextWithLinks text={ad.description ?? "Sem descrição."} />
-            </div>
-
             <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              {ad.userId !== user?.id ? (
+              {ad.type === "RECOMMENDATION" ? (
+                ad.recommendedContact ? (
+                  <Button onClick={onContact}>Entrar em contato</Button>
+                ) : null
+              ) : ad.userId !== user?.id ? (
                 <Button onClick={onContact}>Entrar em contato</Button>
               ) : null}
               <Button

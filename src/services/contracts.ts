@@ -40,8 +40,9 @@ export interface RegisterRequest {
 }
 
 // Ads
-export type AdType = "SALE_TRADE" | "RENT" | "SERVICE" | "DONATION";
+export type AdType = "SALE_TRADE" | "RENT" | "SERVICE" | "DONATION" | "RECOMMENDATION";
 export type AdStatus = "ACTIVE" | "PAUSED" | "CLOSED";
+export type ReactionKind = "LIKE" | "DISLIKE";
 
 export interface AdResponse {
   id: number;
@@ -56,6 +57,27 @@ export interface AdResponse {
   communityId: number;
   createdAt: string;
   imageUrls?: string[];
+  /** Apenas quando type === RECOMMENDATION */
+  recommendedContact?: string;
+  serviceType?: string;
+  likeCount?: number;
+  dislikeCount?: number;
+  currentUserReaction?: ReactionKind | null;
+}
+
+export interface CommentResponse {
+  id: number;
+  adId: number;
+  userId: number;
+  userName: string;
+  text: string;
+  createdAt: string;
+  likeCount: number;
+  currentUserLiked: boolean;
+}
+
+export interface CreateCommentRequest {
+  text: string;
 }
 
 export interface CreateAdRequest {
@@ -64,6 +86,8 @@ export interface CreateAdRequest {
   type: AdType;
   price?: number;
   communityId: number;
+  recommendedContact?: string;
+  serviceType?: string;
 }
 
 export interface UpdateAdRequest {
@@ -71,6 +95,8 @@ export interface UpdateAdRequest {
   description?: string;
   type: AdType;
   price?: number;
+  recommendedContact?: string;
+  serviceType?: string;
 }
 
 export interface Page<T> {
@@ -87,6 +113,7 @@ export const AdTypeLabels: Record<AdType, string> = {
   RENT: "Aluguel",
   SERVICE: "Serviços",
   DONATION: "Doação",
+  RECOMMENDATION: "Indicações",
 };
 
 // Users
