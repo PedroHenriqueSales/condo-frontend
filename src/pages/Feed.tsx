@@ -26,8 +26,6 @@ const tabToAdType: Record<Exclude<UiTab, "TODOS">, AdType> = {
   INDICACOES: "RECOMMENDATION",
 };
 
-const FILTERS_LEFT: UiTab[] = ["TODOS", "VENDA", "ALUGUEL"];
-const FILTERS_RIGHT: UiTab[] = ["SERVICOS", "DOACAO", "INDICACOES"];
 const FILTER_LABELS: Record<UiTab, string> = {
   TODOS: "Todos",
   VENDA: "Venda",
