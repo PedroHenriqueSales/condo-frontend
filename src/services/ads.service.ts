@@ -12,19 +12,23 @@ import type {
 
 export async function getAdsByType(params: {
   communityId: number;
-  type: AdType;
+  type?: AdType;
   search?: string;
   page?: number;
   size?: number;
 }): Promise<Page<AdResponse>> {
+  const queryParams: Record<string, string | number | undefined> = {
+    communityId: params.communityId,
+    search: params.search,
+    page: params.page ?? 0,
+    size: params.size ?? 20,
+    sort: "createdAt,desc",
+  };
+  if (params.type != null) {
+    queryParams.type = params.type;
+  }
   const { data } = await api.get<Page<AdResponse>>("/ads", {
-    params: {
-      communityId: params.communityId,
-      type: params.type,
-      search: params.search,
-      page: params.page ?? 0,
-      size: params.size ?? 20,
-    },
+    params: queryParams,
   });
   return data;
 }

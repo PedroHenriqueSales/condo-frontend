@@ -5,7 +5,6 @@ import { Badge } from "../components/Badge";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Navbar } from "../components/Navbar";
-import { Tabs } from "../components/Tabs";
 import { TextWithLinks } from "../components/TextWithLinks";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
@@ -17,9 +16,9 @@ import { buildContactUrl, buildRecommendationContactUrl } from "../utils/whatsap
 import * as AdsService from "../services/ads.service";
 import * as MetricsService from "../services/metrics.service";
 
-type UiTab = "VENDA" | "ALUGUEL" | "SERVICOS" | "DOACAO" | "INDICACOES";
+type UiTab = "TODOS" | "VENDA" | "ALUGUEL" | "SERVICOS" | "DOACAO" | "INDICACOES";
 
-const tabToAdType: Record<UiTab, AdType> = {
+const tabToAdType: Record<Exclude<UiTab, "TODOS">, AdType> = {
   VENDA: "SALE_TRADE",
   ALUGUEL: "RENT",
   SERVICOS: "SERVICE",
@@ -27,13 +26,23 @@ const tabToAdType: Record<UiTab, AdType> = {
   INDICACOES: "RECOMMENDATION",
 };
 
-const TAB_ORDER: UiTab[] = ["VENDA", "ALUGUEL", "SERVICOS", "DOACAO", "INDICACOES"];
+const FILTERS_LEFT: UiTab[] = ["TODOS", "VENDA", "ALUGUEL"];
+const FILTERS_RIGHT: UiTab[] = ["SERVICOS", "DOACAO", "INDICACOES"];
+const FILTER_LABELS: Record<UiTab, string> = {
+  TODOS: "Todos",
+  VENDA: "Venda",
+  ALUGUEL: "Aluguel",
+  SERVICOS: "Serviços",
+  DOACAO: "Doação",
+  INDICACOES: "Indicações",
+};
+const TAB_ORDER: UiTab[] = ["TODOS", "VENDA", "ALUGUEL", "SERVICOS", "DOACAO", "INDICACOES"];
 
 export function Feed() {
   const nav = useNavigate();
   const { user } = useAuth();
   const { activeCommunityId } = useCondominium();
-  const [tab, setTab] = useState<UiTab>("VENDA");
+  const [tab, setTab] = useState<UiTab>("TODOS");
   const [search, setSearch] = useState("");
   const [items, setItems] = useState<AdResponse[]>([]);
   const [page, setPage] = useState(0);
@@ -41,7 +50,10 @@ export function Feed() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const adType = useMemo(() => tabToAdType[tab], [tab]);
+  const adType = useMemo<AdType | undefined>(
+    () => (tab === "TODOS" ? undefined : tabToAdType[tab]),
+    [tab]
+  );
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   const goToTab = useCallback((direction: "prev" | "next") => {
@@ -81,7 +93,7 @@ export function Feed() {
       const nextPage = reset ? 0 : page;
       const res = await AdsService.getAdsByType({
         communityId: activeCommunityId,
-        type: adType,
+        ...(adType != null && { type: adType }),
         search: search.trim() ? search.trim() : undefined,
         page: nextPage,
         size: 20,
@@ -154,28 +166,37 @@ export function Feed() {
   return (
     <div className="min-h-screen bg-bg pb-20">
       <Navbar />
+
+      {/* Barra de filtros no topo (sticky logo abaixo da Navbar) */}
+      <div className="sticky top-16 z-10 border-b border-border bg-bg/95 shadow-[0_2px_8px_rgba(0,0,0,0.04)] backdrop-blur supports-[backdrop-filter]:bg-bg/90">
+        <div className="mx-auto flex max-w-5xl items-center gap-1.5 overflow-x-auto px-3 py-2.5">
+          {TAB_ORDER.map((t) => {
+            const active = tab === t;
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTab(t)}
+                className={
+                  "shrink-0 rounded-lg border-2 px-2 py-1 text-[10px] font-semibold transition sm:px-2.5 sm:py-1.5 sm:text-xs " +
+                  (active
+                    ? "border-primary bg-primary/15 text-primary-strong"
+                    : "border-border bg-surface text-muted hover:border-primary/50 hover:text-text")
+                }
+              >
+                {FILTER_LABELS[t]}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div
         className="mx-auto max-w-5xl px-4 py-6"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
         <div className="flex flex-col gap-3">
-          <div className="flex w-full justify-center">
-            <div className="w-full max-w-sm">
-              <Tabs<UiTab>
-                value={tab}
-                onChange={setTab}
-                options={[
-                  { value: "VENDA", label: "Venda" },
-                  { value: "ALUGUEL", label: "Aluguel" },
-                  { value: "SERVICOS", label: "Serviços" },
-                  { value: "DOACAO", label: "Doação" },
-                  { value: "INDICACOES", label: "Indicações" },
-                ]}
-              />
-            </div>
-          </div>
-
           <input
             className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 sm:w-72"
             placeholder="Buscar anúncios..."
@@ -195,19 +216,18 @@ export function Feed() {
                 onClick={() => nav(`/ads/${ad.id}`)}
               >
                 <div className="flex items-start gap-3">
-                  {ad.type === "RECOMMENDATION" ? (
-                    <AdPlaceholder compact className="h-20 w-20" />
-                  ) : ad.imageUrls?.length ? (
-                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-surface">
-                      <img
-                        src={resolveImageUrl(ad.imageUrls[0])}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <AdPlaceholder compact className="h-20 w-20" />
-                  )}
+                  {ad.type !== "RECOMMENDATION" &&
+                    (ad.imageUrls?.length ? (
+                      <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-surface">
+                        <img
+                          src={resolveImageUrl(ad.imageUrls[0])}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <AdPlaceholder compact className="h-20 w-20" />
+                    ))}
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold">{ad.title}</div>
                     <div className="mt-1 max-h-10 overflow-hidden text-sm text-muted">
@@ -283,6 +303,7 @@ export function Feed() {
         </div>
       </div>
 
+      {/* Botão flutuante novo anúncio */}
       <Link
         to="/ads/new"
         aria-label="Criar anúncio"
