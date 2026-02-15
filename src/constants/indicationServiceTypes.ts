@@ -12,7 +12,7 @@ export const INDICATION_SERVICE_TYPE_SUGGESTIONS = [
   "Cuidador de idosos",
   "Babá",
   "Buffet",
-  "Confeiteiro"
+  "Confeiteiro",
   "Professor particular",
   "Personal trainer",
   "Nutricionista",
