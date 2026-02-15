@@ -91,17 +91,18 @@ export function MyAds() {
               onClick={() => nav(`/ads/${ad.id}`)}
             >
               <div className="flex items-start gap-3">
-                {ad.imageUrls?.length ? (
-                  <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-surface">
-                    <img
-                      src={resolveImageUrl(ad.imageUrls[0])}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <AdPlaceholder compact className="h-16 w-16" />
-                )}
+                {ad.type !== "RECOMMENDATION" && ad.type !== "SERVICE" &&
+                  (ad.imageUrls?.length ? (
+                    <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-surface">
+                      <img
+                        src={resolveImageUrl(ad.imageUrls[0])}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <AdPlaceholder compact className="h-16 w-16" />
+                  ))}
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-semibold">{ad.title}</div>
                   <div className="mt-1 flex flex-wrap items-center gap-x-1 text-xs text-muted">

@@ -6,6 +6,7 @@ import { Card } from "../components/Card";
 import { Input } from "../components/Input";
 import { Navbar } from "../components/Navbar";
 import { useCondominium } from "../hooks/useCondominium";
+import { INDICATION_SERVICE_TYPE_SUGGESTIONS } from "../constants/indicationServiceTypes";
 import type { AdType } from "../services/contracts";
 import * as AdsService from "../services/ads.service";
 
@@ -58,7 +59,7 @@ export function CreateAd() {
           recommendedContact: adType === "RECOMMENDATION" ? recommendedContact.trim() || undefined : undefined,
           serviceType: adType === "RECOMMENDATION" ? serviceType.trim() || undefined : undefined,
         },
-        adType === "RECOMMENDATION" ? undefined : (images.length ? images.slice(0, 5) : undefined)
+        (adType === "RECOMMENDATION" || adType === "SERVICE") ? undefined : (images.length ? images.slice(0, 5) : undefined)
       );
       setSuccess(true);
       setTimeout(() => nav("/feed", { replace: true }), 1500);
@@ -143,13 +144,20 @@ export function CreateAd() {
                   ) : null}
                 </div>
                 <div>
-                  <Input
-                    label="Tipo de serviço"
-                    placeholder="Ex.: Encanador, Eletricista"
+                  <label className="mb-1 block text-sm font-medium text-text">Tipo de serviço</label>
+                  <input
+                    list="indication-service-type-list"
+                    placeholder="Selecione ou digite (ex.: Encanador, Eletricista)"
                     value={serviceType}
                     onChange={(e) => setServiceType(e.target.value)}
                     required
+                    className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
                   />
+                  <datalist id="indication-service-type-list">
+                    {INDICATION_SERVICE_TYPE_SUGGESTIONS.map((s) => (
+                      <option key={s} value={s} />
+                    ))}
+                  </datalist>
                   {fieldErrors.serviceType ? (
                     <div className="mt-1 text-sm text-danger">{fieldErrors.serviceType}</div>
                   ) : null}
@@ -170,7 +178,7 @@ export function CreateAd() {
               </div>
             ) : null}
 
-            {uiType !== "INDICACOES" ? (
+            {uiType !== "INDICACOES" && uiType !== "SERVICOS" ? (
             <label className="block">
               <div className="mb-1 text-sm font-medium text-text">Fotos (até 5, opcional)</div>
               <input

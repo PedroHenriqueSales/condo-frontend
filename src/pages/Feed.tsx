@@ -214,7 +214,7 @@ export function Feed() {
                 onClick={() => nav(`/ads/${ad.id}`)}
               >
                 <div className="flex items-start gap-3">
-                  {ad.type !== "RECOMMENDATION" &&
+                  {ad.type !== "RECOMMENDATION" && ad.type !== "SERVICE" &&
                     (ad.imageUrls?.length ? (
                       <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-surface">
                         <img
