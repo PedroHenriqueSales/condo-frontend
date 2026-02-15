@@ -112,7 +112,9 @@ export function AdDetail() {
               </div>
               <div className="flex flex-shrink-0 flex-col items-end gap-1">
                 <Badge tone="primary">{AdTypeLabels[ad.type]}</Badge>
-                {ad.price != null ? (
+                {ad.type === "DONATION" ? (
+                  <span className="text-sm text-muted">Doação</span>
+                ) : ad.price != null ? (
                   <span className="whitespace-nowrap text-lg font-semibold text-primary-strong">
                     {formatPrice(Number(ad.price))}
                   </span>

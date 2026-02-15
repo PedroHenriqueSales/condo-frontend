@@ -40,7 +40,7 @@ export interface RegisterRequest {
 }
 
 // Ads
-export type AdType = "SALE_TRADE" | "RENT" | "SERVICE";
+export type AdType = "SALE_TRADE" | "RENT" | "SERVICE" | "DONATION";
 export type AdStatus = "ACTIVE" | "PAUSED" | "CLOSED";
 
 export interface AdResponse {
@@ -86,6 +86,7 @@ export const AdTypeLabels: Record<AdType, string> = {
   SALE_TRADE: "Venda",
   RENT: "Aluguel",
   SERVICE: "Serviços",
+  DONATION: "Doação",
 };
 
 // Users

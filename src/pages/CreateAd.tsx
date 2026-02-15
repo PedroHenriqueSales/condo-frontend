@@ -9,12 +9,13 @@ import { useCondominium } from "../hooks/useCondominium";
 import type { AdType } from "../services/contracts";
 import * as AdsService from "../services/ads.service";
 
-type UiType = "VENDA" | "ALUGUEL" | "SERVICOS";
+type UiType = "VENDA" | "ALUGUEL" | "SERVICOS" | "DOACAO";
 
 const uiToAdType: Record<UiType, AdType> = {
   VENDA: "SALE_TRADE",
   ALUGUEL: "RENT",
   SERVICOS: "SERVICE",
+  DOACAO: "DONATION",
 };
 
 export function CreateAd() {
@@ -41,7 +42,7 @@ export function CreateAd() {
     setFieldErrors({});
     setBusy(true);
     try {
-      const p = price.trim() ? Number(price.replace(",", ".")) : undefined;
+      const p = adType === "DONATION" ? undefined : (price.trim() ? Number(price.replace(",", ".")) : undefined);
       await AdsService.createAd(
         {
           title: title.trim(),
@@ -112,24 +113,27 @@ export function CreateAd() {
                 <option value="VENDA">Venda</option>
                 <option value="ALUGUEL">Aluguel</option>
                 <option value="SERVICOS">Serviços</option>
+                <option value="DOACAO">Doação</option>
               </select>
               {fieldErrors.type ? (
                 <div className="mt-1 text-sm text-danger">{fieldErrors.type}</div>
               ) : null}
             </label>
 
-            <div>
-              <Input
-                label="Preço (opcional)"
-                inputMode="decimal"
-                placeholder="Ex.: 50.00"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-              />
-              {fieldErrors.price ? (
-                <div className="mt-1 text-sm text-danger">{fieldErrors.price}</div>
-              ) : null}
-            </div>
+            {uiType !== "DOACAO" ? (
+              <div>
+                <Input
+                  label="Preço (opcional)"
+                  inputMode="decimal"
+                  placeholder="Ex.: 50.00"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                />
+                {fieldErrors.price ? (
+                  <div className="mt-1 text-sm text-danger">{fieldErrors.price}</div>
+                ) : null}
+              </div>
+            ) : null}
 
             <label className="block">
               <div className="mb-1 text-sm font-medium text-text">Fotos (até 5, opcional)</div>

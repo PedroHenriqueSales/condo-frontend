@@ -17,15 +17,16 @@ import { buildContactUrl } from "../utils/whatsapp";
 import * as AdsService from "../services/ads.service";
 import * as MetricsService from "../services/metrics.service";
 
-type UiTab = "VENDA" | "ALUGUEL" | "SERVICOS";
+type UiTab = "VENDA" | "ALUGUEL" | "SERVICOS" | "DOACAO";
 
 const tabToAdType: Record<UiTab, AdType> = {
   VENDA: "SALE_TRADE",
   ALUGUEL: "RENT",
   SERVICOS: "SERVICE",
+  DOACAO: "DONATION",
 };
 
-const TAB_ORDER: UiTab[] = ["VENDA", "ALUGUEL", "SERVICOS"];
+const TAB_ORDER: UiTab[] = ["VENDA", "ALUGUEL", "SERVICOS", "DOACAO"];
 
 export function Feed() {
   const nav = useNavigate();
@@ -151,6 +152,7 @@ export function Feed() {
                   { value: "VENDA", label: "Venda" },
                   { value: "ALUGUEL", label: "Aluguel" },
                   { value: "SERVICOS", label: "Serviços" },
+                  { value: "DOACAO", label: "Doação" },
                 ]}
               />
             </div>
@@ -197,7 +199,9 @@ export function Feed() {
                   </div>
                   <div className="flex flex-shrink-0 flex-col items-end gap-1">
                     <Badge tone="primary">{AdTypeLabels[ad.type]}</Badge>
-                    {ad.price != null ? (
+                    {ad.type === "DONATION" ? (
+                      <span className="whitespace-nowrap text-xs text-muted">Doação</span>
+                    ) : ad.price != null ? (
                       <span className="whitespace-nowrap text-sm font-semibold text-primary-strong">
                         {formatPriceCompact(Number(ad.price))}
                       </span>
