@@ -50,7 +50,7 @@ export function CreateAd() {
           price: Number.isFinite(p as any) ? p : undefined,
           communityId: activeCommunityId,
         },
-        images.length ? images.slice(0, 3) : undefined
+        images.length ? images.slice(0, 5) : undefined
       );
       setSuccess(true);
       setTimeout(() => nav("/feed", { replace: true }), 1500);
@@ -81,6 +81,8 @@ export function CreateAd() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
+                maxLength={60}
+                placeholder="Até 60 caracteres"
               />
               {fieldErrors.title ? (
                 <div className="mt-1 text-sm text-danger">{fieldErrors.title}</div>
@@ -130,7 +132,7 @@ export function CreateAd() {
             </div>
 
             <label className="block">
-              <div className="mb-1 text-sm font-medium text-text">Fotos (até 3, opcional)</div>
+              <div className="mb-1 text-sm font-medium text-text">Fotos (até 5, opcional)</div>
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -138,7 +140,7 @@ export function CreateAd() {
                 className="hidden"
                 id="ad-images"
                 onChange={(e) => {
-                  const files = Array.from(e.target.files ?? []).slice(0, 3);
+                  const files = Array.from(e.target.files ?? []).slice(0, 5);
                   setImages(files);
                 }}
               />

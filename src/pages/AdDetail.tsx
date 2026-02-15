@@ -6,6 +6,7 @@ import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { ImageLightbox } from "../components/ImageLightbox";
 import { Navbar } from "../components/Navbar";
+import { TextWithLinks } from "../components/TextWithLinks";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
 import type { AdResponse } from "../services/contracts";
@@ -140,7 +141,7 @@ export function AdDetail() {
             )}
 
             <div className="mt-4 whitespace-pre-wrap text-sm text-text">
-              {ad.description ?? "Sem descrição."}
+              <TextWithLinks text={ad.description ?? "Sem descrição."} />
             </div>
 
             <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">

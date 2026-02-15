@@ -7,7 +7,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
 
 function Bootstrap() {
-  const { token } = useAuth();
+  const { token, logout } = useAuth();
   const { refresh, clear } = useCondominium();
 
   useEffect(() => {
@@ -16,10 +16,13 @@ function Bootstrap() {
       return;
     }
     // Carrega comunidades assim que o usuário autentica
-    refresh().catch(() => {
-      // Gate lida com os erros; aqui evitamos quebrar o render.
+    refresh().catch((err: any) => {
+      const status = err?.response?.status;
+      if (status === 401 || status === 403) {
+        logout();
+      }
     });
-  }, [token, refresh, clear]);
+  }, [token, logout, refresh, clear]);
 
   return <AppRoutes />;
 }

@@ -6,6 +6,7 @@ import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Navbar } from "../components/Navbar";
 import { Tabs } from "../components/Tabs";
+import { TextWithLinks } from "../components/TextWithLinks";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
 import type { AdResponse, AdType } from "../services/contracts";
@@ -188,7 +189,10 @@ export function Feed() {
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold">{ad.title}</div>
                     <div className="mt-1 max-h-10 overflow-hidden text-sm text-muted">
-                      {ad.description ?? "Sem descrição"}
+                      <TextWithLinks
+                        text={ad.description ?? "Sem descrição"}
+                        stopPropagation
+                      />
                     </div>
                   </div>
                   <div className="flex flex-shrink-0 flex-col items-end gap-1">

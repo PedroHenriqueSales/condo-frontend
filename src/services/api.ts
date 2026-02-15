@@ -40,3 +40,21 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+const AUTH_STATE_KEY = "aquidolado.authState";
+
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    const status = err?.response?.status;
+    if (status === 401 || status === 403) {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(AUTH_STATE_KEY);
+      const path = window.location.pathname;
+      if (path !== "/login" && path !== "/register") {
+        window.location.replace("/login");
+      }
+    }
+    return Promise.reject(err);
+  }
+);
+
