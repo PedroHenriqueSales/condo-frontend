@@ -11,6 +11,8 @@ export const INDICATION_SERVICE_TYPE_SUGGESTIONS = [
   "Diarista",
   "Cuidador de idosos",
   "Babá",
+  "Buffet",
+  "Confeiteiro"
   "Professor particular",
   "Personal trainer",
   "Nutricionista",
@@ -19,7 +21,7 @@ export const INDICATION_SERVICE_TYPE_SUGGESTIONS = [
   "Veterinário",
   "Adestrador",
   "Motorista",
-  "Carreto / Mudança",
+  "Carreta / Mudança",
   "Manutenção geral",
   "Jardineiro",
   "Dedetização",

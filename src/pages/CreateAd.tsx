@@ -145,19 +145,29 @@ export function CreateAd() {
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text">Tipo de serviço</label>
-                  <input
-                    list="indication-service-type-list"
-                    placeholder="Selecione ou digite (ex.: Encanador, Eletricista)"
-                    value={serviceType}
-                    onChange={(e) => setServiceType(e.target.value)}
-                    required
-                    className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
-                  />
-                  <datalist id="indication-service-type-list">
+                  <select
+                    value={serviceType === "" ? "" : (INDICATION_SERVICE_TYPE_SUGGESTIONS.includes(serviceType as any) ? serviceType : "Outro")}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setServiceType(v === "Outro" ? "" : v);
+                    }}
+                    className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm shadow-soft focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+                  >
+                    <option value="">Selecione...</option>
                     {INDICATION_SERVICE_TYPE_SUGGESTIONS.map((s) => (
-                      <option key={s} value={s} />
+                      <option key={s} value={s}>{s}</option>
                     ))}
-                  </datalist>
+                  </select>
+                  {(!serviceType || !INDICATION_SERVICE_TYPE_SUGGESTIONS.includes(serviceType as any)) && (
+                    <input
+                      type="text"
+                      placeholder="Digite o tipo de serviço (ex.: Encanador)"
+                      value={serviceType}
+                      onChange={(e) => setServiceType(e.target.value)}
+                      required
+                      className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+                    />
+                  )}
                   {fieldErrors.serviceType ? (
                     <div className="mt-1 text-sm text-danger">{fieldErrors.serviceType}</div>
                   ) : null}
