@@ -97,7 +97,7 @@ export function AdDetail() {
         alert("WhatsApp inválido.");
         return;
       }
-      window.open(buildContactUrl(ad.userWhatsapp, ad.title), "_blank", "noopener,noreferrer");
+      window.open(buildContactUrl(ad.userWhatsapp, ad.title, ad.price), "_blank", "noopener,noreferrer");
     }
 
     try {
