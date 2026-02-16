@@ -6,7 +6,6 @@ import type {
   CreateAdRequest,
   CreateCommentRequest,
   Page,
-  ReactionKind,
   UpdateAdRequest,
 } from "./contracts";
 
@@ -104,9 +103,9 @@ export async function listMyAds(params?: {
   return data;
 }
 
-// Indicações: reações e comentários
-export async function setReaction(adId: number, kind: ReactionKind): Promise<void> {
-  await api.post(`/ads/${adId}/reaction`, { kind });
+// Indicações: avaliação por nota (0-5) e comentários
+export async function setRating(adId: number, rating: number): Promise<void> {
+  await api.put(`/ads/${adId}/rating`, { rating });
 }
 
 export async function removeReaction(adId: number): Promise<void> {

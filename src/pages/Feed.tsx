@@ -253,9 +253,16 @@ export function Feed() {
                   <div className="flex flex-shrink-0 flex-col items-end gap-1">
                     <Badge tone="primary">{AdTypeLabels[ad.type]}</Badge>
                     {ad.type === "RECOMMENDATION" ? (
-                      <span className="whitespace-nowrap text-xs text-muted">
-                        +{ad.likeCount ?? 0} −{ad.dislikeCount ?? 0}
-                      </span>
+                      <div className="flex flex-col items-end text-xs text-muted">
+                        {(ad.ratingCount ?? 0) > 0 ? (
+                          <>
+                            <span>{Number(ad.averageRating).toFixed(1)} de 5 ★</span>
+                            <span>{ad.ratingCount} {ad.ratingCount === 1 ? "avaliação" : "avaliações"}</span>
+                          </>
+                        ) : (
+                          <span>Sem avaliações</span>
+                        )}
+                      </div>
                     ) : ad.type === "DONATION" ? (
                       <span className="whitespace-nowrap text-xs text-muted">Doação</span>
                     ) : ad.price != null ? (

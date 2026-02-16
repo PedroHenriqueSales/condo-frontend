@@ -42,7 +42,6 @@ export interface RegisterRequest {
 // Ads
 export type AdType = "SALE_TRADE" | "RENT" | "SERVICE" | "DONATION" | "RECOMMENDATION";
 export type AdStatus = "ACTIVE" | "PAUSED" | "CLOSED";
-export type ReactionKind = "LIKE" | "DISLIKE";
 
 export interface AdResponse {
   id: number;
@@ -60,9 +59,9 @@ export interface AdResponse {
   /** Apenas quando type === RECOMMENDATION */
   recommendedContact?: string;
   serviceType?: string;
-  likeCount?: number;
-  dislikeCount?: number;
-  currentUserReaction?: ReactionKind | null;
+  averageRating?: number | null;
+  ratingCount?: number;
+  currentUserRating?: number | null;
 }
 
 export interface CommentResponse {

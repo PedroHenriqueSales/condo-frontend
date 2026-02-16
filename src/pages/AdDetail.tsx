@@ -114,21 +114,17 @@ export function AdDetail() {
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   }
 
-  async function onReaction(kind: "LIKE" | "DISLIKE") {
+  async function onSetRating(rating: number) {
     if (!ad || ad.type !== "RECOMMENDATION") return;
     try {
-      if (ad.currentUserReaction === kind) {
-        await AdsService.removeReaction(ad.id);
-      } else {
-        await AdsService.setReaction(ad.id, kind);
-      }
+      await AdsService.setRating(ad.id, rating);
       fetchAd();
     } catch {
       // ignore
     }
   }
 
-  async function onRemoveReaction() {
+  async function onRemoveRating() {
     if (!ad || ad.type !== "RECOMMENDATION") return;
     try {
       await AdsService.removeReaction(ad.id);
@@ -278,54 +274,67 @@ export function AdDetail() {
                   </div>
                 </div>
 
-                {ad.userId !== user?.id ? (
-                  <div className="mt-4 rounded-xl border border-border bg-surface/40 p-4">
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
-                      Você também indica este serviço?
-                    </h3>
-                    <p className="mb-3 text-xs text-muted">
-                      Conhece o indicado? Diga se você também recomenda ou não.
-                    </p>
-                    <div className="flex flex-wrap items-center gap-4">
-                      <button
-                        type="button"
-                        onClick={() => (ad.currentUserReaction === "LIKE" ? onRemoveReaction() : onReaction("LIKE"))}
-                        className={
-                          "flex flex-col items-center gap-0.5 rounded-lg px-3 py-2 text-base transition " +
-                          (ad.currentUserReaction === "LIKE"
-                            ? "bg-primary/20 text-primary-strong"
-                            : "hover:bg-surface text-muted hover:text-text")
-                        }
-                        title="Também indico — conheço e recomendo"
-                      >
-                        <span className="text-lg leading-none">👍</span>
-                        <span className="text-xs">Também indico</span>
-                        {(ad.likeCount ?? 0) > 0 ? (
-                          <span className="text-xs text-muted">{(ad.likeCount ?? 0)}</span>
-                        ) : null}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          ad.currentUserReaction === "DISLIKE" ? onRemoveReaction() : onReaction("DISLIKE")
-                        }
-                        className={
-                          "flex flex-col items-center gap-0.5 rounded-lg px-3 py-2 text-base transition " +
-                          (ad.currentUserReaction === "DISLIKE"
-                            ? "bg-primary/20 text-primary-strong"
-                            : "hover:bg-surface text-muted hover:text-text")
-                        }
-                        title="Não indico — não recomendo"
-                      >
-                        <span className="text-lg leading-none">👎</span>
-                        <span className="text-xs">Não indico</span>
-                        {(ad.dislikeCount ?? 0) > 0 ? (
-                          <span className="text-xs text-muted">{(ad.dislikeCount ?? 0)}</span>
-                        ) : null}
-                      </button>
-                    </div>
+                <div className="mt-4 rounded-xl border border-border bg-surface/40 p-4">
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
+                    Avaliação
+                  </h3>
+                  <div className="flex flex-col gap-0.5 text-sm">
+                    {(ad.ratingCount ?? 0) > 0 ? (
+                      <>
+                        <span className="font-medium text-text">
+                          {Number(ad.averageRating).toFixed(1)} de 5 ★
+                        </span>
+                        <span className="text-muted">
+                          {ad.ratingCount} {ad.ratingCount === 1 ? "avaliação" : "avaliações"}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-muted">Sem avaliações</span>
+                    )}
                   </div>
-                ) : null}
+                  {ad.userId !== user?.id ? (
+                    <>
+                      <p className="mt-3 mb-2 text-xs text-muted">
+                        Conhece o indicado? Dê uma nota de 1 a 5 estrelas.
+                      </p>
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => onSetRating(star)}
+                            className="rounded p-0.5 text-muted transition hover:text-primary-strong focus:outline-none focus:ring-2 focus:ring-primary/50"
+                            title={`${star} ${star === 1 ? "estrela" : "estrelas"}`}
+                            aria-label={`${star} estrelas`}
+                          >
+                            <svg
+                              width="28"
+                              height="28"
+                              viewBox="0 0 24 24"
+                              fill={(ad.currentUserRating ?? 0) >= star ? "currentColor" : "none"}
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className={(ad.currentUserRating ?? 0) >= star ? "text-primary-strong" : ""}
+                            >
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg>
+                          </button>
+                        ))}
+                      </div>
+                      {ad.currentUserRating != null ? (
+                        <button
+                          type="button"
+                          onClick={onRemoveRating}
+                          className="mt-2 text-xs font-medium text-muted underline hover:text-text"
+                        >
+                          Remover minha avaliação
+                        </button>
+                      ) : null}
+                    </>
+                  ) : null}
+                </div>
 
                 <div className="mt-4 rounded-xl border border-border bg-surface/40 p-4">
                   <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">Comentários</h3>
