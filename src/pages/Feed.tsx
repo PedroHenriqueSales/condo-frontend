@@ -52,6 +52,11 @@ export function Feed() {
     () => (tab === "TODOS" ? undefined : tabToAdType[tab]),
     [tab]
   );
+
+  const adTypes = useMemo<AdType[] | undefined>(
+    () => (tab === "TODOS" ? ["SALE_TRADE", "RENT", "DONATION"] : undefined),
+    [tab]
+  );
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   const goToTab = useCallback((direction: "prev" | "next") => {
@@ -91,6 +96,7 @@ export function Feed() {
       const nextPage = reset ? 0 : page;
       const res = await AdsService.getAdsByType({
         communityId: activeCommunityId,
+        ...(adTypes != null && { types: adTypes }),
         ...(adType != null && { type: adType }),
         search: search.trim() ? search.trim() : undefined,
         page: nextPage,
@@ -117,10 +123,16 @@ export function Feed() {
     }, 250);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adType, activeCommunityId, search]);
+  }, [adType, adTypes, activeCommunityId, search]);
 
   async function onContactClick(ad: AdResponse) {
     if (!activeCommunityId) return;
+
+    // Verifica se é o criador do anúncio
+    if (user && ad.userId === user.id) {
+      alert("Esse anúncio é seu! 😊");
+      return;
+    }
 
     if (ad.type === "RECOMMENDATION") {
       if (!ad.recommendedContact?.trim()) {
@@ -263,7 +275,7 @@ export function Feed() {
                       <span className="ml-2">• {formatPublishedAt(ad.createdAt)}</span>
                     ) : null}
                   </div>
-                  {user && ad.userId !== user.id && (ad.type !== "RECOMMENDATION" || !!ad.recommendedContact?.trim()) ? (
+                  {user && (ad.type !== "RECOMMENDATION" || !!ad.recommendedContact?.trim()) ? (
                     <Button
                       type="button"
                       variant="primary"

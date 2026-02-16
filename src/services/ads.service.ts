@@ -13,18 +13,21 @@ import type {
 export async function getAdsByType(params: {
   communityId: number;
   type?: AdType;
+  types?: AdType[];
   search?: string;
   page?: number;
   size?: number;
 }): Promise<Page<AdResponse>> {
-  const queryParams: Record<string, string | number | undefined> = {
+  const queryParams: Record<string, string | number | string[] | undefined> = {
     communityId: params.communityId,
     search: params.search,
     page: params.page ?? 0,
     size: params.size ?? 20,
     sort: "createdAt,desc",
   };
-  if (params.type != null) {
+  if (params.types != null && params.types.length > 0) {
+    queryParams.types = params.types;
+  } else if (params.type != null) {
     queryParams.type = params.type;
   }
   const { data } = await api.get<Page<AdResponse>>("/ads", {
