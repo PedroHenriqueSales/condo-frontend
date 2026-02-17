@@ -247,7 +247,7 @@ export function AdDetail() {
               </div>
             ) : null}
 
-            {ad.type !== "RECOMMENDATION" && ad.type !== "SERVICE" && ad.imageUrls?.length ? (
+            {ad.type !== "RECOMMENDATION" && ad.imageUrls?.length ? (
               <div className="mt-4 flex gap-2 overflow-x-auto rounded-xl">
                 {ad.imageUrls.map((url, i) => (
                   <img
@@ -259,7 +259,7 @@ export function AdDetail() {
                   />
                 ))}
               </div>
-            ) : ad.type !== "RECOMMENDATION" && ad.type !== "SERVICE" ? (
+            ) : ad.type !== "RECOMMENDATION" ? (
               <div className="mt-4 flex justify-center">
                 <AdPlaceholder />
               </div>

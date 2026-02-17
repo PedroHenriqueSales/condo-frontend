@@ -109,7 +109,7 @@ export function EditAd() {
           recommendedContact: adType === "RECOMMENDATION" ? recommendedContact.trim() || undefined : undefined,
           serviceType: adType === "RECOMMENDATION" ? serviceType.trim() || undefined : undefined,
         },
-        (adType === "RECOMMENDATION" || adType === "SERVICE") ? undefined : (newImages.length ? newImages.slice(0, 5) : undefined)
+        adType === "RECOMMENDATION" ? undefined : (newImages.length ? newImages.slice(0, 5) : undefined)
       );
       setSuccess(true);
       setTimeout(() => nav("/my-ads", { replace: true }), 1500);
@@ -272,7 +272,7 @@ export function EditAd() {
               </div>
             ) : null}
 
-            {uiType !== "INDICACOES" && uiType !== "SERVICOS" ? (
+            {uiType !== "INDICACOES" ? (
             <label className="block">
               <div className="mb-1 text-sm font-medium text-text">Fotos (até 5)</div>
               <input

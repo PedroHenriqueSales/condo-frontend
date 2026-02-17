@@ -59,7 +59,7 @@ export function CreateAd() {
           recommendedContact: adType === "RECOMMENDATION" ? recommendedContact.trim() || undefined : undefined,
           serviceType: adType === "RECOMMENDATION" ? serviceType.trim() || undefined : undefined,
         },
-        (adType === "RECOMMENDATION" || adType === "SERVICE") ? undefined : (images.length ? images.slice(0, 5) : undefined)
+        adType === "RECOMMENDATION" ? undefined : (images.length ? images.slice(0, 5) : undefined)
       );
       setSuccess(true);
       setTimeout(() => nav("/feed", { replace: true }), 1500);
@@ -188,7 +188,7 @@ export function CreateAd() {
               </div>
             ) : null}
 
-            {uiType !== "INDICACOES" && uiType !== "SERVICOS" ? (
+            {uiType !== "INDICACOES" ? (
             <label className="block">
               <div className="mb-1 text-sm font-medium text-text">Fotos (até 5, opcional)</div>
               <input

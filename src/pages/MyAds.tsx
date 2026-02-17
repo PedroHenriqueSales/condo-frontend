@@ -91,7 +91,7 @@ export function MyAds() {
               onClick={() => nav(`/ads/${ad.id}`)}
             >
               <div className="flex items-start gap-3">
-                {ad.type !== "RECOMMENDATION" && ad.type !== "SERVICE" &&
+                {ad.type !== "RECOMMENDATION" &&
                   (ad.imageUrls?.length ? (
                     <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-surface">
                       <img
