@@ -292,47 +292,43 @@ export function AdDetail() {
                       <span className="text-muted">Sem avaliações</span>
                     )}
                   </div>
-                  {ad.userId !== user?.id ? (
-                    <>
-                      <p className="mt-3 mb-2 text-xs text-muted">
-                        Conhece o indicado? Dê uma nota de 1 a 5 estrelas.
-                      </p>
-                      <div className="flex items-center gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            type="button"
-                            onClick={() => onSetRating(star)}
-                            className="rounded p-0.5 text-muted transition hover:text-primary-strong focus:outline-none focus:ring-2 focus:ring-primary/50"
-                            title={`${star} ${star === 1 ? "estrela" : "estrelas"}`}
-                            aria-label={`${star} estrelas`}
-                          >
-                            <svg
-                              width="28"
-                              height="28"
-                              viewBox="0 0 24 24"
-                              fill={(ad.currentUserRating ?? 0) >= star ? "currentColor" : "none"}
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className={(ad.currentUserRating ?? 0) >= star ? "text-primary-strong" : ""}
-                            >
-                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                            </svg>
-                          </button>
-                        ))}
-                      </div>
-                      {ad.currentUserRating != null ? (
-                        <button
-                          type="button"
-                          onClick={onRemoveRating}
-                          className="mt-2 text-xs font-medium text-muted underline hover:text-text"
+                  <p className="mt-3 mb-2 text-xs text-muted">
+                    Conhece o indicado? Dê uma nota de 1 a 5 estrelas.
+                  </p>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => onSetRating(star)}
+                        className="rounded p-0.5 text-muted transition hover:text-primary-strong focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        title={`${star} ${star === 1 ? "estrela" : "estrelas"}`}
+                        aria-label={`${star} estrelas`}
+                      >
+                        <svg
+                          width="28"
+                          height="28"
+                          viewBox="0 0 24 24"
+                          fill={(ad.currentUserRating ?? 0) >= star ? "currentColor" : "none"}
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className={(ad.currentUserRating ?? 0) >= star ? "text-primary-strong" : ""}
                         >
-                          Remover minha avaliação
-                        </button>
-                      ) : null}
-                    </>
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
+                  {ad.currentUserRating != null ? (
+                    <button
+                      type="button"
+                      onClick={onRemoveRating}
+                      className="mt-2 text-xs font-medium text-muted underline hover:text-text"
+                    >
+                      Remover minha avaliação
+                    </button>
                   ) : null}
                 </div>
 
