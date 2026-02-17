@@ -7,6 +7,11 @@ import { Input } from "../components/Input";
 import { Navbar } from "../components/Navbar";
 import { useCondominium } from "../hooks/useCondominium";
 import { INDICATION_SERVICE_TYPE_SUGGESTIONS } from "../constants/indicationServiceTypes";
+import {
+  getOversizedImageMessage,
+  isImageWithinSizeLimit,
+  MAX_IMAGE_SIZE_MB,
+} from "../constants/upload";
 import type { AdType } from "../services/contracts";
 import * as AdsService from "../services/ads.service";
 
@@ -198,8 +203,20 @@ export function CreateAd() {
                 className="hidden"
                 id="ad-images"
                 onChange={(e) => {
-                  const files = Array.from(e.target.files ?? []).slice(0, 5);
-                  setImages(files);
+                  const raw = Array.from(e.target.files ?? []).slice(0, 5);
+                  const valid = raw.filter(isImageWithinSizeLimit);
+                  const oversized = raw.length - valid.length;
+                  if (oversized > 0) {
+                    setFieldErrors((prev) => ({ ...prev, images: getOversizedImageMessage(oversized) }));
+                  } else {
+                    setFieldErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.images;
+                      return next;
+                    });
+                  }
+                  setImages(valid);
+                  e.target.value = "";
                 }}
               />
               <label
@@ -208,7 +225,7 @@ export function CreateAd() {
               >
                 {images.length === 0 ? (
                   <span className="flex items-center text-sm text-muted">
-                    Clique para selecionar imagens (JPEG, PNG ou WebP, máx. 5MB cada)
+                    Clique para selecionar imagens (JPEG, PNG ou WebP, máx. {MAX_IMAGE_SIZE_MB}MB cada)
                   </span>
                 ) : (
                   images.map((f, i) => (
@@ -232,6 +249,9 @@ export function CreateAd() {
                   ))
                 )}
               </label>
+              {fieldErrors.images ? (
+                <div className="mt-1 text-sm text-danger">{fieldErrors.images}</div>
+              ) : null}
             </label>
             ) : null}
 

@@ -7,6 +7,11 @@ import { Input } from "../components/Input";
 import { Navbar } from "../components/Navbar";
 import { useAuth } from "../hooks/useAuth";
 import { INDICATION_SERVICE_TYPE_SUGGESTIONS } from "../constants/indicationServiceTypes";
+import {
+  getOversizedImageMessage,
+  isImageWithinSizeLimit,
+  MAX_IMAGE_SIZE_MB,
+} from "../constants/upload";
 import type { AdType } from "../services/contracts";
 import * as AdsService from "../services/ads.service";
 import { resolveImageUrl } from "../utils/imageUrl";
@@ -274,7 +279,7 @@ export function EditAd() {
 
             {uiType !== "INDICACOES" ? (
             <label className="block">
-              <div className="mb-1 text-sm font-medium text-text">Fotos (até 5)</div>
+              <div className="mb-1 text-sm font-medium text-text">Fotos (até 5, máx. {MAX_IMAGE_SIZE_MB}MB cada)</div>
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -282,8 +287,20 @@ export function EditAd() {
                 className="hidden"
                 id="edit-ad-images"
                 onChange={(e) => {
-                  const files = Array.from(e.target.files ?? []).slice(0, 5);
-                  setNewImages(files);
+                  const raw = Array.from(e.target.files ?? []).slice(0, 5);
+                  const valid = raw.filter(isImageWithinSizeLimit);
+                  const oversized = raw.length - valid.length;
+                  if (oversized > 0) {
+                    setFieldErrors((prev) => ({ ...prev, images: getOversizedImageMessage(oversized) }));
+                  } else {
+                    setFieldErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.images;
+                      return next;
+                    });
+                  }
+                  setNewImages(valid);
+                  e.target.value = "";
                 }}
               />
               <div className="flex min-h-24 flex-wrap gap-2 rounded-xl border border-border bg-surface/60 p-3">
@@ -320,6 +337,9 @@ export function EditAd() {
                   </>
                 )}
               </div>
+              {fieldErrors.images ? (
+                <div className="mt-1 text-sm text-danger">{fieldErrors.images}</div>
+              ) : null}
             </label>
             ) : null}
 
