@@ -52,10 +52,7 @@ export function Feed() {
     return currentTab === "INDICACOES" ? "title,asc" : "createdAt,desc";
   }, []);
 
-  const [sortOrder, setSortOrder] = useState<string>(() => {
-    const initialTab: UiTab = "TODOS";
-    return initialTab === "INDICACOES" ? "title,asc" : "createdAt,desc";
-  });
+  const [sortOrder, setSortOrder] = useState<string>("createdAt,desc");
 
   const adType = useMemo<AdType | undefined>(
     () => (tab === "TODOS" ? undefined : tabToAdType[tab]),
