@@ -48,6 +48,15 @@ export function Feed() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const getDefaultSort = useCallback((currentTab: UiTab): string => {
+    return currentTab === "INDICACOES" ? "title,asc" : "createdAt,desc";
+  }, []);
+
+  const [sortOrder, setSortOrder] = useState<string>(() => {
+    const initialTab: UiTab = "TODOS";
+    return initialTab === "INDICACOES" ? "title,asc" : "createdAt,desc";
+  });
+
   const adType = useMemo<AdType | undefined>(
     () => (tab === "TODOS" ? undefined : tabToAdType[tab]),
     [tab]
@@ -58,6 +67,37 @@ export function Feed() {
     [tab]
   );
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+
+  type SortOption = {
+    value: string;
+    label: string;
+  };
+
+  const getSortOptions = useCallback((currentTab: UiTab): SortOption[] => {
+    const base: SortOption[] = [
+      { value: "title,asc", label: "Alfabética (A-Z)" },
+      { value: "title,desc", label: "Alfabética (Z-A)" },
+      { value: "createdAt,desc", label: "Data (mais recente)" },
+      { value: "createdAt,asc", label: "Data (mais antiga)" },
+      { value: "user.name,asc", label: "Usuário (A-Z)" },
+      { value: "user.name,desc", label: "Usuário (Z-A)" },
+    ];
+    if (currentTab === "TODOS") {
+      return [
+        ...base,
+        { value: "type,asc", label: "Tipo (A-Z)" },
+        { value: "type,desc", label: "Tipo (Z-A)" },
+      ];
+    }
+    if (currentTab === "INDICACOES") {
+      return [
+        ...base,
+        { value: "serviceType,asc", label: "Tipo de serviço (A-Z)" },
+        { value: "serviceType,desc", label: "Tipo de serviço (Z-A)" },
+      ];
+    }
+    return base;
+  }, []);
 
   const goToTab = useCallback((direction: "prev" | "next") => {
     setTab((current) => {
@@ -101,6 +141,7 @@ export function Feed() {
         search: search.trim() ? search.trim() : undefined,
         page: nextPage,
         size: 20,
+        sort: sortOrder,
       });
 
       setItems((prev) => (reset ? res.content : [...prev, ...res.content]));
@@ -113,7 +154,13 @@ export function Feed() {
     }
   }
 
-  // Recarrega ao trocar aba ou busca
+  // Reset ordenação ao trocar aba
+  useEffect(() => {
+    const defaultSort = getDefaultSort(tab);
+    setSortOrder(defaultSort);
+  }, [tab, getDefaultSort]);
+
+  // Recarrega ao trocar aba, busca ou ordenação
   useEffect(() => {
     setItems([]);
     setPage(0);
@@ -123,7 +170,7 @@ export function Feed() {
     }, 250);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adType, adTypes, activeCommunityId, search]);
+  }, [adType, adTypes, activeCommunityId, search, sortOrder]);
 
   async function onContactClick(ad: AdResponse) {
     if (!activeCommunityId) return;
@@ -206,13 +253,27 @@ export function Feed() {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <input
-            className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 sm:w-72"
+            className="h-10 flex-1 rounded-xl border border-border bg-surface px-3 text-sm shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 sm:w-72"
             placeholder="Buscar anúncios..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          <label className="flex items-center gap-1.5 text-xs text-muted sm:shrink-0">
+            <span className="hidden sm:inline">Ordenar:</span>
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="h-8 rounded-lg border border-border bg-surface px-2 text-xs text-text focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/20"
+            >
+              {getSortOptions(tab).map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
 
         {error ? <div className="mt-4 text-sm text-danger">{error}</div> : null}

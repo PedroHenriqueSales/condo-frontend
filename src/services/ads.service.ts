@@ -16,13 +16,14 @@ export async function getAdsByType(params: {
   search?: string;
   page?: number;
   size?: number;
+  sort?: string;
 }): Promise<Page<AdResponse>> {
   const queryParams: Record<string, string | number | string[] | undefined> = {
     communityId: params.communityId,
     search: params.search,
     page: params.page ?? 0,
     size: params.size ?? 20,
-    sort: "createdAt,desc",
+    sort: params.sort ?? "createdAt,desc",
   };
   if (params.types != null && params.types.length > 0) {
     queryParams.types = params.types;
