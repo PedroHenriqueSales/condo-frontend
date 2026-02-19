@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
@@ -7,19 +8,48 @@ import { CondominiumGate } from "../pages/CondominiumGate";
 import { CreateAd } from "../pages/CreateAd";
 import { EditAd } from "../pages/EditAd";
 import { Feed } from "../pages/Feed";
+import { ForgotPassword } from "../pages/ForgotPassword";
 import { Login } from "../pages/Login";
 import { MyAccount } from "../pages/MyAccount";
 import { MyAds } from "../pages/MyAds";
 import { MyCommunities } from "../pages/MyCommunities";
 import { Register } from "../pages/Register";
+import { ResetPassword } from "../pages/ResetPassword";
+import { VerifyEmail } from "../pages/VerifyEmail";
+import * as AuthService from "../services/auth.service";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { token } = useAuth();
+  const { token, emailVerified } = useAuth();
   const location = useLocation();
+  const [resendLoading, setResendLoading] = useState(false);
   if (!token) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-  return <>{children}</>;
+  const showUnverifiedBanner = emailVerified === false;
+  return (
+    <>
+      {showUnverifiedBanner && (
+        <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-2 text-sm text-amber-800 dark:text-amber-200 flex flex-wrap items-center justify-center gap-2">
+          <span>Confirme seu email para ativar sua conta.</span>
+          <button
+            type="button"
+            className="font-medium underline hover:no-underline disabled:opacity-60"
+            disabled={resendLoading}
+            onClick={() => {
+              setResendLoading(true);
+              AuthService.resendVerification()
+                .then(() => {})
+                .catch(() => {})
+                .finally(() => setResendLoading(false));
+            }}
+          >
+            {resendLoading ? "Enviando..." : "Reenviar verificação"}
+          </button>
+        </div>
+      )}
+      {children}
+    </>
+  );
 }
 
 function RequireCommunity({ children }: { children: React.ReactNode }) {
@@ -45,6 +75,9 @@ export function AppRoutes() {
       <Route path="/" element={<IndexRedirect />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/gate" element={<RequireAuth><CondominiumGate /></RequireAuth>} />
       <Route path="/feed" element={<RequireAuth><RequireCommunity><Feed /></RequireCommunity></RequireAuth>} />
       <Route path="/ads/new" element={<RequireAuth><RequireCommunity><CreateAd /></RequireCommunity></RequireAuth>} />

@@ -12,6 +12,7 @@ type AuthUser = {
 type AuthState = {
   token: string | null;
   user: AuthUser | null;
+  emailVerified: boolean | null;
 };
 
 type AuthContextValue = AuthState & {
@@ -29,11 +30,12 @@ function toState(res: AuthResponse): AuthState {
   return {
     token: res.token,
     user: { id: res.userId, email: res.email, name: res.name },
+    emailVerified: res.emailVerified ?? null,
   };
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AuthState>({ token: null, user: null });
+  const [state, setState] = useState<AuthState>({ token: null, user: null, emailVerified: null });
 
   useEffect(() => {
     const token = getStoredToken();
@@ -45,6 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setState({
           token: token ?? parsed.token ?? null,
           user: parsed.user ?? null,
+          emailVerified: parsed.emailVerified ?? null,
         });
         return;
       } catch {
@@ -76,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     AuthService.logout();
     setStoredToken(null);
     localStorage.removeItem(AUTH_STATE_KEY);
-    setState({ token: null, user: null });
+    setState({ token: null, user: null, emailVerified: null });
   }, []);
 
   const updateUser = useCallback((updates: Partial<AuthUser>) => {

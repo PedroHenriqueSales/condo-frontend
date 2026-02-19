@@ -24,6 +24,7 @@ export interface AuthResponse {
   userId: number;
   email: string;
   name: string;
+  emailVerified?: boolean;
 }
 
 export interface LoginRequest {

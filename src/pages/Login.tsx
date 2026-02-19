@@ -67,6 +67,12 @@ export function Login() {
               required
             />
 
+            <div className="text-right text-sm">
+              <Link className="text-primary-strong hover:underline" to="/forgot-password">
+                Esqueci minha senha
+              </Link>
+            </div>
+
             {error ? <div className="text-sm text-danger">{error}</div> : null}
 
             <Button type="submit" className="w-full" disabled={isLoading}>

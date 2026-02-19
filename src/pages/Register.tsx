@@ -5,6 +5,7 @@ import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
 import { useAuth } from "../hooks/useAuth";
+import * as AuthService from "../services/auth.service";
 
 export function Register() {
   const nav = useNavigate();
@@ -18,6 +19,9 @@ export function Register() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailVerificationSent, setEmailVerificationSent] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendError, setResendError] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -31,12 +35,68 @@ export function Register() {
         whatsapp: whatsapp.trim(),
         address: address.trim() ? address.trim() : undefined,
       });
-      nav("/gate", { replace: true });
+      setEmailVerificationSent(true);
     } catch (err: any) {
       setError(err?.response?.data?.error ?? "Falha no cadastro.");
     } finally {
       setIsLoading(false);
     }
+  }
+
+  async function onResendVerification() {
+    setResendError(null);
+    setResendLoading(true);
+    try {
+      await AuthService.resendVerification();
+      setResendError(null);
+    } catch (err: any) {
+      setResendError(err?.response?.data?.error ?? "Não foi possível reenviar. Tente mais tarde.");
+    } finally {
+      setResendLoading(false);
+    }
+  }
+
+  if (emailVerificationSent) {
+    return (
+      <div className="min-h-screen bg-bg">
+        <div className="mx-auto max-w-md px-4 py-10">
+          <div className="mb-6">
+            <div className="text-2xl font-semibold">Conta criada</div>
+            <div className="mt-1 text-sm text-muted">
+              Verifique seu email para ativar sua conta.
+            </div>
+          </div>
+          <Card>
+            <div className="space-y-4">
+              <p className="text-text">
+                Enviamos um link de verificação para <strong>{email}</strong>. Clique no link para
+                confirmar seu email. Se não receber em alguns minutos, verifique a pasta de spam.
+              </p>
+              {resendError ? <div className="text-sm text-danger">{resendError}</div> : null}
+              <div className="flex flex-col gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full"
+                  disabled={resendLoading}
+                  onClick={onResendVerification}
+                >
+                  {resendLoading ? "Enviando..." : "Reenviar email de verificação"}
+                </Button>
+                <Button type="button" className="w-full" onClick={() => nav("/gate", { replace: true })}>
+                  Continuar para o app
+                </Button>
+              </div>
+              <div className="text-center text-sm text-muted">
+                <Link className="font-medium text-primary-strong hover:underline" to="/login">
+                  Ir para o login
+                </Link>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
   }
 
   return (
