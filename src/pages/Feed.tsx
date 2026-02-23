@@ -33,7 +33,7 @@ const FILTER_LABELS: Record<UiTab, string> = {
   ALUGUEL: "Aluguel",
   SERVICOS: "Serviços",
   DOACAO: "Doação",
-  INDICACOES: "Indicações",
+  INDICACOES: "Indic.",
 };
 const TAB_ORDER: UiTab[] = ["TODOS", "VENDA", "ALUGUEL", "SERVICOS", "DOACAO", "INDICACOES"];
 
@@ -277,6 +277,7 @@ export function Feed() {
                 key={t}
                 type="button"
                 onClick={() => setTab(t)}
+                title={t === "INDICACOES" ? "Indicações" : undefined}
                 className={
                   "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg border-2 px-1 py-1.5 text-[9px] font-semibold transition sm:gap-1 sm:py-2 sm:text-[10px] " +
                   (active
@@ -285,7 +286,7 @@ export function Feed() {
                 }
               >
                 <FilterIcon tab={t} />
-                <span className="truncate w-full text-center">{FILTER_LABELS[t]}</span>
+                <span className="w-full text-center">{FILTER_LABELS[t]}</span>
               </button>
             );
           })}
