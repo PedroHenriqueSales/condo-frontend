@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
+import type { CommunityResponse } from "../services/contracts";
 import { AdDetail } from "../pages/AdDetail";
 import { CommunityDetail } from "../pages/CommunityDetail";
+import { CommunityAdmin } from "../pages/CommunityAdmin";
 import { CondominiumGate } from "../pages/CondominiumGate";
 import { CreateAd } from "../pages/CreateAd";
+import { CreateCommunity } from "../pages/CreateCommunity";
 import { EditAd } from "../pages/EditAd";
 import { Feed } from "../pages/Feed";
 import { ForgotPassword } from "../pages/ForgotPassword";
@@ -62,11 +65,37 @@ function RequireCommunity({ children }: { children: React.ReactNode }) {
 }
 
 function IndexRedirect() {
+  const nav = useNavigate();
   const { token } = useAuth();
-  const { communities, activeCommunityId } = useCondominium();
+  const { refresh, setActiveCommunityId } = useCondominium();
+  const [list, setList] = useState<CommunityResponse[] | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    refresh().then(setList);
+  }, [token, refresh]);
+
+  useEffect(() => {
+    if (list === null) return;
+    if (list.length === 0) {
+      nav("/gate", { replace: true });
+    } else if (list.length === 1) {
+      setActiveCommunityId(list[0].id);
+      nav("/feed", { replace: true });
+    } else {
+      nav("/communities", { replace: true });
+    }
+  }, [list, nav, setActiveCommunityId]);
+
   if (!token) return <Navigate to="/login" replace />;
-  if (!communities.length || !activeCommunityId) return <Navigate to="/gate" replace />;
-  return <Navigate to="/feed" replace />;
+  if (list === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-bg">
+        <span className="text-sm text-muted">Carregando...</span>
+      </div>
+    );
+  }
+  return null;
 }
 
 export function AppRoutes() {
@@ -79,6 +108,7 @@ export function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/gate" element={<RequireAuth><CondominiumGate /></RequireAuth>} />
+      <Route path="/communities/new" element={<RequireAuth><CreateCommunity /></RequireAuth>} />
       <Route path="/feed" element={<RequireAuth><RequireCommunity><Feed /></RequireCommunity></RequireAuth>} />
       <Route path="/ads/new" element={<RequireAuth><RequireCommunity><CreateAd /></RequireCommunity></RequireAuth>} />
       <Route path="/ads/:id" element={<RequireAuth><RequireCommunity><AdDetail /></RequireCommunity></RequireAuth>} />
@@ -86,6 +116,7 @@ export function AppRoutes() {
       <Route path="/my-ads" element={<RequireAuth><RequireCommunity><MyAds /></RequireCommunity></RequireAuth>} />
       <Route path="/communities" element={<RequireAuth><RequireCommunity><MyCommunities /></RequireCommunity></RequireAuth>} />
       <Route path="/communities/:id" element={<RequireAuth><RequireCommunity><CommunityDetail /></RequireCommunity></RequireAuth>} />
+      <Route path="/communities/:id/admin" element={<RequireAuth><RequireCommunity><CommunityAdmin /></RequireCommunity></RequireAuth>} />
       <Route path="/my-account" element={<RequireAuth><RequireCommunity><MyAccount /></RequireCommunity></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

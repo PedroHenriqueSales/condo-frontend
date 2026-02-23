@@ -96,13 +96,6 @@ export function CommunityDetail() {
     <div className="min-h-screen bg-bg pb-24">
       <Navbar />
       <div className="mx-auto max-w-2xl px-4 py-6">
-        <div className="mb-2 flex items-center gap-2 text-sm text-muted">
-          <Link to="/communities" className="hover:text-primary-strong">
-            Minhas comunidades
-          </Link>
-          <span aria-hidden>/</span>
-          <span className="text-text">{community.name}</span>
-        </div>
         <h1 className="mb-6 text-2xl font-semibold">Detalhes da minha comunidade</h1>
 
         <div className="space-y-4">
@@ -122,6 +115,18 @@ export function CommunityDetail() {
                 <dt className="text-muted">Data de criação</dt>
                 <dd className="text-text">{formatCreatedAt(community.createdAt)}</dd>
               </div>
+              {community.isPrivate != null && (
+                <div>
+                  <dt className="text-muted">Tipo</dt>
+                  <dd className="text-text">{community.isPrivate ? "Privada" : "Aberta"}</dd>
+                </div>
+              )}
+              {community.postalCode && (
+                <div>
+                  <dt className="text-muted">CEP</dt>
+                  <dd className="text-text">{community.postalCode}</dd>
+                </div>
+              )}
               {community.createdByName != null && (
                 <div>
                   <dt className="text-muted">Criada por</dt>
@@ -129,13 +134,22 @@ export function CommunityDetail() {
                 </div>
               )}
             </dl>
-            <Button
-              variant="ghost"
-              className="mt-3 w-full sm:w-auto"
-              onClick={() => setShareOpen(true)}
-            >
-              Compartilhar comunidade
-            </Button>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {community.isAdmin ? (
+                <Link to={`/communities/${community.id}/admin`}>
+                  <Button type="button" variant="ghost">
+                    Administrar
+                  </Button>
+                </Link>
+              ) : null}
+              <Button
+                variant="ghost"
+                className="sm:w-auto"
+                onClick={() => setShareOpen(true)}
+              >
+                Compartilhar comunidade
+              </Button>
+            </div>
           </Card>
 
           <Card>

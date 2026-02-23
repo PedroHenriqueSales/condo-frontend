@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation, Link } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
@@ -14,6 +14,7 @@ export function CondominiumGate() {
   const [searchParams] = useSearchParams();
   const { logout } = useAuth();
   const from = (location.state as { from?: { pathname: string; search: string } } | null)?.from;
+  const codeFromUrl = searchParams.get("code") ?? "";
   const {
     communities,
     activeCommunityId,
@@ -22,9 +23,9 @@ export function CondominiumGate() {
     setActiveCommunityId,
   } = useCondominium();
 
-  const codeFromUrl = searchParams.get("code") ?? "";
   const [accessCode, setAccessCode] = useState(codeFromUrl || "");
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState<"join" | null>(null);
 
   useEffect(() => {
@@ -37,25 +38,37 @@ export function CondominiumGate() {
     });
   }, [refresh]);
 
+  // Redireciona só quando chegou na gate sem "from" (ex.: após login) e já tem comunidade ativa.
+  // Se veio de "Entrar em uma comunidade" (state from), permanece na gate para poder entrar em outra.
   useEffect(() => {
-    if (communities.length && activeCommunityId) {
-      const target = from ? `${from.pathname}${from.search ?? ""}` : "/feed";
-      nav(target, { replace: true });
+    if (!from && communities.length > 0 && activeCommunityId) {
+      nav("/communities", { replace: true });
     }
-  }, [communities.length, activeCommunityId, from, nav]);
+  }, [from, communities.length, activeCommunityId, nav]);
 
   async function onJoin(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setSuccessMessage(null);
     setBusy("join");
     try {
       const c = await CondominiumService.joinCommunity({ accessCode: accessCode.trim() });
+      if (c.joinPending) {
+        setSuccessMessage("Solicitação enviada. Aguarde a aprovação do administrador da comunidade.");
+        setAccessCode("");
+        return;
+      }
       setActiveCommunityId(c.id);
       await refresh();
-      const target = from ? `${from.pathname}${from.search ?? ""}` : "/feed";
+      const target = from ? `${from.pathname}${from.search ?? ""}` : "/communities";
       nav(target, { replace: true });
     } catch (err: any) {
-      setError(err?.response?.data?.error ?? "Código inválido.");
+      const msg = err?.response?.data?.error;
+      if (msg) {
+        setError(msg);
+      } else {
+        setError("Não foi possível entrar. Verifique o código e tente novamente.");
+      }
     } finally {
       setBusy(null);
     }
@@ -80,9 +93,18 @@ export function CondominiumGate() {
           <div className="text-sm text-muted">Carregando...</div>
         ) : null}
 
-        {error ? <div className="mb-4 text-sm text-danger">{error}</div> : null}
+        {error ? (
+          <div className="mb-4 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+            {error}
+          </div>
+        ) : null}
+        {successMessage ? (
+          <div className="mb-4 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary-strong">
+            {successMessage}
+          </div>
+        ) : null}
 
-        <div className="max-w-sm">
+        <div className="flex max-w-sm flex-col gap-4">
           <Card>
             <div className="mb-3 text-sm font-semibold">Tenho um código</div>
             <form className="space-y-3" onSubmit={onJoin}>
@@ -98,6 +120,24 @@ export function CondominiumGate() {
               </Button>
             </form>
           </Card>
+
+          <Card className="border-2 border-dashed border-border">
+            <p className="mb-3 text-sm text-muted">
+              Quer criar uma nova comunidade? Você será o administrador inicial.
+            </p>
+            <Link to="/communities/new">
+              <Button type="button" variant="ghost" className="w-full">
+                Criar comunidade
+              </Button>
+            </Link>
+          </Card>
+          {communities.length > 0 ? (
+            <p className="text-center text-sm text-muted">
+              <Link to="/communities" className="font-medium text-primary-strong hover:underline">
+                Voltar para Minhas comunidades
+              </Link>
+            </p>
+          ) : null}
         </div>
       </div>
     </div>

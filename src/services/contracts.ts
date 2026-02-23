@@ -1,20 +1,49 @@
-/** Resposta de comunidade (lista e detalhe). Detalhe inclui createdByName e memberNames. */
+/** Resposta de comunidade (lista e detalhe). Detalhe inclui createdByName, memberNames e members. */
 export interface CommunityResponse {
   id: number;
   name: string;
   accessCode: string;
+  isPrivate?: boolean;
+  postalCode?: string;
   createdAt: string;
   createdById: number;
   createdByName?: string;
   memberNames?: string[];
+  /** Para o usuário autenticado: é administrador desta comunidade? */
+  isAdmin?: boolean;
+  /** No detalhe: lista de membros com id (para "Tornar admin"). */
+  members?: MemberSummary[];
+  /** Ao entrar em comunidade privada: true = solicitação enviada, aguardando aprovação. */
+  joinPending?: boolean;
+  /** Quando o usuário é admin: ids dos administradores (para não mostrar "Tornar admin" para quem já é). */
+  adminIds?: number[];
+}
+
+export interface MemberSummary {
+  id: number;
+  name: string;
 }
 
 export interface CreateCommunityRequest {
+  name: string;
+  isPrivate: boolean;
+  postalCode: string;
+}
+
+export interface UpdateCommunityRequest {
   name: string;
 }
 
 export interface JoinCommunityRequest {
   accessCode: string;
+}
+
+export interface JoinRequestResponse {
+  id: number;
+  userId: number;
+  userName: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  createdAt: string;
 }
 
 // Auth

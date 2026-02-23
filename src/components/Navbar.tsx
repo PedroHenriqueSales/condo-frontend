@@ -1,13 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import logoIcon from "../assets/logo-icon.png";
 import logoName from "../assets/logo-name.png";
 import { Button } from "./Button";
+import * as CondominiumService from "../services/condominium.service";
+import type { CommunityResponse } from "../services/contracts";
 
 export function Navbar() {
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [adminCommunities, setAdminCommunities] = useState<CommunityResponse[] | null>(null);
+
+  useEffect(() => {
+    if (menuOpen && user) {
+      CondominiumService.listAdminCommunities()
+        .then(setAdminCommunities)
+        .catch(() => setAdminCommunities([]));
+    } else if (!menuOpen) {
+      setAdminCommunities(null);
+    }
+  }, [menuOpen, user]);
 
   return (
     <>
@@ -78,6 +91,33 @@ export function Navbar() {
               >
                 Minha conta
               </Link>
+              {adminCommunities && adminCommunities.length > 0 ? (
+                adminCommunities.length === 1 ? (
+                  <Link
+                    to={`/communities/${adminCommunities[0].id}/admin`}
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-muted hover:bg-surface/60"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Administrar Comunidade
+                  </Link>
+                ) : (
+                  <>
+                    <div className="rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted">
+                      Administrar Comunidade
+                    </div>
+                    {adminCommunities.map((c) => (
+                      <Link
+                        key={c.id}
+                        to={`/communities/${c.id}/admin`}
+                        className="rounded-lg px-3 py-2 pl-5 text-sm font-medium text-muted hover:bg-surface/60"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        {c.name}
+                      </Link>
+                    ))}
+                  </>
+                )
+              ) : null}
               <button
                 type="button"
                 className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-muted hover:bg-surface/60"

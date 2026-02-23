@@ -6,7 +6,7 @@ type CondominiumContextValue = {
   communities: CommunityResponse[];
   activeCommunityId: number | null;
   isLoading: boolean;
-  refresh: () => Promise<void>;
+  refresh: () => Promise<CommunityResponse[]>;
   setActiveCommunityId: (id: number) => void;
   clear: () => void;
 };
@@ -39,7 +39,7 @@ export function CondominiumProvider({ children }: { children: React.ReactNode })
     localStorage.setItem(ACTIVE_COMMUNITY_KEY, String(id));
   }, []);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (): Promise<CommunityResponse[]> => {
     setIsLoading(true);
     try {
       const list = await CondominiumService.listMyCommunities();
@@ -49,7 +49,7 @@ export function CondominiumProvider({ children }: { children: React.ReactNode })
         setActiveCommunityIdState(null);
         activeCommunityIdRef.current = null;
         localStorage.removeItem(ACTIVE_COMMUNITY_KEY);
-        return;
+        return list;
       }
 
       // Se a comunidade ativa não existir mais, seleciona a primeira.
@@ -61,6 +61,7 @@ export function CondominiumProvider({ children }: { children: React.ReactNode })
         activeCommunityIdRef.current = firstId;
         localStorage.setItem(ACTIVE_COMMUNITY_KEY, String(firstId));
       }
+      return list;
     } finally {
       setIsLoading(false);
     }

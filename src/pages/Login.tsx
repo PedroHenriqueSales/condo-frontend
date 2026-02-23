@@ -5,11 +5,13 @@ import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
 import { useAuth } from "../hooks/useAuth";
+import { useCondominium } from "../hooks/useCondominium";
 
 export function Login() {
   const nav = useNavigate();
   const location = useLocation();
   const { token, login } = useAuth();
+  const { refresh, setActiveCommunityId } = useCondominium();
   const from = (location.state as { from?: { pathname: string; search: string } } | null)?.from;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +20,7 @@ export function Login() {
 
   useEffect(() => {
     if (token) {
-      const target = from ? `${from.pathname}${from.search ?? ""}` : "/feed";
+      const target = from ? `${from.pathname}${from.search ?? ""}` : "/communities";
       nav(target, { replace: true });
     }
   }, [token, from, nav]);
@@ -29,8 +31,19 @@ export function Login() {
     setIsLoading(true);
     try {
       await login({ email, password });
-      const target = from ? `${from.pathname}${from.search ?? ""}` : "/gate";
-      nav(target, { replace: true });
+      if (from) {
+        nav(`${from.pathname}${from.search ?? ""}`, { replace: true });
+        return;
+      }
+      const list = await refresh();
+      if (list.length === 0) {
+        nav("/gate", { replace: true });
+      } else if (list.length === 1) {
+        setActiveCommunityId(list[0].id);
+        nav("/feed", { replace: true });
+      } else {
+        nav("/communities", { replace: true });
+      }
     } catch (err: any) {
       setError(err?.response?.data?.error ?? "Falha no login. Verifique suas credenciais.");
     } finally {
