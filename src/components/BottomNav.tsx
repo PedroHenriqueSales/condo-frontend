@@ -23,7 +23,7 @@ const navItems: { to: string; label: string; icon: React.ReactNode; match?: (pat
   },
   {
     to: "/ads/new",
-    label: "Adicionar anúncio",
+    label: "Anunciar",
     icon: (
       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -70,7 +70,7 @@ export function BottomNav() {
           const linkClass =
             "flex flex-col items-center gap-1 min-w-0 flex-1 py-1 rounded-xl transition " +
             (isActive ? "text-primary-strong" : "text-muted hover:text-text active:bg-surface/60");
-          const labelClass = "text-[8px] font-medium leading-tight text-center max-w-[4rem] line-clamp-2 min-h-[2rem]";
+          const labelClass = "text-[10px] font-medium leading-tight text-center max-w-[4.5rem] line-clamp-2 min-h-[2.25rem]";
 
           return (
             <Link
