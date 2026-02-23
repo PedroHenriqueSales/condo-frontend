@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AdPlaceholder } from "../components/AdPlaceholder";
 import { Badge } from "../components/Badge";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Navbar } from "../components/Navbar";
+import { BottomNav } from "../components/BottomNav";
 import { TextWithLinks } from "../components/TextWithLinks";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
@@ -218,7 +219,7 @@ export function Feed() {
   }
 
   return (
-    <div className="min-h-screen bg-bg pb-20">
+    <div className="min-h-screen bg-bg pb-24">
       <Navbar />
 
       {/* Barra de filtros no topo (sticky logo abaixo da Navbar) */}
@@ -378,15 +379,7 @@ export function Feed() {
         </div>
       </div>
 
-      {/* Botão flutuante novo anúncio */}
-      <Link
-        to="/ads/new"
-        aria-label="Criar anúncio"
-        className="fixed bottom-6 right-6 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg transition hover:bg-primary-strong active:scale-95 sm:bottom-8 sm:right-8 sm:h-16 sm:w-16"
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 0)" }}
-      >
-        <span className="text-2xl font-light leading-none sm:text-3xl">+</span>
-      </Link>
+      <BottomNav />
     </div>
   );
 }

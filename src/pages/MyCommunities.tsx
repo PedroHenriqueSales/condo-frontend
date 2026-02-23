@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Navbar } from "../components/Navbar";
+import { BottomNav } from "../components/BottomNav";
 import { useCondominium } from "../hooks/useCondominium";
 
 export function MyCommunities() {
@@ -9,7 +10,7 @@ export function MyCommunities() {
   const { communities, isLoading, activeCommunityId, setActiveCommunityId } = useCondominium();
 
   return (
-    <div className="min-h-screen bg-bg pb-20">
+    <div className="min-h-screen bg-bg pb-24">
       <Navbar />
       <div className="mx-auto max-w-2xl px-4 py-6">
         <div className="mb-4 text-2xl font-semibold">Minhas comunidades</div>
@@ -51,6 +52,7 @@ export function MyCommunities() {
           </ul>
         )}
       </div>
+      <BottomNav />
     </div>
   );
 }

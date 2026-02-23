@@ -6,6 +6,7 @@ import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { ImageLightbox } from "../components/ImageLightbox";
 import { Navbar } from "../components/Navbar";
+import { BottomNav } from "../components/BottomNav";
 import { TextWithLinks } from "../components/TextWithLinks";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
@@ -196,7 +197,7 @@ export function AdDetail() {
   );
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen bg-bg pb-24">
       <Navbar />
       <div className="mx-auto max-w-3xl px-4 py-6">
         <div className="mb-4 flex items-center justify-between">
@@ -440,6 +441,7 @@ export function AdDetail() {
       {lightboxImage && (
         <ImageLightbox imageUrl={lightboxImage} onClose={() => setLightboxImage(null)} />
       )}
+      <BottomNav />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
 import { Navbar } from "../components/Navbar";
+import { BottomNav } from "../components/BottomNav";
 import { useCondominium } from "../hooks/useCondominium";
 import { INDICATION_SERVICE_TYPE_SUGGESTIONS } from "../constants/indicationServiceTypes";
 import {
@@ -82,13 +83,31 @@ export function CreateAd() {
   }
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen bg-bg pb-24">
       <Navbar />
       <div className="mx-auto max-w-3xl px-4 py-6">
         <div className="mb-4 text-2xl font-semibold">Criar anúncio</div>
 
         <Card>
           <form className="space-y-4" onSubmit={onSubmit}>
+            <label className="block">
+              <div className="mb-1 text-sm font-medium text-text">Tipo</div>
+              <select
+                className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm shadow-soft focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+                value={uiType}
+                onChange={(e) => setUiType(e.target.value as UiType)}
+              >
+                <option value="VENDA">Venda</option>
+                <option value="ALUGUEL">Aluguel</option>
+                <option value="SERVICOS">Serviços</option>
+                <option value="DOACAO">Doação</option>
+                <option value="INDICACOES">Indicações</option>
+              </select>
+              {fieldErrors.type ? (
+                <div className="mt-1 text-sm text-danger">{fieldErrors.type}</div>
+              ) : null}
+            </label>
+
             <div>
               <Input
                 label="Título"
@@ -113,24 +132,6 @@ export function CreateAd() {
               />
               {fieldErrors.description ? (
                 <div className="mt-1 text-sm text-danger">{fieldErrors.description}</div>
-              ) : null}
-            </label>
-
-            <label className="block">
-              <div className="mb-1 text-sm font-medium text-text">Tipo</div>
-              <select
-                className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm shadow-soft focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
-                value={uiType}
-                onChange={(e) => setUiType(e.target.value as UiType)}
-              >
-                <option value="VENDA">Venda</option>
-                <option value="ALUGUEL">Aluguel</option>
-                <option value="SERVICOS">Serviços</option>
-                <option value="DOACAO">Doação</option>
-                <option value="INDICACOES">Indicações</option>
-              </select>
-              {fieldErrors.type ? (
-                <div className="mt-1 text-sm text-danger">{fieldErrors.type}</div>
               ) : null}
             </label>
 
@@ -271,6 +272,7 @@ export function CreateAd() {
           </form>
         </Card>
       </div>
+      <BottomNav />
     </div>
   );
 }

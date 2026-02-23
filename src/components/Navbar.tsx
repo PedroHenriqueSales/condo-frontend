@@ -1,95 +1,97 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import logoIcon from "../assets/logo-icon.png";
 import logoName from "../assets/logo-name.png";
 import { Button } from "./Button";
 
 export function Navbar() {
-  const { pathname } = useLocation();
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const item = (to: string, label: string, closeOnClick = false) => {
-    const active = pathname === to || pathname.startsWith(to + "/");
-    const baseClass =
-      "block rounded-xl px-3 py-2.5 text-sm font-medium transition " +
-      (active ? "bg-primary/10 text-primary-strong" : "text-muted hover:bg-surface/60");
-
-    return closeOnClick ? (
-      <Link to={to} className={baseClass} onClick={() => setMenuOpen(false)}>
-        {label}
-      </Link>
-    ) : (
-      <Link to={to} className={baseClass}>
-        {label}
-      </Link>
-    );
-  };
-
   return (
-    <div className="sticky top-0 z-10 border-b border-border bg-bg/80 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-        <Link to="/feed" className="flex items-center gap-2" aria-label="Aquidolado">
-          <img src={logoIcon} alt="" className="h-9 w-auto" />
-          <img src={logoName} alt="Aqui do Lado" className="h-6 w-auto sm:h-7" />
-        </Link>
+    <>
+      <div className="sticky top-0 z-10 border-b border-border bg-bg/80 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+          <Link to="/feed" className="flex items-center gap-2" aria-label="Aquidolado - Início">
+            <img src={logoIcon} alt="" className="h-9 w-auto" />
+            <img src={logoName} alt="Aqui do Lado" className="h-6 w-auto sm:h-7" />
+          </Link>
 
-        <nav className="hidden items-center gap-1 sm:flex">
-          {item("/feed", "Feed")}
-          {item("/ads/new", "Criar")}
-          {item("/my-ads", "Meus anúncios")}
-          {item("/communities", "Minhas comunidades")}
-          {item("/my-account", "Minha conta")}
-        </nav>
+          <div className="flex items-center gap-2">
+            {user ? (
+              <span className="hidden text-xs text-muted sm:inline">{user.name}</span>
+            ) : null}
+            <Button variant="ghost" size="sm" onClick={logout} className="hidden sm:inline-flex">
+              Sair
+            </Button>
 
-        <div className="flex items-center gap-2">
-          {user ? (
-            <span className="hidden text-xs text-muted sm:inline">{user.name}</span>
-          ) : null}
-          <Button variant="ghost" size="sm" onClick={logout} className="hidden sm:inline-flex">
-            Sair
-          </Button>
-
-          <button
-            type="button"
-            aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
-            aria-expanded={menuOpen}
-            className="flex h-10 w-10 flex-shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl hover:bg-surface/60 sm:hidden"
-            onClick={() => setMenuOpen((o) => !o)}
-          >
-            <span
-              className={`h-0.5 w-5 rounded-full bg-text transition ${menuOpen ? "translate-y-2 rotate-45" : ""}`}
-            />
-            <span className={`h-0.5 w-5 rounded-full bg-text transition ${menuOpen ? "opacity-0" : ""}`} />
-            <span
-              className={`h-0.5 w-5 rounded-full bg-text transition ${menuOpen ? "-translate-y-2 -rotate-45" : ""}`}
-            />
-          </button>
+            <button
+              type="button"
+              aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+              aria-expanded={menuOpen}
+              className="flex h-10 w-10 flex-shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl hover:bg-surface/60 sm:hidden"
+              onClick={() => setMenuOpen((o) => !o)}
+            >
+              <span
+                className={`h-0.5 w-5 rounded-full bg-text transition ${menuOpen ? "translate-y-2 rotate-45" : ""}`}
+              />
+              <span className={`h-0.5 w-5 rounded-full bg-text transition ${menuOpen ? "opacity-0" : ""}`} />
+              <span
+                className={`h-0.5 w-5 rounded-full bg-text transition ${menuOpen ? "-translate-y-2 -rotate-45" : ""}`}
+              />
+            </button>
+          </div>
         </div>
       </div>
 
       {menuOpen ? (
-        <div className="border-t border-border bg-bg px-4 py-3 sm:hidden">
-          <nav className="flex flex-col gap-0.5">
-            {item("/feed", "Feed", true)}
-            {item("/my-ads", "Meus anúncios", true)}
-            {item("/communities", "Minhas comunidades", true)}
-            {item("/my-account", "Minha conta", true)}
-            <button
-              type="button"
-              className="mt-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-muted hover:bg-surface/60"
-              onClick={() => {
-                setMenuOpen(false);
-                logout();
-              }}
-            >
-              Sair
-            </button>
-          </nav>
+        <div
+          className="fixed inset-0 z-50 sm:hidden"
+          aria-hidden="false"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu"
+        >
+          {/* Fundo transparente – clique fecha o menu */}
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+            aria-label="Fechar menu"
+            onClick={() => setMenuOpen(false)}
+          />
+          {/* Menu compacto alinhado ao canto superior direito */}
+          <div
+            className="absolute right-3 top-14 min-w-[10rem] rounded-xl border border-border bg-bg shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <nav className="flex flex-col gap-0.5 p-2">
+              {user ? (
+                <div className="rounded-lg px-3 py-2 text-sm font-medium text-text">
+                  {user.name}
+                </div>
+              ) : null}
+              <Link
+                to="/my-account"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-muted hover:bg-surface/60"
+                onClick={() => setMenuOpen(false)}
+              >
+                Minha conta
+              </Link>
+              <button
+                type="button"
+                className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-muted hover:bg-surface/60"
+                onClick={() => {
+                  setMenuOpen(false);
+                  logout();
+                }}
+              >
+                Sair
+              </button>
+            </nav>
+          </div>
         </div>
       ) : null}
-    </div>
+    </>
   );
 }
-

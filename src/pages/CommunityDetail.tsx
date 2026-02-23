@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Navbar } from "../components/Navbar";
+import { BottomNav } from "../components/BottomNav";
 import { ShareCommunityModal } from "../components/ShareCommunityModal";
 import { useCondominium } from "../hooks/useCondominium";
 import * as CondominiumService from "../services/condominium.service";
@@ -64,18 +65,19 @@ export function CommunityDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg pb-20">
+      <div className="min-h-screen bg-bg pb-24">
         <Navbar />
         <div className="mx-auto max-w-2xl px-4 py-6">
           <div className="text-sm text-muted">Carregando...</div>
         </div>
+        <BottomNav />
       </div>
     );
   }
 
   if (error || !community) {
     return (
-      <div className="min-h-screen bg-bg pb-20">
+      <div className="min-h-screen bg-bg pb-24">
         <Navbar />
         <div className="mx-auto max-w-2xl px-4 py-6">
           <p className="mb-4 text-sm text-danger">{error ?? "Comunidade não encontrada."}</p>
@@ -83,6 +85,7 @@ export function CommunityDetail() {
             Voltar para Minhas comunidades
           </Button>
         </div>
+        <BottomNav />
       </div>
     );
   }
@@ -90,7 +93,7 @@ export function CommunityDetail() {
   const memberNames = community.memberNames ?? [];
 
   return (
-    <div className="min-h-screen bg-bg pb-20">
+    <div className="min-h-screen bg-bg pb-24">
       <Navbar />
       <div className="mx-auto max-w-2xl px-4 py-6">
         <div className="mb-2 flex items-center gap-2 text-sm text-muted">
@@ -169,6 +172,7 @@ export function CommunityDetail() {
           onClose={() => setShareOpen(false)}
         />
       )}
+      <BottomNav />
     </div>
   );
 }

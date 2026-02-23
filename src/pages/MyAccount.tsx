@@ -4,6 +4,7 @@ import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
 import { Navbar } from "../components/Navbar";
+import { BottomNav } from "../components/BottomNav";
 import { useAuth } from "../hooks/useAuth";
 import * as UsersService from "../services/users.service";
 
@@ -68,7 +69,7 @@ export function MyAccount() {
   }
 
   return (
-    <div className="min-h-screen bg-bg pb-20">
+    <div className="min-h-screen bg-bg pb-24">
       <Navbar />
       <div className="mx-auto max-w-md px-4 py-6">
         <div className="mb-4 text-2xl font-semibold">Minha conta</div>
@@ -124,6 +125,7 @@ export function MyAccount() {
           </Card>
         )}
       </div>
+      <BottomNav />
     </div>
   );
 }

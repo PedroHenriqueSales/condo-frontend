@@ -5,6 +5,7 @@ import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
 import { Navbar } from "../components/Navbar";
+import { BottomNav } from "../components/BottomNav";
 import { useAuth } from "../hooks/useAuth";
 import { INDICATION_SERVICE_TYPE_SUGGESTIONS } from "../constants/indicationServiceTypes";
 import {
@@ -133,18 +134,19 @@ export function EditAd() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg">
+      <div className="min-h-screen bg-bg pb-24">
         <Navbar />
         <div className="mx-auto max-w-3xl px-4 py-6">
           <div className="text-sm text-muted">Carregando...</div>
         </div>
+        <BottomNav />
       </div>
     );
   }
 
   if (forbidden) {
     return (
-      <div className="min-h-screen bg-bg">
+      <div className="min-h-screen bg-bg pb-24">
         <Navbar />
         <div className="mx-auto max-w-3xl px-4 py-6">
           <Card>
@@ -156,12 +158,13 @@ export function EditAd() {
             </Link>
           </Card>
         </div>
+        <BottomNav />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen bg-bg pb-24">
       <Navbar />
       <div className="mx-auto max-w-3xl px-4 py-6">
         <div className="mb-4 flex items-center gap-3">
@@ -359,6 +362,7 @@ export function EditAd() {
           </form>
         </Card>
       </div>
+      <BottomNav />
     </div>
   );
 }

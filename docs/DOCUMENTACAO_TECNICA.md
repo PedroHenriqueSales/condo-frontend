@@ -13,6 +13,7 @@ src/
 ├── app/              # App.tsx, rotas (routes.tsx)
 ├── components/       # Componentes reutilizáveis
 │   ├── Badge.tsx
+│   ├── BottomNav.tsx
 │   ├── Button.tsx
 │   ├── Card.tsx
 │   ├── Input.tsx
@@ -158,10 +159,11 @@ Tipos TypeScript alinhados ao backend:
 |------------|-----------|
 | `AdPlaceholder` | Placeholder com logo quando anúncio não tem imagem |
 | `Badge` | Badge para tipo/status de anúncio |
+| `BottomNav` | Barra de navegação inferior (Início, Meus Anúncios, Adicionar anúncio, Comunidades, Minha Conta) |
 | `Button` | Botão com variantes (primary, ghost, danger) |
 | `Card` | Card para anúncios e layouts |
 | `Input` | Input com label e erro |
-| `Navbar` | Barra de navegação com Compartilhar e Minhas comunidades |
+| `Navbar` | Barra superior com logo e Sair |
 | `ShareCommunityModal` | Modal para compartilhar código (QR code, copiar, WhatsApp) |
 | `Tabs` | Abas para filtros (ex.: Feed) |
 
