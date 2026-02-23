@@ -15,17 +15,17 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --c-bg: 72 50 34; /* marrom mais fechado - centro do degradé (#483622) */
-    --c-surface: 88 62 42; /* cartões sobre o degradé */
+    --c-bg: 28 22 18; /* marrom bem escuro, quase preto (#1c1612) */
+    --c-surface: 38 30 24; /* cartões */
     --c-text: 250 245 235;
-    --c-muted: 200 190 180;
-    --c-border: 62 44 30;
+    --c-muted: 180 170 160;
+    --c-border: 52 42 34;
 
     --c-primary: 215 166 75; /* #d7a64b - botões de destaque */
     --c-primary-strong: 195 150 60;
     --c-accent: 76 184 169; /* #4CB8A9 - verde/teal da logo */
     --c-accent-strong: 64 160 146;
-    --c-info: 220 210 195; /* contraste no fundo escuro */
+    --c-info: 220 210 195;
     --c-danger: 248 113 113;
   }
 }

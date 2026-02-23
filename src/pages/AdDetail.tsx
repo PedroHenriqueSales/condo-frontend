@@ -413,10 +413,14 @@ export function AdDetail() {
             <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               {ad.type === "RECOMMENDATION" ? (
                 ad.recommendedContact ? (
-                  <Button onClick={onContact}>Entrar em contato</Button>
+                  <Button onClick={onContact} variant="accent" className="!bg-accent/80 text-white hover:!bg-accent/90">
+                    Entrar em contato
+                  </Button>
                 ) : null
               ) : ad.userId !== user?.id ? (
-                <Button onClick={onContact}>Entrar em contato</Button>
+                <Button onClick={onContact} variant="accent" className="!bg-accent/80 text-white hover:!bg-accent/90">
+                  Entrar em contato
+                </Button>
               ) : null}
               <Button
                 onClick={onShare}

@@ -40,7 +40,7 @@ export function Navbar() {
             <img
               src={isDark ? logoNameDark : logoNameLight}
               alt="Aqui do Lado"
-              className={`h-12 w-auto sm:h-14 mix-blend-lighten`}
+              className={`h-14 w-auto sm:h-16 ${isDark ? "mix-blend-lighten" : ""}`}
             />
           </Link>
 
