@@ -5,8 +5,8 @@
   --c-muted: 100 116 139; /* slate-500-ish */
   --c-border: 226 232 240; /* slate-200-ish */
 
-  --c-primary: 34 197 94; /* green-500 */
-  --c-primary-strong: 22 163 74; /* green-600 */
+  --c-primary: 59 130 246; /* blue-500 */
+  --c-primary-strong: 37 99 235; /* blue-600 */
   --c-danger: 239 68 68; /* red-500 */
 }
 
@@ -18,8 +18,8 @@
     --c-muted: 148 163 184;
     --c-border: 51 65 85;
 
-    --c-primary: 74 222 128;
-    --c-primary-strong: 34 197 94;
+    --c-primary: 96 165 250; /* blue-400 */
+    --c-primary-strong: 59 130 246; /* blue-500 */
     --c-danger: 248 113 113;
   }
 }

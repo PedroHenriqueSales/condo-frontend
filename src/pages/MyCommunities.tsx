@@ -29,13 +29,20 @@ export function MyCommunities() {
             {communities.map((c) => (
               <li key={c.id}>
                 <Card
-                  className="flex cursor-pointer flex-row flex-wrap items-center justify-between gap-3 transition hover:bg-surface/80"
+                  className="flex cursor-pointer flex-row flex-wrap items-center justify-between gap-3 border-2 border-border py-4 transition hover:border-primary/50 hover:bg-primary/5 active:scale-[0.99] active:bg-primary/10"
                   onClick={() => {
                     if (c.id !== activeCommunityId) setActiveCommunityId(c.id);
                     nav("/feed");
                   }}
                 >
-                  <span className="font-medium text-text">{c.name}</span>
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                    <span className="font-semibold text-text">{c.name}</span>
+                    <span className="text-primary-strong" aria-hidden>
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </span>
+                  </div>
                   <Button
                     variant="ghost"
                     size="sm"
