@@ -62,7 +62,7 @@ export function ForgotPassword() {
                 {isLoading ? "Enviando..." : "Enviar link"}
               </Button>
               <div className="text-center text-sm text-muted">
-                <Link className="font-medium text-primary-strong hover:underline" to="/login">
+                <Link className="font-medium text-accent-strong hover:underline" to="/login">
                   Voltar ao login
                 </Link>
               </div>

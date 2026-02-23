@@ -58,7 +58,7 @@ export function CreateCommunity() {
       <Navbar />
       <div className="mx-auto max-w-2xl px-4 py-6">
         <div className="mb-2 flex items-center gap-2 text-sm text-muted">
-          <Link to="/gate" className="hover:text-primary-strong">
+          <Link to="/gate" className="hover:text-accent-strong">
             Entrar na comunidade
           </Link>
           <span aria-hidden>/</span>

@@ -142,16 +142,19 @@ Tipos TypeScript alinhados ao backend:
 | `--c-text` | Texto principal |
 | `--c-muted` | Texto secundário |
 | `--c-border` | Bordas |
-| `--c-primary` | Cor primária (verde) |
-| `--c-primary-strong` | Verde mais forte |
+| `--c-primary` | Cor de destaque (botões; #d7a64b) |
+| `--c-primary-strong` | Hover dos botões de destaque |
+| `--c-info` | Informações relevantes (ex.: valor dos anúncios; #705034 no tema claro) |
 | `--c-danger` | Vermelho (erros, ações perigosas) |
 
 ### 6.2 Tema
 
 - Suporte a **dark mode** via `prefers-color-scheme: dark`
-- Paleta clara (off-white/cinza) com verde suave como primária
+- **Tema claro:** fundo #ffffff; botões de destaque #d7a64b; informações relevantes #705034
+- **Tema escuro:** fundo em degradé radial (centro #795537, bordas #593f28); botões de destaque #d7a64b
 - Cantos arredondados (12–16px), sombras suaves
 - Tipografia: Inter ou system-ui
+- Logo no topo: variantes por tema (logo-name-light.png / logo-name-dark.png)
 
 ## 7. Componentes principais
 

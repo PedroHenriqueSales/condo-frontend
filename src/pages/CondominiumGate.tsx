@@ -133,7 +133,7 @@ export function CondominiumGate() {
           </Card>
           {communities.length > 0 ? (
             <p className="text-center text-sm text-muted">
-              <Link to="/communities" className="font-medium text-primary-strong hover:underline">
+              <Link to="/communities" className="font-medium text-accent-strong hover:underline">
                 Voltar para Minhas comunidades
               </Link>
             </p>

@@ -88,7 +88,7 @@ export function Register() {
                 </Button>
               </div>
               <div className="text-center text-sm text-muted">
-                <Link className="font-medium text-primary-strong hover:underline" to="/login">
+                <Link className="font-medium text-accent-strong hover:underline" to="/login">
                   Ir para o login
                 </Link>
               </div>
@@ -157,7 +157,7 @@ export function Register() {
 
             <div className="text-center text-sm text-muted">
               Já tem conta?{" "}
-              <Link className="font-medium text-primary-strong hover:underline" to="/login">
+              <Link className="font-medium text-accent-strong hover:underline" to="/login">
                 Entrar
               </Link>
             </div>

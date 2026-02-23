@@ -109,7 +109,7 @@ export function ResetPassword() {
                 {isLoading ? "Salvando..." : "Redefinir senha"}
               </Button>
               <div className="text-center text-sm text-muted">
-                <Link className="font-medium text-primary-strong hover:underline" to="/login">
+                <Link className="font-medium text-accent-strong hover:underline" to="/login">
                   Voltar ao login
                 </Link>
               </div>

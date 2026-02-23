@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import logoIcon from "../assets/logo-icon.png";
-import logoName from "../assets/logo-name.png";
+import logoNameLight from "../assets/logo-name-light.png";
+import logoNameDark from "../assets/logo-name-dark.png";
 import { Button } from "./Button";
 import * as CondominiumService from "../services/condominium.service";
 import type { CommunityResponse } from "../services/contracts";
@@ -11,6 +11,16 @@ export function Navbar() {
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [adminCommunities, setAdminCommunities] = useState<CommunityResponse[] | null>(null);
+  const [isDark, setIsDark] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+
+  useEffect(() => {
+    const m = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = () => setIsDark(m.matches);
+    m.addEventListener("change", onChange);
+    return () => m.removeEventListener("change", onChange);
+  }, []);
 
   useEffect(() => {
     if (menuOpen && user) {
@@ -26,9 +36,12 @@ export function Navbar() {
     <>
       <div className="sticky top-0 z-10 border-b border-border bg-bg/80 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <Link to="/feed" className="flex items-center gap-2" aria-label="Aquidolado - Início">
-            <img src={logoIcon} alt="" className="h-9 w-auto" />
-            <img src={logoName} alt="Aqui do Lado" className="h-6 w-auto sm:h-7" />
+          <Link to="/feed" className="flex items-center rounded overflow-hidden bg-bg" aria-label="Aquidolado - Início">
+            <img
+              src={isDark ? logoNameDark : logoNameLight}
+              alt="Aqui do Lado"
+              className={`h-12 w-auto sm:h-14 ${isDark ? "mix-blend-lighten" : ""}`}
+            />
           </Link>
 
           <div className="flex items-center gap-2">

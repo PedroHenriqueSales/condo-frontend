@@ -22,7 +22,7 @@ export function Tabs<T extends string>({ value, options, onChange }: Props<T>) {
             className={
               "h-9 flex-1 rounded-xl text-center text-sm font-medium transition " +
               (active
-                ? "bg-primary/10 text-primary-strong"
+                ? "bg-accent/10 text-accent-strong"
                 : "text-muted hover:bg-surface/70")
             }
           >

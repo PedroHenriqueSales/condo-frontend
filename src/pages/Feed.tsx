@@ -281,8 +281,8 @@ export function Feed() {
                 className={
                   "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg border-2 px-1 py-1.5 text-[9px] font-semibold transition sm:gap-1 sm:py-2 sm:text-[10px] " +
                   (active
-                    ? "border-primary bg-primary/15 text-primary-strong"
-                    : "border-border bg-surface text-muted hover:border-primary/50 hover:text-text")
+                    ? "border-accent bg-accent/15 text-accent-strong"
+                    : "border-border bg-surface text-muted hover:border-accent/50 hover:text-text")
                 }
               >
                 <FilterIcon tab={t} />
@@ -353,11 +353,11 @@ export function Feed() {
                       />
                     </div>
                     {ad.type === "RECOMMENDATION" && ad.serviceType ? (
-                      <div className="mt-0.5 text-xs text-primary-strong">{ad.serviceType}</div>
+                      <div className="mt-0.5 text-xs text-info">{ad.serviceType}</div>
                     ) : null}
                   </div>
                   <div className="flex flex-shrink-0 flex-col items-end gap-1">
-                    <Badge tone="primary">{AdTypeLabels[ad.type]}</Badge>
+                    <Badge tone={ad.type === "RECOMMENDATION" ? "accent" : "primary"}>{AdTypeLabels[ad.type]}</Badge>
                     {ad.type === "RECOMMENDATION" ? (
                       <div className="flex flex-col items-end text-xs text-muted">
                         {(ad.ratingCount ?? 0) > 0 ? (
@@ -372,7 +372,7 @@ export function Feed() {
                     ) : ad.type === "DONATION" ? (
                       <span className="whitespace-nowrap text-xs text-muted">Doação</span>
                     ) : ad.price != null ? (
-                      <span className="whitespace-nowrap text-sm font-semibold text-primary-strong">
+                      <span className="whitespace-nowrap text-sm font-semibold text-info">
                         {formatPriceCompact(Number(ad.price))}
                       </span>
                     ) : (
@@ -391,7 +391,7 @@ export function Feed() {
                   {user && (ad.type !== "RECOMMENDATION" || !!ad.recommendedContact?.trim()) ? (
                     <Button
                       type="button"
-                      variant="primary"
+                      variant="accent"
                       size="sm"
                       className="shrink-0 whitespace-nowrap"
                       onClick={(e) => {

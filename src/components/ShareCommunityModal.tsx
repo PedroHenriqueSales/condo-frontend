@@ -92,7 +92,7 @@ export function ShareCommunityModal({ community, onClose }: Props) {
           <Button onClick={handleCopy} variant="ghost" className="w-full">
             {copied ? "Copiado!" : "Copiar código e link"}
           </Button>
-          <Button onClick={handleWhatsApp} variant="primary" className="w-full">
+          <Button onClick={handleWhatsApp} variant="accent" className="w-full">
             Enviar por WhatsApp
           </Button>
         </div>

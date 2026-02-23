@@ -69,7 +69,7 @@ export function BottomNav() {
 
           const linkClass =
             "flex flex-col items-center gap-1 min-w-0 flex-1 py-1 rounded-xl transition " +
-            (isActive ? "text-primary-strong" : "text-muted hover:text-text active:bg-surface/60");
+            (isActive ? "text-accent-strong" : "text-muted hover:text-text active:bg-surface/60");
           const labelClass = "text-[10px] font-medium leading-tight text-center max-w-[4.5rem] line-clamp-2 min-h-[2.25rem]";
 
           return (
@@ -82,7 +82,7 @@ export function BottomNav() {
               <span
                 className={
                   isCenter
-                    ? "flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white shadow-soft"
+                    ? "flex h-9 w-9 items-center justify-center rounded-full bg-accent text-white shadow-soft"
                     : "flex items-center justify-center"
                 }
               >

@@ -201,7 +201,7 @@ export function AdDetail() {
       <Navbar />
       <div className="mx-auto max-w-3xl px-4 py-6">
         <div className="mb-4 flex items-center justify-between">
-          <Link className="text-sm font-medium text-primary-strong hover:underline" to="/feed">
+          <Link className="text-sm font-medium text-accent-strong hover:underline" to="/feed">
             ← Voltar
           </Link>
         </div>
@@ -222,13 +222,13 @@ export function AdDetail() {
                 </div>
               </div>
               <div className="flex flex-shrink-0 flex-col items-end gap-1">
-                <Badge tone="primary">{AdTypeLabels[ad.type]}</Badge>
+                <Badge tone={ad.type === "RECOMMENDATION" ? "accent" : "primary"}>{AdTypeLabels[ad.type]}</Badge>
                 {ad.type === "RECOMMENDATION" ? (
                   <span className="text-sm text-muted">Indicação</span>
                 ) : ad.type === "DONATION" ? (
                   <span className="text-sm text-muted">Doação</span>
                 ) : ad.price != null ? (
-                  <span className="whitespace-nowrap text-lg font-semibold text-primary-strong">
+                  <span className="whitespace-nowrap text-lg font-semibold text-info">
                     {formatPrice(Number(ad.price))}
                   </span>
                 ) : (
@@ -348,7 +348,7 @@ export function AdDetail() {
                       type="submit"
                       disabled={submittingComment || !commentText.trim()}
                       size="sm"
-                      variant="primary"
+                      variant="accent"
                       className="w-fit self-end px-3 py-1.5 text-xs"
                     >
                       {submittingComment ? "..." : "Enviar"}

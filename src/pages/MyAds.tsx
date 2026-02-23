@@ -112,10 +112,10 @@ export function MyAds() {
                       <span>• {formatPublishedAt(ad.createdAt)}</span>
                     ) : null}
                     {ad.type === "RECOMMENDATION" && ad.serviceType ? (
-                      <span className="text-primary-strong">• {ad.serviceType}</span>
+                      <span className="text-info">• {ad.serviceType}</span>
                     ) : null}
                     {ad.type !== "RECOMMENDATION" && ad.price != null ? (
-                      <span className="whitespace-nowrap font-medium text-primary-strong">
+                      <span className="whitespace-nowrap font-medium text-info">
                         • {formatPriceCompact(Number(ad.price))}
                       </span>
                     ) : null}

@@ -119,7 +119,7 @@ export function CommunityAdmin() {
 
   async function handleSaveName() {
     const name = editNameValue.trim();
-    if (!name || name === community.name) {
+    if (!community || !name || name === community.name) {
       setEditingName(false);
       return;
     }
@@ -137,6 +137,7 @@ export function CommunityAdmin() {
   }
 
   function startEditingName() {
+    if (!community) return;
     setEditNameValue(community.name);
     setEditingName(true);
   }
