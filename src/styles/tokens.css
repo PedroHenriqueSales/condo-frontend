@@ -16,10 +16,10 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --c-bg: 28 22 18; /* marrom bem escuro, quase preto (#1c1612) */
-    --c-surface: 38 30 24; /* cartões */
+    --c-surface: 50 42 36; /* cartões e superfícies – um pouco mais claro (#322a24) */
     --c-text: 250 245 235;
     --c-muted: 180 170 160;
-    --c-border: 52 42 34;
+    --c-border: 62 52 44; /* bordas um pouco mais claras para combinar */
 
     --c-primary: 76 184 169; /* #4CB8A9 - verde/teal */
     --c-primary-strong: 64 160 146;
