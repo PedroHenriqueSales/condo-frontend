@@ -36,11 +36,15 @@ export function Navbar() {
     <>
       <div className="sticky top-0 z-10 border-b border-border bg-bg/80 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <Link to="/feed" className="flex items-center rounded overflow-hidden bg-bg" aria-label="Aquidolado - Início">
+          <Link
+            to="/feed"
+            className={`flex items-center rounded overflow-hidden ${isDark ? "bg-bg" : "bg-white"}`}
+            aria-label="Aquidolado - Início"
+          >
             <img
               src={isDark ? logoNameDark : logoNameLight}
               alt="Aqui do Lado"
-              className={`h-14 w-auto sm:h-16 ${isDark ? "mix-blend-lighten" : ""}`}
+              className={`h-14 w-auto sm:h-16 bg-transparent ${isDark ? "mix-blend-lighten" : ""}`}
             />
           </Link>
 

@@ -20,7 +20,7 @@ export function AdPlaceholder({ className = "", compact = false }: AdPlaceholder
       <img
         src={logoIcon}
         alt=""
-        className="h-full w-full object-contain p-2"
+        className="h-full w-full object-contain bg-transparent p-2"
         aria-hidden
       />
     </div>

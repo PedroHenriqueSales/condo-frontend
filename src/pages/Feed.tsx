@@ -300,7 +300,7 @@ export function Feed() {
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <input
-            className="h-12 flex-1 rounded-xl border border-border bg-surface px-4 text-sm shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 sm:w-96"
+            className="h-16 min-w-0 flex-1 rounded-xl border border-border bg-surface px-4 text-sm shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 sm:min-w-[20rem]"
             placeholder="Buscar anúncios..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -393,7 +393,7 @@ export function Feed() {
                       type="button"
                       variant="accent"
                       size="sm"
-                      className="shrink-0 whitespace-nowrap !bg-accent/80 text-white hover:!bg-accent/90"
+                      className="shrink-0 whitespace-nowrap !bg-accent/50 text-white hover:!bg-accent/65"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
