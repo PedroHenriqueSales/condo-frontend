@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import logoNameLight from "../assets/logo-name-light.png";
 import logoNameDark from "../assets/logo-name-dark.png";
 import { Button } from "./Button";
 import * as CondominiumService from "../services/condominium.service";
@@ -11,16 +10,6 @@ export function Navbar() {
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [adminCommunities, setAdminCommunities] = useState<CommunityResponse[] | null>(null);
-  const [isDark, setIsDark] = useState(() =>
-    typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
-  );
-
-  useEffect(() => {
-    const m = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => setIsDark(m.matches);
-    m.addEventListener("change", onChange);
-    return () => m.removeEventListener("change", onChange);
-  }, []);
 
   useEffect(() => {
     if (menuOpen && user) {
@@ -34,29 +23,29 @@ export function Navbar() {
 
   return (
     <>
-      <div className={`sticky top-0 z-10 border-b ${isDark ? "border-border bg-bg" : "border-white/20 bg-black"}`}>
+      <div className="sticky top-0 z-10 border-b border-white/10 bg-[#1c1612]">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <Link
             to="/feed"
-            className={`flex items-center rounded overflow-hidden ${isDark ? "bg-bg" : "bg-black"}`}
+            className="flex items-center rounded overflow-hidden bg-[#1c1612]"
             aria-label="Aquidolado - Início"
           >
             <img
-              src={isDark ? logoNameDark : logoNameLight}
+              src={logoNameDark}
               alt="Aqui do Lado"
-              className={`h-14 w-auto sm:h-16 bg-transparent ${isDark ? "mix-blend-lighten" : ""}`}
+              className="h-14 w-auto bg-transparent sm:h-16 mix-blend-lighten"
             />
           </Link>
 
-          <div className={`flex items-center gap-2 ${!isDark ? "text-white" : ""}`}>
+          <div className="flex items-center gap-2 text-white">
             {user ? (
-              <span className={`hidden text-xs sm:inline ${isDark ? "text-muted" : "text-white"}`}>{user.name}</span>
+              <span className="hidden text-xs text-white/90 sm:inline">{user.name}</span>
             ) : null}
             <Button
               variant="ghost"
               size="sm"
               onClick={logout}
-              className={`hidden sm:inline-flex ${!isDark ? "!text-white hover:!bg-white/10 !border-white/30" : ""}`}
+              className="hidden sm:inline-flex !text-white hover:!bg-white/10 !border-white/30"
             >
               Sair
             </Button>
@@ -65,17 +54,15 @@ export function Navbar() {
               type="button"
               aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
               aria-expanded={menuOpen}
-              className={`flex h-10 w-10 flex-shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl sm:hidden ${
-                isDark ? "hover:bg-surface/60" : "hover:bg-white/10"
-              }`}
+              className="flex h-10 w-10 flex-shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl hover:bg-white/10 sm:hidden"
               onClick={() => setMenuOpen((o) => !o)}
             >
               <span
-                className={`h-0.5 w-5 rounded-full transition ${menuOpen ? "translate-y-2 rotate-45" : ""} ${isDark ? "bg-text" : "bg-white"}`}
+                className={`h-0.5 w-5 rounded-full bg-white transition ${menuOpen ? "translate-y-2 rotate-45" : ""}`}
               />
-              <span className={`h-0.5 w-5 rounded-full transition ${menuOpen ? "opacity-0" : ""} ${isDark ? "bg-text" : "bg-white"}`} />
+              <span className={`h-0.5 w-5 rounded-full bg-white transition ${menuOpen ? "opacity-0" : ""}`} />
               <span
-                className={`h-0.5 w-5 rounded-full transition ${menuOpen ? "-translate-y-2 -rotate-45" : ""} ${isDark ? "bg-text" : "bg-white"}`}
+                className={`h-0.5 w-5 rounded-full bg-white transition ${menuOpen ? "-translate-y-2 -rotate-45" : ""}`}
               />
             </button>
           </div>

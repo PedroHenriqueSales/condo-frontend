@@ -3,7 +3,7 @@
   --c-surface: 255 255 255;
   --c-text: 15 23 42; /* slate-900-ish */
   --c-muted: 100 116 139; /* slate-500-ish */
-  --c-border: 226 232 240; /* slate-200-ish */
+  --c-border: 186 185 184; /* marrom #1c1612 com ~30% opacidade sobre branco, contornos suaves */
 
   --c-primary: 76 184 169; /* #4CB8A9 - verde/teal, botões de destaque */
   --c-primary-strong: 64 160 146; /* hover */

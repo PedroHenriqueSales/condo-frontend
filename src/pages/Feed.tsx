@@ -393,7 +393,7 @@ export function Feed() {
                       type="button"
                       variant="accent"
                       size="sm"
-                      className="shrink-0 whitespace-nowrap !bg-accent/35 text-white hover:!bg-accent/50"
+                      className="shrink-0 whitespace-nowrap"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
