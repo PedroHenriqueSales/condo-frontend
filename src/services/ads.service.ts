@@ -92,15 +92,18 @@ export async function deleteAd(adId: number): Promise<void> {
 }
 
 export async function listMyAds(params?: {
+  communityId?: number;
   page?: number;
   size?: number;
 }): Promise<Page<AdResponse>> {
-  const { data } = await api.get<Page<AdResponse>>("/ads/me", {
-    params: {
-      page: params?.page ?? 0,
-      size: params?.size ?? 20,
-    },
-  });
+  const query: Record<string, number | undefined> = {
+    page: params?.page ?? 0,
+    size: params?.size ?? 20,
+  };
+  if (params?.communityId != null) {
+    query.communityId = params.communityId;
+  }
+  const { data } = await api.get<Page<AdResponse>>("/ads/me", { params: query });
   return data;
 }
 

@@ -11,15 +11,16 @@ export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [adminCommunities, setAdminCommunities] = useState<CommunityResponse[] | null>(null);
 
+  // Carrega comunidades de admin assim que o usuário está disponível, para o menu não “pular” ao abrir
   useEffect(() => {
-    if (menuOpen && user) {
+    if (user) {
       CondominiumService.listAdminCommunities()
         .then(setAdminCommunities)
         .catch(() => setAdminCommunities([]));
-    } else if (!menuOpen) {
+    } else {
       setAdminCommunities(null);
     }
-  }, [menuOpen, user]);
+  }, [user]);
 
   return (
     <>
@@ -102,7 +103,9 @@ export function Navbar() {
               >
                 Minha conta
               </Link>
-              {adminCommunities && adminCommunities.length > 0 ? (
+              {adminCommunities === null ? (
+                <div className="rounded-lg px-3 py-2 text-xs text-muted">Carregando…</div>
+              ) : adminCommunities.length > 0 ? (
                 adminCommunities.length === 1 ? (
                   <Link
                     to={`/communities/${adminCommunities[0].id}/admin`}

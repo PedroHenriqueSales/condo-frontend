@@ -99,6 +99,8 @@ export function Feed() {
   }, []);
 
   const [sortOrder, setSortOrder] = useState<string>("createdAt,desc");
+  const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const sortMenuRef = useRef<HTMLDivElement>(null);
 
   const adType = useMemo<AdType | undefined>(
     () => (tab === "TODOS" ? undefined : tabToAdType[tab]),
@@ -215,6 +217,18 @@ export function Feed() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adType, adTypes, activeCommunityId, search, sortOrder]);
 
+  // Fechar menu de ordenação ao clicar fora
+  useEffect(() => {
+    if (!sortMenuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (sortMenuRef.current && !sortMenuRef.current.contains(e.target as Node)) {
+        setSortMenuOpen(false);
+      }
+    }
+    document.addEventListener("click", handleClick, true);
+    return () => document.removeEventListener("click", handleClick, true);
+  }, [sortMenuOpen]);
+
   async function onContactClick(ad: AdResponse) {
     if (!activeCommunityId) return;
 
@@ -298,27 +312,53 @@ export function Feed() {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <input
-            className="h-16 min-w-0 flex-1 rounded-xl border border-border bg-surface px-4 text-base shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 sm:min-w-[20rem]"
-            placeholder="Buscar anúncios..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <label className="flex items-center gap-1.5 text-xs text-muted sm:shrink-0">
-            <span className="hidden sm:inline">Ordenar:</span>
-            <select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
-              className="h-8 rounded-lg border border-border bg-surface px-2 text-xs text-text focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/20"
+        <div className="flex items-center gap-2">
+          <div className="min-h-[2.5rem] min-w-0 flex-1">
+            <input
+              className="h-full min-h-[2.5rem] w-full rounded-xl border border-border bg-surface px-4 text-base shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+              placeholder="Buscar anúncios..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="relative shrink-0" ref={sortMenuRef}>
+            <button
+              type="button"
+              onClick={() => setSortMenuOpen((o) => !o)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface text-muted shadow-soft transition hover:border-primary/50 hover:text-text focus:outline-none focus:ring-2 focus:ring-primary/25 sm:h-12 sm:w-12"
+              aria-label="Ordenar anúncios"
+              aria-expanded={sortMenuOpen}
+              aria-haspopup="listbox"
             >
-              {getSortOptions(tab).map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </label>
+              <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+              </svg>
+            </button>
+            {sortMenuOpen ? (
+              <div
+                className="absolute right-0 top-full z-20 mt-1 min-w-[12rem] rounded-xl border border-border bg-bg py-1 shadow-xl"
+                role="listbox"
+              >
+                {getSortOptions(tab).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    role="option"
+                    aria-selected={sortOrder === opt.value}
+                    onClick={() => {
+                      setSortOrder(opt.value);
+                      setSortMenuOpen(false);
+                    }}
+                    className={`w-full px-3 py-2 text-left text-sm transition hover:bg-surface/80 ${
+                      sortOrder === opt.value ? "bg-primary/10 font-medium text-primary-strong" : "text-text"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
         </div>
 
         {error ? <div className="mt-4 text-sm text-danger">{error}</div> : null}

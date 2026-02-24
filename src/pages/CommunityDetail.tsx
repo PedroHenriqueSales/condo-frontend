@@ -134,16 +134,16 @@ export function CommunityDetail() {
                 </div>
               )}
             </dl>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-3">
               {community.isAdmin ? (
                 <Link to={`/communities/${community.id}/admin`}>
-                  <Button type="button" variant="ghost">
+                  <Button type="button" variant="primary">
                     Administrar
                   </Button>
                 </Link>
               ) : null}
               <Button
-                variant="ghost"
+                variant="accent"
                 className="sm:w-auto"
                 onClick={() => setShareOpen(true)}
               >

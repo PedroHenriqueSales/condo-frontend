@@ -25,7 +25,7 @@ const navItems: { to: string; label: string; icon: React.ReactNode; match?: (pat
     to: "/ads/new",
     label: "Anunciar",
     icon: (
-      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
       </svg>
     ),
@@ -76,13 +76,13 @@ export function BottomNav() {
             <Link
               key={to}
               to={to}
-              className={linkClass}
+              className={`${linkClass} ${isCenter ? "-mt-5" : ""}`}
               aria-current={isActive ? "page" : undefined}
             >
               <span
                 className={
                   isCenter
-                    ? "flex h-9 w-9 items-center justify-center rounded-full bg-accent text-white shadow-soft"
+                    ? "flex h-14 w-14 items-center justify-center rounded-full bg-accent text-white shadow-soft"
                     : "flex items-center justify-center"
                 }
               >

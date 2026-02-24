@@ -12,7 +12,7 @@ export function MyCommunities() {
   return (
     <div className="min-h-screen bg-bg pb-24">
       <Navbar />
-      <div className="mx-auto max-w-2xl px-4 py-6 pb-52">
+      <div className="mx-auto max-w-2xl px-4 py-6 pb-60">
         <div className="mb-4 text-2xl font-semibold">Minhas comunidades</div>
         <p className="mb-6 text-sm text-muted">
           Selecione uma comunidade para ver detalhes ou compartilhar o código de acesso.
@@ -35,24 +35,24 @@ export function MyCommunities() {
                     nav("/feed");
                   }}
                 >
-                  <div className="flex min-w-0 flex-1 items-center gap-3">
-                    <span className="font-semibold text-text">{c.name}</span>
+                  <span className="min-w-0 flex-1 font-semibold text-text">{c.name}</span>
+                  <div className="flex shrink-0 items-center gap-2">
                     <span className="text-primary-strong" aria-hidden>
                       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                       </svg>
                     </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        nav(`/communities/${c.id}`);
+                      }}
+                    >
+                      Detalhe
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      nav(`/communities/${c.id}`);
-                    }}
-                  >
-                    Detalhe
-                  </Button>
                 </Card>
               </li>
             ))}
@@ -60,7 +60,7 @@ export function MyCommunities() {
         )}
       </div>
 
-      <div className="fixed bottom-24 left-0 right-0 z-30 border-t border-border bg-bg/95 backdrop-blur-sm" style={{ paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
+      <div className="fixed bottom-32 left-0 right-0 z-30 border-t border-border bg-bg/95 backdrop-blur-sm" style={{ paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
         <div className="mx-auto flex max-w-2xl items-center justify-center gap-6 px-4 py-3">
           <Link
             to="/communities/new"

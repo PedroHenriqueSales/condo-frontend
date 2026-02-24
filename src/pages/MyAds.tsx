@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AdPlaceholder } from "../components/AdPlaceholder";
 import { Badge } from "../components/Badge";
@@ -6,6 +6,7 @@ import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Navbar } from "../components/Navbar";
 import { BottomNav } from "../components/BottomNav";
+import { useCondominium } from "../hooks/useCondominium";
 import type { AdResponse } from "../services/contracts";
 import { AdTypeLabels } from "../services/contracts";
 import { formatPriceCompact, formatPublishedAt } from "../utils/format";
@@ -14,26 +15,36 @@ import * as AdsService from "../services/ads.service";
 
 export function MyAds() {
   const nav = useNavigate();
+  const { activeCommunityId } = useCondominium();
   const [items, setItems] = useState<AdResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function load() {
+  const load = useCallback(async () => {
+    if (activeCommunityId == null) {
+      setItems([]);
+      setLoading(false);
+      return;
+    }
     setError(null);
     setLoading(true);
     try {
-      const res = await AdsService.listMyAds({ page: 0, size: 50 });
+      const res = await AdsService.listMyAds({
+        communityId: activeCommunityId,
+        page: 0,
+        size: 50,
+      });
       setItems(res.content);
     } catch (err: any) {
       setError(err?.response?.data?.error ?? "Falha ao carregar seus anúncios.");
     } finally {
       setLoading(false);
     }
-  }
+  }, [activeCommunityId]);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   async function onPause(adId: number) {
     try {
@@ -147,6 +158,7 @@ export function MyAds() {
                     size="sm"
                     type="button"
                     onClick={() => onPause(ad.id)}
+                    className="!bg-amber-500/50 !text-amber-900 hover:!bg-amber-500/65 dark:!text-amber-100 dark:hover:!bg-amber-500/55"
                   >
                     Pausar
                   </Button>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
@@ -19,6 +19,8 @@ export function CommunityAdmin() {
   const [editingName, setEditingName] = useState(false);
   const [editNameValue, setEditNameValue] = useState("");
   const [shareOpen, setShareOpen] = useState(false);
+  const [memberMenuOpen, setMemberMenuOpen] = useState<number | null>(null);
+  const memberMenuRef = useRef<HTMLDivElement>(null);
 
   const communityId = id ? Number(id) : NaN;
 
@@ -141,6 +143,17 @@ export function CommunityAdmin() {
     setEditNameValue(community.name);
     setEditingName(true);
   }
+
+  useEffect(() => {
+    if (memberMenuOpen === null) return;
+    function handleClick(e: MouseEvent) {
+      if (memberMenuRef.current && !memberMenuRef.current.contains(e.target as Node)) {
+        setMemberMenuOpen(null);
+      }
+    }
+    document.addEventListener("click", handleClick, true);
+    return () => document.removeEventListener("click", handleClick, true);
+  }, [memberMenuOpen]);
 
   async function handleRegenerateCode() {
     const ok = confirm(
@@ -330,7 +343,7 @@ export function CommunityAdmin() {
           ) : null}
 
           <Card>
-            <h2 className="mb-3 text-base font-semibold text-text">Administradores</h2>
+            <h2 className="mb-3 text-base font-semibold text-text">Membros</h2>
             <p className="mb-3 text-xs text-muted">
               Adicione outros membros como administradores. Eles poderão aprovar solicitações e gerenciar a comunidade.
             </p>
@@ -341,20 +354,42 @@ export function CommunityAdmin() {
                 {members.map((m) => (
                   <li
                     key={m.id}
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface/30 px-3 py-2"
+                    className="flex items-center justify-between gap-2 rounded-lg border border-border bg-surface/30 px-3 py-2"
                   >
-                    <span className="text-sm font-medium">{m.name}</span>
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium" title={m.name}>
+                      {m.name}
+                    </span>
                     {adminIds.has(m.id) ? (
-                      <span className="text-xs text-muted">Administrador</span>
+                      <span className="shrink-0 text-xs text-muted">Administrador</span>
                     ) : (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        disabled={actionBusy !== null}
-                        onClick={() => handleAddAdmin(m.id)}
-                      >
-                        {actionBusy === `admin-${m.id}` ? "Adicionando..." : "Tornar admin"}
-                      </Button>
+                      <div className="relative shrink-0" ref={memberMenuOpen === m.id ? memberMenuRef : null}>
+                        <button
+                          type="button"
+                          onClick={() => setMemberMenuOpen((prev) => (prev === m.id ? null : m.id))}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-surface/80 hover:text-text"
+                          aria-label="Opções do membro"
+                          aria-expanded={memberMenuOpen === m.id}
+                        >
+                          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                          </svg>
+                        </button>
+                        {memberMenuOpen === m.id ? (
+                          <div className="absolute right-0 top-full z-10 mt-1 min-w-[10rem] rounded-lg border border-border bg-bg py-1 shadow-xl">
+                            <button
+                              type="button"
+                              className="w-full px-3 py-2 text-left text-sm text-text hover:bg-surface/80 disabled:opacity-50"
+                              disabled={actionBusy !== null}
+                              onClick={() => {
+                                handleAddAdmin(m.id);
+                                setMemberMenuOpen(null);
+                              }}
+                            >
+                              {actionBusy === `admin-${m.id}` ? "Adicionando..." : "Tornar admin"}
+                            </button>
+                          </div>
+                        ) : null}
+                      </div>
                     )}
                   </li>
                 ))}
