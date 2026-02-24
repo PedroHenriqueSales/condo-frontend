@@ -34,11 +34,11 @@ export function Navbar() {
 
   return (
     <>
-      <div className="sticky top-0 z-10 border-b border-border bg-bg/80 backdrop-blur">
+      <div className={`sticky top-0 z-10 border-b ${isDark ? "border-border bg-bg" : "border-white/20 bg-black"}`}>
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <Link
             to="/feed"
-            className={`flex items-center rounded overflow-hidden ${isDark ? "bg-bg" : "bg-white"}`}
+            className={`flex items-center rounded overflow-hidden ${isDark ? "bg-bg" : "bg-black"}`}
             aria-label="Aquidolado - Início"
           >
             <img
@@ -48,11 +48,16 @@ export function Navbar() {
             />
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className={`flex items-center gap-2 ${!isDark ? "text-white" : ""}`}>
             {user ? (
-              <span className="hidden text-xs text-muted sm:inline">{user.name}</span>
+              <span className={`hidden text-xs sm:inline ${isDark ? "text-muted" : "text-white"}`}>{user.name}</span>
             ) : null}
-            <Button variant="ghost" size="sm" onClick={logout} className="hidden sm:inline-flex">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={logout}
+              className={`hidden sm:inline-flex ${!isDark ? "!text-white hover:!bg-white/10 !border-white/30" : ""}`}
+            >
               Sair
             </Button>
 
@@ -60,15 +65,17 @@ export function Navbar() {
               type="button"
               aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
               aria-expanded={menuOpen}
-              className="flex h-10 w-10 flex-shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl hover:bg-surface/60 sm:hidden"
+              className={`flex h-10 w-10 flex-shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl sm:hidden ${
+                isDark ? "hover:bg-surface/60" : "hover:bg-white/10"
+              }`}
               onClick={() => setMenuOpen((o) => !o)}
             >
               <span
-                className={`h-0.5 w-5 rounded-full bg-text transition ${menuOpen ? "translate-y-2 rotate-45" : ""}`}
+                className={`h-0.5 w-5 rounded-full transition ${menuOpen ? "translate-y-2 rotate-45" : ""} ${isDark ? "bg-text" : "bg-white"}`}
               />
-              <span className={`h-0.5 w-5 rounded-full bg-text transition ${menuOpen ? "opacity-0" : ""}`} />
+              <span className={`h-0.5 w-5 rounded-full transition ${menuOpen ? "opacity-0" : ""} ${isDark ? "bg-text" : "bg-white"}`} />
               <span
-                className={`h-0.5 w-5 rounded-full bg-text transition ${menuOpen ? "-translate-y-2 -rotate-45" : ""}`}
+                className={`h-0.5 w-5 rounded-full transition ${menuOpen ? "-translate-y-2 -rotate-45" : ""} ${isDark ? "bg-text" : "bg-white"}`}
               />
             </button>
           </div>

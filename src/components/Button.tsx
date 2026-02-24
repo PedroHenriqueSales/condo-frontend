@@ -22,13 +22,13 @@ export function Button({
 
   const variants = {
     primary:
-      "bg-primary/50 text-white shadow-soft hover:bg-primary/65 active:bg-primary/60 focus:ring-primary/40",
+      "bg-primary/35 text-white shadow-soft hover:bg-primary/50 active:bg-primary/45 focus:ring-primary/40",
     accent:
-      "bg-accent/50 text-white shadow-soft hover:bg-accent/65 active:bg-accent/60 focus:ring-accent/40",
+      "bg-accent/35 text-white shadow-soft hover:bg-accent/50 active:bg-accent/45 focus:ring-accent/40",
     ghost:
       "bg-transparent text-text border border-border hover:bg-surface/60 active:bg-surface focus:ring-primary/40",
     danger:
-      "bg-danger/50 text-white shadow-soft hover:bg-danger/65 active:bg-danger/60 focus:ring-danger/40",
+      "bg-danger/35 text-white shadow-soft hover:bg-danger/50 active:bg-danger/45 focus:ring-danger/40",
   }[variant];
 
   return <button className={`${base} ${sizes} ${variants} ${className}`} {...props} />;

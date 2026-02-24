@@ -37,7 +37,7 @@ const FILTER_LABELS: Record<UiTab, string> = {
 };
 const TAB_ORDER: UiTab[] = ["TODOS", "VENDA", "ALUGUEL", "SERVICOS", "DOACAO", "INDICACOES"];
 
-const FilterIcon = ({ tab, className = "h-5 w-5 shrink-0 sm:h-6 sm:w-6" }: { tab: UiTab; className?: string }) => {
+const FilterIcon = ({ tab, className = "h-7 w-7 shrink-0 sm:h-8 sm:w-8" }: { tab: UiTab; className?: string }) => {
   const c = className;
   switch (tab) {
     case "TODOS":
@@ -300,7 +300,7 @@ export function Feed() {
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <input
-            className="h-16 min-w-0 flex-1 rounded-xl border border-border bg-surface px-4 text-sm shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 sm:min-w-[20rem]"
+            className="h-16 min-w-0 flex-1 rounded-xl border border-border bg-surface px-4 text-base shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 sm:min-w-[20rem]"
             placeholder="Buscar anúncios..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -393,7 +393,7 @@ export function Feed() {
                       type="button"
                       variant="accent"
                       size="sm"
-                      className="shrink-0 whitespace-nowrap !bg-accent/50 text-white hover:!bg-accent/65"
+                      className="shrink-0 whitespace-nowrap !bg-accent/35 text-white hover:!bg-accent/50"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();

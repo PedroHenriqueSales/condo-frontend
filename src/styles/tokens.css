@@ -5,10 +5,10 @@
   --c-muted: 100 116 139; /* slate-500-ish */
   --c-border: 226 232 240; /* slate-200-ish */
 
-  --c-primary: 215 166 75; /* #d7a64b - amarelo/dourado (igual accent), botões de destaque */
-  --c-primary-strong: 195 150 60; /* hover */
-  --c-accent: 215 166 75; /* #d7a64b - amarelo/dourado, alternativa para ações */
-  --c-accent-strong: 195 150 60; /* hover */
+  --c-primary: 76 184 169; /* #4CB8A9 - verde/teal, botões de destaque */
+  --c-primary-strong: 64 160 146; /* hover */
+  --c-accent: 76 184 169; /* #4CB8A9 - verde/teal, alternativa para ações */
+  --c-accent-strong: 64 160 146; /* hover */
   --c-info: 112 80 52; /* #705034 - informações relevantes (ex.: valor dos anúncios) */
   --c-danger: 239 68 68; /* red-500 */
 }
@@ -21,10 +21,10 @@
     --c-muted: 180 170 160;
     --c-border: 52 42 34;
 
-    --c-primary: 215 166 75; /* #d7a64b - amarelo/dourado (igual accent) */
-    --c-primary-strong: 195 150 60;
-    --c-accent: 215 166 75; /* #d7a64b - amarelo/dourado */
-    --c-accent-strong: 195 150 60;
+    --c-primary: 76 184 169; /* #4CB8A9 - verde/teal */
+    --c-primary-strong: 64 160 146;
+    --c-accent: 76 184 169; /* #4CB8A9 - verde/teal */
+    --c-accent-strong: 64 160 146;
     --c-info: 220 210 195;
     --c-danger: 248 113 113;
   }
