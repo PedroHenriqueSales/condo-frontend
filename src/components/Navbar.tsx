@@ -110,10 +110,9 @@ export function Navbar({ sticky = true }: NavbarProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                 </span>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-white/60">Comunidade ativa</div>
-                  <div className="truncate text-sm font-medium text-white">{activeCommunity.name}</div>
-                </div>
+                <span className="min-w-0 flex-1 truncate text-sm font-medium text-white">
+                  {activeCommunity.name}
+                </span>
                 <svg className="h-4 w-4 shrink-0 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -145,23 +144,18 @@ export function Navbar({ sticky = true }: NavbarProps) {
           >
             <nav className="flex flex-col gap-0.5 p-2">
               {activeCommunity ? (
-                <div className="rounded-xl border border-border/60 bg-surface/50 px-3 py-2.5 shadow-sm">
-                  <div className="mb-1 flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/15">
-                      <svg className="h-3 w-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
-                    </span>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Comunidade ativa</span>
-                  </div>
-                  <Link
-                    to={`/communities/${activeCommunity.id}`}
-                    className="block truncate text-sm font-medium text-text hover:text-primary"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {activeCommunity.name}
-                  </Link>
-                </div>
+                <Link
+                  to={`/communities/${activeCommunity.id}`}
+                  className="flex items-center gap-2 rounded-xl border border-border/60 bg-surface/50 px-3 py-2.5 shadow-sm hover:bg-surface/70"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/15">
+                    <svg className="h-3 w-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </span>
+                  <span className="min-w-0 truncate text-sm font-medium text-text">{activeCommunity.name}</span>
+                </Link>
               ) : null}
               {user ? (
                 <div className="rounded-lg px-3 py-2 text-sm font-medium text-text">
