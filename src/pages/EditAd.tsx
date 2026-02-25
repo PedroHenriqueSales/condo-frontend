@@ -13,7 +13,7 @@ import {
   isImageWithinSizeLimit,
   MAX_IMAGE_SIZE_MB,
 } from "../constants/upload";
-import { isValidBrazilianPhone } from "../utils/whatsapp";
+import { isValidBrazilianPhone, WHATSAPP_PLACEHOLDER, WHATSAPP_VALIDATION_ERROR } from "../utils/whatsapp";
 import type { AdType } from "../services/contracts";
 import * as AdsService from "../services/ads.service";
 import { resolveImageUrl } from "../utils/imageUrl";
@@ -111,9 +111,8 @@ export function EditAd() {
       if (contact && !isValidBrazilianPhone(contact)) {
         setFieldErrors((prev) => ({
           ...prev,
-          recommendedContact: "Informe um número válido (ex.: 11 99999-9999 ou 11999999999).",
+          recommendedContact: WHATSAPP_VALIDATION_ERROR,
         }));
-        setError("WhatsApp do indicado deve ter 10 ou 11 dígitos.");
         return;
       }
     }
@@ -244,9 +243,18 @@ export function EditAd() {
                 <div>
                   <Input
                     label="WhatsApp do indicado"
-                    placeholder="Ex.: (11) 99999-9999"
+                    placeholder={WHATSAPP_PLACEHOLDER}
                     value={recommendedContact}
-                    onChange={(e) => setRecommendedContact(e.target.value)}
+                    onChange={(e) => {
+                      setRecommendedContact(e.target.value);
+                      if (fieldErrors.recommendedContact) {
+                        setFieldErrors((prev) => {
+                          const next = { ...prev };
+                          delete next.recommendedContact;
+                          return next;
+                        });
+                      }
+                    }}
                     required
                   />
                   {fieldErrors.recommendedContact ? (
@@ -281,7 +289,7 @@ export function EditAd() {
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
-                  {(!serviceType || !INDICATION_SERVICE_TYPE_SUGGESTIONS.includes(serviceType as any)) && (
+                  {serviceTypeIsOther && (
                     <input
                       ref={serviceTypeInputRef}
                       type="text"

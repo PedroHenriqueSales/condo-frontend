@@ -1,6 +1,13 @@
+/** Placeholder e exemplo aceitos em campos de WhatsApp (10 ou 11 dígitos). */
+export const WHATSAPP_PLACEHOLDER = "Ex.: (11) 99999-9999";
+
+/** Mensagem de erro quando o número é inválido (use junto com o placeholder). */
+export const WHATSAPP_VALIDATION_ERROR =
+  "Use 10 ou 11 dígitos. Ex.: (11) 99999-9999";
+
 /**
  * Valida número de telefone/WhatsApp (apenas dígitos, 10 ou 11 caracteres — DDD + número).
- * Aceita formatação como (11) 99999-9999; retorna true se os dígitos formam um número válido.
+ * Aceita qualquer formatação; retorna true se, ao extrair só os dígitos, houver 10 ou 11.
  */
 export function isValidBrazilianPhone(value: string): boolean {
   const digits = value.replace(/[^\d]/g, "");

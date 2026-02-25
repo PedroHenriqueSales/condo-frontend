@@ -5,7 +5,7 @@ import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
 import { useAuth } from "../hooks/useAuth";
-import { isValidBrazilianPhone } from "../utils/whatsapp";
+import { isValidBrazilianPhone, WHATSAPP_PLACEHOLDER, WHATSAPP_VALIDATION_ERROR } from "../utils/whatsapp";
 import * as AuthService from "../services/auth.service";
 
 export function Register() {
@@ -31,7 +31,7 @@ export function Register() {
     setWhatsappError(null);
     const whatsappTrimmed = whatsapp.trim();
     if (whatsappTrimmed && !isValidBrazilianPhone(whatsappTrimmed)) {
-      setWhatsappError("Informe um número válido (ex.: 11 99999-9999 ou 11999999999).");
+      setWhatsappError(WHATSAPP_VALIDATION_ERROR);
       return;
     }
     setIsLoading(true);
@@ -145,7 +145,7 @@ export function Register() {
             <Input
               label="WhatsApp (telefone)"
               inputMode="tel"
-              placeholder="Ex.: 11 99999-9999 ou 11999999999"
+              placeholder={WHATSAPP_PLACEHOLDER}
               value={whatsapp}
               onChange={(e) => {
                 setWhatsapp(e.target.value);

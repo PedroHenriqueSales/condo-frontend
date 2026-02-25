@@ -6,6 +6,7 @@ import { Input } from "../components/Input";
 import { Navbar } from "../components/Navbar";
 import { BottomNav } from "../components/BottomNav";
 import { useAuth } from "../hooks/useAuth";
+import { WHATSAPP_PLACEHOLDER } from "../utils/whatsapp";
 import * as UsersService from "../services/users.service";
 
 export function MyAccount() {
@@ -99,7 +100,7 @@ export function MyAccount() {
               <Input
                 label="WhatsApp (telefone)"
                 inputMode="tel"
-                placeholder="Ex.: 11 99999-9999 ou +55 11 99999-9999"
+                placeholder={WHATSAPP_PLACEHOLDER}
                 value={whatsapp}
                 onChange={(e) => setWhatsapp(e.target.value)}
                 error={fieldErrors.whatsapp}

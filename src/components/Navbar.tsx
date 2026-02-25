@@ -7,7 +7,9 @@ import { Button } from "./Button";
 import * as CondominiumService from "../services/condominium.service";
 import type { CommunityResponse } from "../services/contracts";
 
-export function Navbar() {
+type NavbarProps = { sticky?: boolean };
+
+export function Navbar({ sticky = true }: NavbarProps) {
   const { user, logout } = useAuth();
   const { communities, activeCommunityId } = useCondominium();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -30,7 +32,7 @@ export function Navbar() {
 
   return (
     <>
-      <div className="sticky top-0 z-10 border-b border-white/10 bg-[#1c1612]">
+      <div className={`border-b border-white/10 bg-[#1c1612] ${sticky ? "sticky top-0 z-10" : ""}`}>
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <Link

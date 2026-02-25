@@ -279,10 +279,10 @@ export function Feed() {
 
   return (
     <div className="min-h-screen bg-bg pb-24">
-      <Navbar />
-
-      {/* Barra de filtros no topo (sticky logo abaixo da Navbar) */}
-      <div className="sticky top-16 z-10 border-b border-border bg-bg/95 shadow-[0_2px_8px_rgba(0,0,0,0.04)] backdrop-blur supports-[backdrop-filter]:bg-bg/90">
+      <div className="sticky top-0 z-10">
+        <Navbar sticky={false} />
+        {/* Barra de filtros logo abaixo da Navbar — grudam juntas ao rolar */}
+        <div className="border-b border-border bg-bg/95 shadow-[0_2px_8px_rgba(0,0,0,0.04)] backdrop-blur supports-[backdrop-filter]:bg-bg/90">
         <div className="mx-auto flex max-w-5xl items-stretch gap-1 px-2 py-2 sm:gap-2 sm:px-3">
           {TAB_ORDER.map((t) => {
             const active = tab === t;
@@ -304,6 +304,7 @@ export function Feed() {
               </button>
             );
           })}
+        </div>
         </div>
       </div>
 
