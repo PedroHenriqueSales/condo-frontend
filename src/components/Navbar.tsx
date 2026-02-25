@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { useCondominium } from "../hooks/useCondominium";
 import logoNameDark from "../assets/logo-name-dark.png";
 import { Button } from "./Button";
 import * as CondominiumService from "../services/condominium.service";
@@ -8,8 +9,13 @@ import type { CommunityResponse } from "../services/contracts";
 
 export function Navbar() {
   const { user, logout } = useAuth();
+  const { communities, activeCommunityId } = useCondominium();
   const [menuOpen, setMenuOpen] = useState(false);
   const [adminCommunities, setAdminCommunities] = useState<CommunityResponse[] | null>(null);
+
+  const activeCommunity = activeCommunityId
+    ? communities.find((c) => c.id === activeCommunityId)
+    : null;
 
   // Carrega comunidades de admin assim que o usuário está disponível, para o menu não “pular” ao abrir
   useEffect(() => {
@@ -26,19 +32,40 @@ export function Navbar() {
     <>
       <div className="sticky top-0 z-10 border-b border-white/10 bg-[#1c1612]">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <Link
-            to="/feed"
-            className="flex items-center rounded overflow-hidden bg-[#1c1612]"
-            aria-label="Aquidolado - Início"
-          >
-            <img
-              src={logoNameDark}
-              alt="Aqui do Lado"
-              className="h-14 w-auto bg-transparent sm:h-16 mix-blend-lighten"
-            />
-          </Link>
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <Link
+              to="/feed"
+              className="flex shrink-0 items-center rounded overflow-hidden bg-[#1c1612]"
+              aria-label="Aquidolado - Início"
+            >
+              <img
+                src={logoNameDark}
+                alt="Aqui do Lado"
+                className="h-14 w-auto bg-transparent sm:h-16 mix-blend-lighten"
+              />
+            </Link>
+            {activeCommunity ? (
+              <Link
+                to={`/communities/${activeCommunity.id}`}
+                className="hidden min-w-0 sm:flex sm:items-center sm:gap-2 sm:rounded-lg sm:border sm:border-white/15 sm:bg-white/5 sm:px-3 sm:py-2 sm:transition hover:sm:bg-white/10 hover:sm:border-white/25"
+                title={`Ver detalhes · ${activeCommunity.name}`}
+              >
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/10">
+                  <svg className="h-3.5 w-3.5 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </span>
+                <span className="min-w-0 truncate text-sm font-medium text-white/95">
+                  {activeCommunity.name}
+                </span>
+                <svg className="h-4 w-4 shrink-0 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                </svg>
+              </Link>
+            ) : null}
+          </div>
 
-          <div className="flex items-center gap-2 text-white">
+          <div className="flex flex-shrink-0 items-center gap-2 text-white">
             {user ? (
               <span className="hidden text-xs text-white/90 sm:inline">{user.name}</span>
             ) : null}
@@ -68,6 +95,30 @@ export function Navbar() {
             </button>
           </div>
         </div>
+        {activeCommunity ? (
+          <div className="border-t border-white/10 bg-white/5 sm:hidden">
+            <div className="mx-auto flex max-w-5xl items-center px-4 py-2">
+              <Link
+                to={`/communities/${activeCommunity.id}`}
+                className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 transition active:bg-white/10"
+                onClick={() => setMenuOpen(false)}
+              >
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10">
+                  <svg className="h-4 w-4 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-white/60">Comunidade ativa</div>
+                  <div className="truncate text-sm font-medium text-white">{activeCommunity.name}</div>
+                </div>
+                <svg className="h-4 w-4 shrink-0 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {menuOpen ? (
@@ -91,6 +142,25 @@ export function Navbar() {
             onClick={(e) => e.stopPropagation()}
           >
             <nav className="flex flex-col gap-0.5 p-2">
+              {activeCommunity ? (
+                <div className="rounded-xl border border-border/60 bg-surface/50 px-3 py-2.5 shadow-sm">
+                  <div className="mb-1 flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/15">
+                      <svg className="h-3 w-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Comunidade ativa</span>
+                  </div>
+                  <Link
+                    to={`/communities/${activeCommunity.id}`}
+                    className="block truncate text-sm font-medium text-text hover:text-primary"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {activeCommunity.name}
+                  </Link>
+                </div>
+              ) : null}
               {user ? (
                 <div className="rounded-lg px-3 py-2 text-sm font-medium text-text">
                   {user.name}
