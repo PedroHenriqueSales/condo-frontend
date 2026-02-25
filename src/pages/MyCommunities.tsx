@@ -15,7 +15,7 @@ export function MyCommunities() {
       <div className="mx-auto max-w-2xl px-4 py-6 pb-60">
         <div className="mb-4 text-2xl font-semibold">Minhas comunidades</div>
         <p className="mb-6 text-sm text-muted">
-          Selecione uma comunidade para ver detalhes ou compartilhar o código de acesso.
+          Selecione a comunidade que quer acessar, ou use Detalhe para mais informações ou compartilhar o código de acesso.
         </p>
 
         {isLoading ? (

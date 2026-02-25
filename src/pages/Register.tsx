@@ -5,6 +5,7 @@ import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
 import { useAuth } from "../hooks/useAuth";
+import { isValidBrazilianPhone } from "../utils/whatsapp";
 import * as AuthService from "../services/auth.service";
 
 export function Register() {
@@ -19,6 +20,7 @@ export function Register() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [whatsappError, setWhatsappError] = useState<string | null>(null);
   const [emailVerificationSent, setEmailVerificationSent] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendError, setResendError] = useState<string | null>(null);
@@ -26,6 +28,12 @@ export function Register() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setWhatsappError(null);
+    const whatsappTrimmed = whatsapp.trim();
+    if (whatsappTrimmed && !isValidBrazilianPhone(whatsappTrimmed)) {
+      setWhatsappError("Informe um número válido (ex.: 11 99999-9999 ou 11999999999).");
+      return;
+    }
     setIsLoading(true);
     try {
       await register({
@@ -137,11 +145,17 @@ export function Register() {
             <Input
               label="WhatsApp (telefone)"
               inputMode="tel"
-              placeholder="Ex.: 11 99999-9999 ou +55 11 99999-9999"
+              placeholder="Ex.: 11 99999-9999 ou 11999999999"
               value={whatsapp}
-              onChange={(e) => setWhatsapp(e.target.value)}
+              onChange={(e) => {
+                setWhatsapp(e.target.value);
+                if (whatsappError) setWhatsappError(null);
+              }}
               required
             />
+            {whatsappError ? (
+              <div className="-mt-2 text-sm text-danger">{whatsappError}</div>
+            ) : null}
             <Input
               label="Endereço (opcional)"
               placeholder="Ex.: Rua, número, bairro, cidade"

@@ -1,4 +1,13 @@
 /**
+ * Valida número de telefone/WhatsApp (apenas dígitos, 10 ou 11 caracteres — DDD + número).
+ * Aceita formatação como (11) 99999-9999; retorna true se os dígitos formam um número válido.
+ */
+export function isValidBrazilianPhone(value: string): boolean {
+  const digits = value.replace(/[^\d]/g, "");
+  return digits.length >= 10 && digits.length <= 11 && /^\d+$/.test(digits);
+}
+
+/**
  * Gera URL do WhatsApp com mensagem pré-preenchida sobre o anúncio.
  * Se price for informado, inclui o valor na mensagem.
  */

@@ -56,10 +56,25 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 }
 
 function RequireCommunity({ children }: { children: React.ReactNode }) {
-  const { communities, activeCommunityId } = useCondominium();
   const location = useLocation();
-  if (!communities.length || !activeCommunityId) {
-    return <Navigate to="/gate" state={{ from: location }} replace />;
+  const { communities, activeCommunityId, isLoading, refresh } = useCondominium();
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-bg">
+        <span className="text-sm text-muted">Carregando...</span>
+      </div>
+    );
+  }
+  if (communities.length === 0) {
+    return <Navigate to={`/gate${location.search}`} state={{ from: location }} replace />;
+  }
+  if (!activeCommunityId && location.pathname !== "/communities") {
+    return <Navigate to="/communities" state={{ from: location }} replace />;
   }
   return <>{children}</>;
 }
@@ -67,7 +82,7 @@ function RequireCommunity({ children }: { children: React.ReactNode }) {
 function IndexRedirect() {
   const nav = useNavigate();
   const { token } = useAuth();
-  const { refresh, setActiveCommunityId } = useCondominium();
+  const { refresh, setActiveCommunityId, activeCommunityId } = useCondominium();
   const [list, setList] = useState<CommunityResponse[] | null>(null);
 
   useEffect(() => {
@@ -83,9 +98,14 @@ function IndexRedirect() {
       setActiveCommunityId(list[0].id);
       nav("/feed", { replace: true });
     } else {
-      nav("/communities", { replace: true });
+      const selectedInList = activeCommunityId && list.some((c) => c.id === activeCommunityId);
+      if (selectedInList) {
+        nav("/feed", { replace: true });
+      } else {
+        nav("/communities", { replace: true });
+      }
     }
-  }, [list, nav, setActiveCommunityId]);
+  }, [list, activeCommunityId, nav, setActiveCommunityId]);
 
   if (!token) return <Navigate to="/login" replace />;
   if (list === null) {

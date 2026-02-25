@@ -4,6 +4,8 @@ import { useNavigate, useSearchParams, useLocation, Link } from "react-router-do
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
+import { Navbar } from "../components/Navbar";
+import { BottomNav } from "../components/BottomNav";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
 import * as CondominiumService from "../services/condominium.service";
@@ -23,7 +25,7 @@ export function CondominiumGate() {
     setActiveCommunityId,
   } = useCondominium();
 
-  const [accessCode, setAccessCode] = useState(codeFromUrl || "");
+  const [accessCode, setAccessCode] = useState(() => codeFromUrl || "");
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState<"join" | null>(null);
@@ -38,13 +40,13 @@ export function CondominiumGate() {
     });
   }, [refresh]);
 
-  // Redireciona só quando chegou na gate sem "from" (ex.: após login) e já tem comunidade ativa.
-  // Se veio de "Entrar em uma comunidade" (state from), permanece na gate para poder entrar em outra.
+  // Redireciona só quando chegou na gate sem "from" e já tem comunidade ativa.
+  // Não redireciona quando há code na URL (link de convite): usuário deve poder ver o código e entrar.
   useEffect(() => {
-    if (!from && communities.length > 0 && activeCommunityId) {
+    if (!from && communities.length > 0 && activeCommunityId && !codeFromUrl) {
       nav("/communities", { replace: true });
     }
-  }, [from, communities.length, activeCommunityId, nav]);
+  }, [from, communities.length, activeCommunityId, codeFromUrl, nav]);
 
   async function onJoin(e: FormEvent) {
     e.preventDefault();
@@ -74,8 +76,11 @@ export function CondominiumGate() {
     }
   }
 
+  const hasCommunities = communities.length > 0;
+
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen bg-bg pb-24">
+      {hasCommunities ? <Navbar /> : null}
       <div className="mx-auto max-w-3xl px-4 py-10">
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
@@ -84,9 +89,16 @@ export function CondominiumGate() {
               Para manter a confiança e exclusividade, você entra por convite (código de acesso).
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={logout}>
-            Sair
-          </Button>
+          {!hasCommunities ? (
+            <Button
+              variant="ghost"
+              size="md"
+              onClick={logout}
+              className="flex-shrink-0 whitespace-nowrap"
+            >
+              Sair da conta
+            </Button>
+          ) : null}
         </div>
 
         {isLoading ? (
@@ -140,6 +152,7 @@ export function CondominiumGate() {
           ) : null}
         </div>
       </div>
+      {hasCommunities ? <BottomNav /> : null}
     </div>
   );
 }

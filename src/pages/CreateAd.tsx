@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
@@ -13,6 +13,7 @@ import {
   isImageWithinSizeLimit,
   MAX_IMAGE_SIZE_MB,
 } from "../constants/upload";
+import { isValidBrazilianPhone } from "../utils/whatsapp";
 import type { AdType } from "../services/contracts";
 import * as AdsService from "../services/ads.service";
 
@@ -36,6 +37,8 @@ export function CreateAd() {
   const [price, setPrice] = useState("");
   const [recommendedContact, setRecommendedContact] = useState("");
   const [serviceType, setServiceType] = useState("");
+  const [serviceTypeIsOther, setServiceTypeIsOther] = useState(false);
+  const serviceTypeInputRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<File[]>([]);
 
   const [busy, setBusy] = useState(false);
@@ -50,6 +53,19 @@ export function CreateAd() {
     if (!activeCommunityId) return;
     setError(null);
     setFieldErrors({});
+
+    if (adType === "RECOMMENDATION") {
+      const contact = recommendedContact.trim();
+      if (contact && !isValidBrazilianPhone(contact)) {
+        setFieldErrors((prev) => ({
+          ...prev,
+          recommendedContact: "Informe um número válido (ex.: 11 99999-9999 ou 11999999999).",
+        }));
+        setError("WhatsApp do indicado deve ter 10 ou 11 dígitos.");
+        return;
+      }
+    }
+
     setBusy(true);
     try {
       const p = (adType === "DONATION" || adType === "RECOMMENDATION")
@@ -152,10 +168,23 @@ export function CreateAd() {
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text">Tipo de serviço</label>
                   <select
-                    value={serviceType === "" ? "" : (INDICATION_SERVICE_TYPE_SUGGESTIONS.includes(serviceType as any) ? serviceType : "Outro")}
+                    value={
+                      serviceTypeIsOther || (serviceType && !INDICATION_SERVICE_TYPE_SUGGESTIONS.includes(serviceType as any))
+                        ? "Outro"
+                        : serviceType === ""
+                          ? ""
+                          : serviceType
+                    }
                     onChange={(e) => {
                       const v = e.target.value;
-                      setServiceType(v === "Outro" ? "" : v);
+                      if (v === "Outro") {
+                        setServiceTypeIsOther(true);
+                        setServiceType("");
+                        setTimeout(() => serviceTypeInputRef.current?.focus(), 0);
+                      } else {
+                        setServiceTypeIsOther(false);
+                        setServiceType(v);
+                      }
                     }}
                     className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm shadow-soft focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
                   >
@@ -166,6 +195,7 @@ export function CreateAd() {
                   </select>
                   {(!serviceType || !INDICATION_SERVICE_TYPE_SUGGESTIONS.includes(serviceType as any)) && (
                     <input
+                      ref={serviceTypeInputRef}
                       type="text"
                       placeholder="Digite o tipo de serviço (ex.: Encanador)"
                       value={serviceType}
