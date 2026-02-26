@@ -415,46 +415,60 @@ export function AdDetail() {
               </div>
             )}
 
-            <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              {ad.type === "RECOMMENDATION" ? (
-                ad.recommendedContact ? (
-                  <Button onClick={onContact} variant="accent" >
-                    Entrar em contato
+            <div className="mt-6 space-y-4">
+              <div className="w-full min-w-0">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-nowrap sm:justify-center sm:gap-3">
+                  {(ad.type === "RECOMMENDATION" && ad.recommendedContact) || (ad.type !== "RECOMMENDATION" && ad.userId !== user?.id) ? (
+                    <Button
+                      onClick={onContact}
+                      variant="primary"
+                      size="sm"
+                      className="w-full min-w-0 sm:w-auto sm:shrink-0"
+                    >
+                      <WhatsAppIcon />
+                      Entrar em contato
+                    </Button>
+                  ) : null}
+                  <Button
+                    onClick={onShare}
+                    variant="accent"
+                    size="sm"
+                    className="w-full min-w-0 sm:w-auto sm:shrink-0 !bg-[rgba(59,130,246,0.75)] !text-white hover:!bg-[rgba(59,130,246,0.9)] active:!bg-[rgba(59,130,246,0.9)] focus:!ring-[rgb(59,130,246)]/40 dark:!bg-[rgba(59,130,246,0.5)] dark:hover:!bg-[rgba(59,130,246,0.7)] dark:active:!bg-[rgba(59,130,246,0.7)]"
+                  >
+                    <WhatsAppIcon />
+                    Compartilhar
                   </Button>
-                ) : null
-              ) : ad.userId !== user?.id ? (
-                <Button onClick={onContact} variant="accent" >
-                  Entrar em contato
-                </Button>
-              ) : null}
-              <Button
-                onClick={onShare}
-                className="bg-[#25D366] text-white hover:bg-[#20BA5A] active:bg-[#20BA5A] border-0 shadow-soft"
-              >
-                <WhatsAppIcon />
-                Compartilhar no WhatsApp
-              </Button>
+                </div>
+              </div>
               {ad.userId === user?.id && (ad.status === "ACTIVE" || ad.status === "PAUSED") ? (
-                <Button variant="ghost" onClick={() => nav(`/ads/${ad.id}/edit`)}>
-                  Editar
-                </Button>
+                <div className="text-center">
+                  <Button variant="ghost" onClick={() => nav(`/ads/${ad.id}/edit`)}>
+                    Editar
+                  </Button>
+                </div>
               ) : null}
-              <Button variant="ghost" onClick={() => nav("/feed")}>
-                Ver mais anúncios
-              </Button>
-              {ad.userId !== user?.id && ad.status !== "REMOVED" ? (
-                <Button
-                  variant="ghost"
-                  className="text-danger hover:bg-danger/10"
-                  onClick={() => {
-                    setReportError(null);
-                    setReportReason("");
-                    setReportModalOpen(true);
-                  }}
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-sm">
+                <button
+                  type="button"
+                  onClick={() => nav("/feed")}
+                  className="font-medium text-muted hover:text-text hover:underline"
                 >
-                  Denunciar
-                </Button>
-              ) : null}
+                  ← Ver mais anúncios
+                </button>
+                {ad.userId !== user?.id && ad.status !== "REMOVED" ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReportError(null);
+                      setReportReason("");
+                      setReportModalOpen(true);
+                    }}
+                    className="text-muted hover:text-danger hover:underline"
+                  >
+                    Denunciar anúncio
+                  </button>
+                ) : null}
+              </div>
             </div>
           </Card>
         ) : null}
