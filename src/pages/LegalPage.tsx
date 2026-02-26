@@ -3,10 +3,6 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Card } from "../components/Card";
 
 const LEGAL_SLUGS = ["termos-de-uso", "politica-de-privacidade"] as const;
-const TITLES: Record<string, string> = {
-  "termos-de-uso": "Termos de Uso",
-  "politica-de-privacidade": "Política de Privacidade",
-};
 
 type LegalSlug = (typeof LEGAL_SLUGS)[number];
 
