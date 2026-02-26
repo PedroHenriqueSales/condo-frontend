@@ -28,7 +28,7 @@ export function buildContactUrl(
     price != null && Number.isFinite(Number(price))
       ? ` (${formatPrice(Number(price))})`
       : "";
-  const message = `Olá! Vi seu anúncio "${adTitle}"${valorTexto} no Aquidolado e tenho interesse.`;
+  const message = `Olá! Vi seu anúncio "${adTitle}"${valorTexto} no Aqui e tenho interesse.`;
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }
 
@@ -45,6 +45,6 @@ export function buildRecommendationContactUrl(
   _title?: string
 ): string {
   const digits = whatsapp.replace(/[^\d]/g, "");
-  const message = `Olá! Achei seu número em uma recomendação no app Aquidolado para ${serviceType} e gostaria de entrar em contato.`;
+  const message = `Olá! Achei seu número em uma recomendação no app Aqui para ${serviceType} e gostaria de entrar em contato.`;
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }

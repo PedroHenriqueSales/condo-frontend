@@ -83,8 +83,13 @@ export function MyAds() {
     }
   }
 
-  const statusLabel = (s: AdResponse["status"]) =>
-    s === "ACTIVE" ? "Ativo" : s === "PAUSED" ? "Pausado" : "Encerrado";
+  const statusLabel = (ad: AdResponse) => {
+    if (ad.status === "REMOVED") return "Removido por denúncias";
+    if (ad.status === "PAUSED" && ad.suspendedByReportsAt) return "Suspenso por denúncias";
+    if (ad.status === "ACTIVE") return "Ativo";
+    if (ad.status === "PAUSED") return "Pausado";
+    return "Encerrado";
+  };
 
   return (
     <div className="min-h-screen bg-bg pb-24">
@@ -118,7 +123,7 @@ export function MyAds() {
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-semibold">{ad.title}</div>
                   <div className="mt-1 flex flex-wrap items-center gap-x-1 text-xs text-muted">
-                    <span>{AdTypeLabels[ad.type]} • {statusLabel(ad.status)}</span>
+                    <span>{AdTypeLabels[ad.type]} • {statusLabel(ad)}</span>
                     {ad.createdAt ? (
                       <span>• {formatPublishedAt(ad.createdAt)}</span>
                     ) : null}
@@ -134,15 +139,21 @@ export function MyAds() {
                 </div>
                 <span className="flex-shrink-0">
                   <Badge
-                    tone={ad.status === "ACTIVE" ? "primary" : "neutral"}
+                    tone={
+                      ad.status === "REMOVED" || (ad.status === "PAUSED" && ad.suspendedByReportsAt)
+                        ? "danger"
+                        : ad.status === "ACTIVE"
+                          ? "primary"
+                          : "neutral"
+                    }
                   >
-                    {statusLabel(ad.status)}
+                    {statusLabel(ad)}
                   </Badge>
                 </span>
               </div>
 
               <div className="mt-3 flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
-                {(ad.status === "ACTIVE" || ad.status === "PAUSED") ? (
+                {ad.status === "REMOVED" ? null : (ad.status === "ACTIVE" || (ad.status === "PAUSED" && !ad.suspendedByReportsAt)) ? (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -163,7 +174,7 @@ export function MyAds() {
                     Pausar
                   </Button>
                 ) : null}
-                {ad.status === "PAUSED" ? (
+                {ad.status === "PAUSED" && !ad.suspendedByReportsAt ? (
                   <Button
                     variant="primary"
                     size="sm"
@@ -173,7 +184,7 @@ export function MyAds() {
                     Reativar
                   </Button>
                 ) : null}
-                {(ad.status === "ACTIVE" || ad.status === "PAUSED") ? (
+                {ad.status === "REMOVED" ? null : (ad.status === "ACTIVE" || (ad.status === "PAUSED" && !ad.suspendedByReportsAt)) ? (
                   <Button
                     variant="danger"
                     size="sm"

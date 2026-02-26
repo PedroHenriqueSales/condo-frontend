@@ -25,7 +25,7 @@ export function ShareCommunityModal({ community, onClose }: Props) {
 
   async function handleCopy() {
     const ok = await copyToClipboard(
-      `Entra na comunidade "${community.name}" no Aquidolado! Use o código: ${community.accessCode}\n\nOu acesse: ${shareUrl}`
+      `Entra na comunidade "${community.name}" no Aqui! Use o código: ${community.accessCode}\n\nOu acesse: ${shareUrl}`
     );
     if (ok) {
       setCopied(true);

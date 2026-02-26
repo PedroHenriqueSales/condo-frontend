@@ -100,6 +100,11 @@ export function Login() {
             </div>
           </form>
         </Card>
+        <footer className="mt-8 text-center text-sm text-muted">
+          <Link to="/termos-de-uso" className="hover:underline">Termos de Uso</Link>
+          {" · "}
+          <Link to="/politica-de-privacidade" className="hover:underline">Política de Privacidade</Link>
+        </footer>
       </div>
     </div>
   );

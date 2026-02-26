@@ -65,13 +65,15 @@ export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
-  whatsapp: string;
+  whatsapp?: string;
   address?: string;
+  acceptTerms: boolean;
+  acceptPrivacy: boolean;
 }
 
 // Ads
 export type AdType = "SALE_TRADE" | "RENT" | "SERVICE" | "DONATION" | "RECOMMENDATION";
-export type AdStatus = "ACTIVE" | "PAUSED" | "CLOSED";
+export type AdStatus = "ACTIVE" | "PAUSED" | "CLOSED" | "REMOVED";
 
 export interface AdResponse {
   id: number;
@@ -92,7 +94,32 @@ export interface AdResponse {
   averageRating?: number | null;
   ratingCount?: number;
   currentUserRating?: number | null;
+  /** Preenchido quando suspenso automaticamente por denúncias */
+  suspendedByReportsAt?: string | null;
 }
+
+// Denúncias
+export type ReportReason =
+  | "INAPPROPRIATE_CONTENT"
+  | "SPAM"
+  | "FRAUD"
+  | "WRONG_CATEGORY"
+  | "ALREADY_SOLD"
+  | "OTHER";
+
+export interface ReportRequest {
+  adId: number;
+  reason: ReportReason;
+}
+
+export const ReportReasonLabels: Record<ReportReason, string> = {
+  INAPPROPRIATE_CONTENT: "Conteúdo inadequado",
+  SPAM: "Spam",
+  FRAUD: "Fraude",
+  WRONG_CATEGORY: "Categoria errada",
+  ALREADY_SOLD: "Já vendido/indisponível",
+  OTHER: "Outro",
+};
 
 export interface CommentResponse {
   id: number;

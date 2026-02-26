@@ -17,6 +17,7 @@ export function Register() {
   const [password, setPassword] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [address, setAddress] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,8 +41,10 @@ export function Register() {
         name: name.trim(),
         email: email.trim(),
         password,
-        whatsapp: whatsapp.trim(),
+        whatsapp: whatsapp.trim() || undefined,
         address: address.trim() ? address.trim() : undefined,
+        acceptTerms: true,
+        acceptPrivacy: true,
       });
       setEmailVerificationSent(true);
     } catch (err: any) {
@@ -163,9 +166,28 @@ export function Register() {
               onChange={(e) => setAddress(e.target.value)}
             />
 
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-border accent-accent-strong"
+              />
+              <span className="text-sm text-text">
+                Li e aceito os{" "}
+                <Link to="/termos-de-uso" className="font-medium text-accent-strong hover:underline">
+                  Termos de Uso
+                </Link>{" "}
+                e a{" "}
+                <Link to="/politica-de-privacidade" className="font-medium text-accent-strong hover:underline">
+                  Política de Privacidade
+                </Link>.
+              </span>
+            </label>
+
             {error ? <div className="text-sm text-danger">{error}</div> : null}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading || !acceptTerms}>
               {isLoading ? "Criando..." : "Criar conta"}
             </Button>
 
@@ -177,6 +199,11 @@ export function Register() {
             </div>
           </form>
         </Card>
+        <footer className="mt-8 text-center text-sm text-muted">
+          <Link to="/termos-de-uso" className="hover:underline">Termos de Uso</Link>
+          {" · "}
+          <Link to="/politica-de-privacidade" className="hover:underline">Política de Privacidade</Link>
+        </footer>
       </div>
     </div>
   );

@@ -10,14 +10,15 @@ import { BottomNav } from "../components/BottomNav";
 import { TextWithLinks } from "../components/TextWithLinks";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
-import type { AdResponse, CommentResponse } from "../services/contracts";
-import { AdTypeLabels } from "../services/contracts";
+import type { AdResponse, CommentResponse, ReportReason } from "../services/contracts";
+import { AdTypeLabels, ReportReasonLabels } from "../services/contracts";
 import { formatPrice, formatPublishedAt } from "../utils/format";
 import { resolveImageUrl } from "../utils/imageUrl";
 import { buildAdShareWhatsAppUrl } from "../utils/share";
 import { buildContactUrl, buildRecommendationContactUrl } from "../utils/whatsapp";
 import * as AdsService from "../services/ads.service";
 import * as MetricsService from "../services/metrics.service";
+import * as ReportsService from "../services/reports.service";
 
 export function AdDetail() {
   const nav = useNavigate();
@@ -34,6 +35,10 @@ export function AdDetail() {
   const [loadingComments, setLoadingComments] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
   const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState<ReportReason | "">("");
+  const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [reportError, setReportError] = useState<string | null>(null);
 
   const fetchAd = useCallback(() => {
     const adId = Number(id);
@@ -437,10 +442,96 @@ export function AdDetail() {
               <Button variant="ghost" onClick={() => nav("/feed")}>
                 Ver mais anúncios
               </Button>
+              {ad.userId !== user?.id && ad.status !== "REMOVED" ? (
+                <Button
+                  variant="ghost"
+                  className="text-danger hover:bg-danger/10"
+                  onClick={() => {
+                    setReportError(null);
+                    setReportReason("");
+                    setReportModalOpen(true);
+                  }}
+                >
+                  Denunciar
+                </Button>
+              ) : null}
             </div>
           </Card>
         ) : null}
       </div>
+
+      {reportModalOpen && ad && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="report-modal-title"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-border bg-bg p-6 shadow-lg">
+            <h2 id="report-modal-title" className="text-lg font-semibold text-text">
+              Denunciar anúncio
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              Selecione o motivo da denúncia. A moderação pode suspender ou remover o anúncio.
+            </p>
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-text">Motivo</label>
+              <select
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value as ReportReason | "")}
+                className="mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+              >
+                <option value="">Selecione...</option>
+                {(Object.keys(ReportReasonLabels) as ReportReason[]).map((r) => (
+                  <option key={r} value={r}>
+                    {ReportReasonLabels[r]}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {reportError ? (
+              <p className="mt-3 text-sm text-danger">{reportError}</p>
+            ) : null}
+            <div className="mt-6 flex gap-3">
+              <Button
+                type="button"
+                variant="ghost"
+                className="flex-1"
+                disabled={reportSubmitting}
+                onClick={() => {
+                  setReportModalOpen(false);
+                  setReportError(null);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                className="flex-1"
+                disabled={reportSubmitting || !reportReason}
+                onClick={async () => {
+                  if (!reportReason || !ad) return;
+                  setReportError(null);
+                  setReportSubmitting(true);
+                  try {
+                    await ReportsService.reportAd(ad.id, reportReason);
+                    setReportModalOpen(false);
+                    setReportReason("");
+                  } catch (err: any) {
+                    const msg = err?.response?.data?.error ?? "Não foi possível enviar a denúncia.";
+                    setReportError(msg);
+                  } finally {
+                    setReportSubmitting(false);
+                  }
+                }}
+              >
+                {reportSubmitting ? "Enviando..." : "Enviar denúncia"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {lightboxImage && (
         <ImageLightbox imageUrl={lightboxImage} onClose={() => setLightboxImage(null)} />

@@ -38,11 +38,11 @@ export function Navbar({ sticky = true }: NavbarProps) {
             <Link
               to="/feed"
               className="flex shrink-0 items-center rounded overflow-hidden bg-[#1c1612]"
-              aria-label="Aquidolado - Início"
+              aria-label="Aqui - Início"
             >
               <img
                 src={logoNameDark}
-                alt="Aqui do Lado"
+                alt="Aqui"
                 className="h-14 w-auto bg-transparent sm:h-16 mix-blend-lighten"
               />
             </Link>

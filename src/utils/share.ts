@@ -11,7 +11,7 @@ export function buildShareUrl(accessCode: string): string {
 
 export function buildShareWhatsAppUrl(accessCode: string, communityName: string): string {
   const url = buildShareUrl(accessCode);
-  const message = `Entra na nossa comunidade "${communityName}" no Aquidolado!\n\nUse o código: ${accessCode}\n\nOu acesse: ${url}`;
+  const message = `Entra na nossa comunidade "${communityName}" no Aqui!\n\nUse o código: ${accessCode}\n\nOu acesse: ${url}`;
   return `https://wa.me/?text=${encodeURIComponent(message)}`;
 }
 
@@ -38,7 +38,7 @@ export function buildAdShareWhatsAppUrl(ad: {
           ? `Preço: R$ ${ad.price.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
           : "Valor a consultar";
 
-  const message = `Olha esse anúncio no Aquidolado!\n\n${ad.title}\nTipo: ${typeLabel}\n${priceText}\n\n${url}`;
+  const message = `Olha esse anúncio no Aqui!\n\n${ad.title}\nTipo: ${typeLabel}\n${priceText}\n\n${url}`;
   const encodedMessage = encodeURIComponent(message);
   return `https://api.whatsapp.com/send?text=${encodedMessage}`;
 }

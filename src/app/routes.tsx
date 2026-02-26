@@ -17,6 +17,7 @@ import { MyAccount } from "../pages/MyAccount";
 import { MyAds } from "../pages/MyAds";
 import { MyCommunities } from "../pages/MyCommunities";
 import { Register } from "../pages/Register";
+import { LegalPage } from "../pages/LegalPage";
 import { ResetPassword } from "../pages/ResetPassword";
 import { VerifyEmail } from "../pages/VerifyEmail";
 import * as AuthService from "../services/auth.service";
@@ -127,6 +128,8 @@ export function AppRoutes() {
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/termos-de-uso" element={<LegalPage slug="termos-de-uso" />} />
+      <Route path="/politica-de-privacidade" element={<LegalPage slug="politica-de-privacidade" />} />
       <Route path="/gate" element={<RequireAuth><CondominiumGate /></RequireAuth>} />
       <Route path="/communities/new" element={<RequireAuth><CreateCommunity /></RequireAuth>} />
       <Route path="/feed" element={<RequireAuth><RequireCommunity><Feed /></RequireCommunity></RequireAuth>} />

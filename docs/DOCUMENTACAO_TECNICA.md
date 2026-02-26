@@ -1,8 +1,8 @@
-# Documentação Técnica — Frontend Aquidolado
+# Documentação Técnica — Frontend Aqui
 
 ## 1. Visão geral
 
-O frontend do Aquidolado é uma **SPA** em **React 19** com **TypeScript** e **Vite 7**. Utiliza Context API para estado global, Tailwind CSS para estilos e Axios para comunicação com a API REST.
+O frontend do Aqui é uma **SPA** em **React 19** com **TypeScript** e **Vite 7**. Utiliza Context API para estado global, Tailwind CSS para estilos e Axios para comunicação com a API REST.
 
 ## 2. Arquitetura
 
@@ -197,7 +197,7 @@ O frontend usa **Vercel** com custo zero. Em homologação, frontend e backend e
 
 **Variáveis de ambiente (Vercel):**
 
-- `VITE_API_URL` — URL base do backend, sem `/api` (ex.: `https://aquidolado-api.onrender.com`)
+- `VITE_API_URL` — URL base do backend, sem `/api` (ex.: `https://aqui-api.onrender.com`)
 
 **Arquivos de exemplo:**
 

@@ -1,7 +1,7 @@
 {
-  "name": "Aquidolado - Comunidade do condomínio",
-  "short_name": "Aquidolado",
-  "description": "Compre, venda, alugue e encontre serviços na sua comunidade de condomínio.",
+  "name": "Aqui - Comunidades",
+  "short_name": "Aqui",
+  "description": "Compre, venda, alugue e encontre serviços na sua comunidade.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
 import { Navbar } from "../components/Navbar";
 import { BottomNav } from "../components/BottomNav";
 import { useAuth } from "../hooks/useAuth";
+import { useCondominium } from "../hooks/useCondominium";
 import { WHATSAPP_PLACEHOLDER } from "../utils/whatsapp";
 import * as UsersService from "../services/users.service";
 
 export function MyAccount() {
-  const { updateUser } = useAuth();
+  const nav = useNavigate();
+  const { updateUser, logout } = useAuth();
+  const { clear: clearCondominium } = useCondominium();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -21,6 +25,9 @@ export function MyAccount() {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -66,6 +73,21 @@ export function MyAccount() {
       }
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleConfirmDelete() {
+    setDeleteError(null);
+    setDeleting(true);
+    try {
+      await UsersService.deleteAccount();
+      clearCondominium();
+      logout();
+      nav("/login", { replace: true });
+    } catch (err: any) {
+      setDeleteError(err?.response?.data?.error ?? "Não foi possível excluir a conta. Tente novamente.");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -125,7 +147,63 @@ export function MyAccount() {
             </form>
           </Card>
         )}
+
+        <div className="mt-8 border-t border-border pt-6">
+          <p className="mb-2 text-sm text-muted">
+            Você pode excluir sua conta e todos os dados associados a ela, em conformidade com a{" "}
+            <Link to="/politica-de-privacidade" className="font-medium text-accent-strong hover:underline">
+              Política de Privacidade
+            </Link>.
+          </p>
+          <Button
+            type="button"
+            variant="ghost"
+            className="text-danger hover:bg-danger/10"
+            onClick={() => setDeleteModalOpen(true)}
+          >
+            Excluir minha conta
+          </Button>
+        </div>
+
+        <footer className="mt-8 text-center text-sm text-muted">
+          <Link to="/termos-de-uso" className="hover:underline">Termos de Uso</Link>
+          {" · "}
+          <Link to="/politica-de-privacidade" className="hover:underline">Política de Privacidade</Link>
+        </footer>
       </div>
+
+      {deleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-bg p-6 shadow-lg">
+            <h2 id="delete-modal-title" className="text-lg font-semibold text-text">Excluir conta</h2>
+            <p className="mt-2 text-sm text-muted">
+              Isso removerá seus dados de acordo com a Política de Privacidade. Você não poderá desfazer esta ação. Deseja continuar?
+            </p>
+            {deleteError ? <p className="mt-2 text-sm text-danger">{deleteError}</p> : null}
+            <div className="mt-6 flex gap-3">
+              <Button
+                type="button"
+                variant="ghost"
+                className="flex-1"
+                disabled={deleting}
+                onClick={() => { setDeleteModalOpen(false); setDeleteError(null); }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                className="flex-1"
+                disabled={deleting}
+                onClick={handleConfirmDelete}
+              >
+                {deleting ? "Excluindo..." : "Sim, excluir"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <BottomNav />
     </div>
   );
