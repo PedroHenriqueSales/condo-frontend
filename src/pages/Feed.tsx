@@ -369,37 +369,62 @@ export function Feed() {
             <Card key={ad.id} className="p-0">
               <button
                 type="button"
-                className="w-full rounded-2xl p-4 text-left hover:bg-surface/60"
+                className="w-full rounded-2xl text-left hover:bg-surface/60"
                 onClick={() => nav(`/ads/${ad.id}`)}
               >
-                <div className="flex items-start gap-3">
-                  {ad.type !== "RECOMMENDATION" &&
-                    (ad.imageUrls?.length ? (
-                      <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-surface">
+                {ad.type !== "RECOMMENDATION" ? (
+                  <div className="flex flex-col sm:flex-row sm:items-stretch">
+                    <div className="aspect-[4/3] w-full flex-shrink-0 overflow-hidden rounded-t-2xl rounded-b-xl bg-surface sm:w-40 sm:rounded-b-none sm:rounded-l-2xl sm:rounded-tr-none">
+                      {ad.imageUrls?.length ? (
                         <img
                           src={resolveImageUrl(ad.imageUrls[0])}
                           alt=""
                           className="h-full w-full object-cover"
                         />
-                      </div>
-                    ) : (
-                      <AdPlaceholder compact className="h-20 w-20" />
-                    ))}
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold">{ad.title}</div>
-                    <div className="mt-1 max-h-10 overflow-hidden text-sm text-muted">
-                      <TextWithLinks
-                        text={ad.description ?? "Sem descrição"}
-                        stopPropagation
-                      />
+                      ) : (
+                        <AdPlaceholder compact className="h-full w-full min-h-0" />
+                      )}
                     </div>
-                    {ad.type === "RECOMMENDATION" && ad.serviceType ? (
-                      <div className="mt-0.5 text-xs text-info">{ad.serviceType}</div>
-                    ) : null}
+                    <div className="flex min-w-0 flex-1 flex-col p-4 sm:flex-row sm:items-start sm:gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-semibold">{ad.title}</div>
+                        <div className="mt-1 line-clamp-2 text-sm text-muted">
+                          <TextWithLinks
+                            text={ad.description ?? "Sem descrição"}
+                            stopPropagation
+                          />
+                        </div>
+                        {ad.type === "DONATION" ? (
+                          <span className="mt-1 inline-block text-xs text-muted">Doação</span>
+                        ) : ad.price != null ? (
+                          <span className="mt-1 inline-block text-sm font-semibold text-info">
+                            {formatPriceCompact(Number(ad.price))}
+                          </span>
+                        ) : (
+                          <span className="mt-1 inline-block text-xs text-muted">A consultar</span>
+                        )}
+                      </div>
+                      <div className="mt-2 flex flex-shrink-0 items-center justify-between gap-2 sm:mt-0 sm:flex-col sm:items-end sm:justify-start">
+                        <Badge tone="primary">{AdTypeLabels[ad.type]}</Badge>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex flex-shrink-0 flex-col items-end gap-1">
-                    <Badge tone={ad.type === "RECOMMENDATION" ? "accent" : "primary"}>{AdTypeLabels[ad.type]}</Badge>
-                    {ad.type === "RECOMMENDATION" ? (
+                ) : (
+                  <div className="flex items-start gap-3 px-4 pt-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-semibold">{ad.title}</div>
+                      <div className="mt-1 max-h-10 overflow-hidden text-sm text-muted">
+                        <TextWithLinks
+                          text={ad.description ?? "Sem descrição"}
+                          stopPropagation
+                        />
+                      </div>
+                      {ad.serviceType ? (
+                        <div className="mt-0.5 text-xs text-info">{ad.serviceType}</div>
+                      ) : null}
+                    </div>
+                    <div className="flex flex-shrink-0 flex-col items-end gap-1">
+                      <Badge tone="accent">{AdTypeLabels[ad.type]}</Badge>
                       <div className="flex flex-col items-end text-xs text-muted">
                         {(ad.ratingCount ?? 0) > 0 ? (
                           <>
@@ -410,23 +435,15 @@ export function Feed() {
                           <span>Sem avaliações</span>
                         )}
                       </div>
-                    ) : ad.type === "DONATION" ? (
-                      <span className="whitespace-nowrap text-xs text-muted">Doação</span>
-                    ) : ad.price != null ? (
-                      <span className="whitespace-nowrap text-sm font-semibold text-info">
-                        {formatPriceCompact(Number(ad.price))}
-                      </span>
-                    ) : (
-                      <span className="whitespace-nowrap text-xs text-muted">A consultar</span>
-                    )}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                <div className="mt-3 flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-3 border-t border-border/50 px-4 py-3">
                   <div className="min-w-0 shrink text-xs text-muted">
-                    por <span className="font-medium text-text">{ad.userName}</span>
+                    <div className="truncate">por <span className="font-medium text-text">{ad.userName}</span></div>
                     {ad.createdAt ? (
-                      <span className="ml-2">• {formatPublishedAt(ad.createdAt)}</span>
+                      <div>{formatPublishedAt(ad.createdAt)}</div>
                     ) : null}
                   </div>
                   {user && (ad.type !== "RECOMMENDATION" || !!ad.recommendedContact?.trim()) ? (
