@@ -19,12 +19,16 @@ export default async function handler(req, res) {
   const backendUrl = process.env.BACKEND_API_URL || process.env.VITE_API_URL_PRODUCTION;
   const frontendOrigin = process.env.FRONTEND_PUBLIC_ORIGIN || "https://www.aquiapp.com.br";
 
+  const fbAppId = process.env.FB_APP_ID || "";
+
   if (!adId || !backendUrl) {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.status(200).send(renderOgHtml({
       title: "Aqui",
       description: "Anúncios entre membros da sua comunidade.",
       imageUrl: `${frontendOrigin}/logo-icon.png`,
+      canonicalUrl: frontendOrigin + "/",
+      fbAppId,
     }));
     return;
   }
@@ -38,6 +42,8 @@ export default async function handler(req, res) {
         title: "Aqui",
         description: "Anúncios entre membros da sua comunidade.",
         imageUrl: `${frontendOrigin}/logo-icon.png`,
+        canonicalUrl: frontendOrigin + "/ads/" + adId,
+        fbAppId,
       }));
       return;
     }
@@ -53,6 +59,8 @@ export default async function handler(req, res) {
       title: title + " – Aqui",
       description: "Anúncio no Aqui – entre membros da sua comunidade.",
       imageUrl,
+      canonicalUrl: frontendOrigin + "/ads/" + adId,
+      fbAppId,
     }));
   } catch (e) {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -60,17 +68,21 @@ export default async function handler(req, res) {
       title: "Aqui",
       description: "Anúncios entre membros da sua comunidade.",
       imageUrl: `${frontendOrigin}/logo-icon.png`,
+      canonicalUrl: frontendOrigin + "/ads/" + adId,
+      fbAppId,
     }));
   }
 }
 
-function renderOgHtml({ title, description, imageUrl }) {
+function renderOgHtml({ title, description, imageUrl, canonicalUrl = "", fbAppId = "" }) {
+  const ogUrlMeta = canonicalUrl ? `  <meta property="og:url" content="${escapeHtml(canonicalUrl)}" />\n  ` : "";
+  const fbAppIdMeta = fbAppId ? `  <meta property="fb:app_id" content="${escapeHtml(fbAppId)}" />\n  ` : "";
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Aqui" />
+  ${ogUrlMeta}${fbAppIdMeta}<meta property="og:site_name" content="Aqui" />
   <meta property="og:title" content="${escapeHtml(title)}" />
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:image" content="${escapeHtml(imageUrl)}" />
