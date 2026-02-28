@@ -103,9 +103,9 @@ Página
 
 ### 5.1 api.ts
 
-- Cliente **Axios** com `baseURL` dinâmico:
-  - **Dev:** `"/api"` (proxy Vite)
-  - **Homologação/produção:** `${VITE_API_URL}/api` quando `VITE_API_URL` está definida
+- Cliente **Axios** com `baseURL` de `src/config/env.ts` (`apiPrefix`):
+  - **Dev:** `"/api"` (proxy Vite; nenhuma `VITE_API_URL_*` definida)
+  - **Homolog/Produção (Vercel):** `${VITE_API_URL_PRODUCTION}` ou `${VITE_API_URL_PREVIEW}` + `/api`, conforme o ambiente do deploy
 - **Interceptor:** adiciona `Authorization: Bearer <token>` em todas as requisições
 - Funções: `getStoredToken`, `setStoredToken`
 
@@ -197,25 +197,38 @@ O frontend usa **Vercel** com custo zero. Em homologação, frontend e backend e
 
 **Variáveis de ambiente (Vercel):**
 
-- `VITE_API_URL` — URL base do backend, sem `/api` (ex.: `https://aqui-api.onrender.com`)
+No Vercel, uma mesma variável tem um único valor; se você marcar Production e Preview, os dois ambientes usam o mesmo valor. Para ter URL diferente em cada ambiente, use **duas variáveis** e atribua **cada uma a um único ambiente**:
+
+| Variável | Atribuir apenas a | Valor (exemplo) |
+|----------|--------------------|-----------------|
+| `VITE_API_URL_PRODUCTION` | **Production** | `https://condo-backend-production.up.railway.app` |
+| `VITE_API_URL_PREVIEW` | **Preview** | `https://condo-backend-homolog.up.railway.app` |
+| `VITE_APP_ENV` (opcional) | Production → `production`, Preview → `homolog` | `production` ou `homolog` |
+
+Assim, ao editar uma variável no painel, a outra não é alterada. O build usa a URL correspondente ao ambiente do deploy (Production ou Preview).
+
+O perfil `VITE_APP_ENV` pode ser usado no código (`src/config/env.ts`: `appEnv`, `isHomolog`) para exibir um aviso “Ambiente de homologação” ou alterar comportamento.
 
 **Arquivos de exemplo:**
 
-- `.env.example` — documenta `VITE_API_URL` para homologação
+- `.env.example` — documenta `VITE_API_URL_PRODUCTION`, `VITE_API_URL_PREVIEW` e `VITE_APP_ENV`
 
 **URLs de imagens:**
 
-- O backend retorna paths relativos (`/uploads/ads/xxx.jpg`). Em homologação, usamos `resolveImageUrl()` em `utils/imageUrl.ts` para resolver para o domínio do backend quando `VITE_API_URL` está definida.
+- O backend retorna paths relativos (`/uploads/ads/xxx.jpg`). Em homolog/prod usamos `resolveImageUrl()` em `utils/imageUrl.ts`, que usa a URL da API de `src/config/env.ts` (`VITE_API_URL_PRODUCTION` ou `VITE_API_URL_PREVIEW`).
 - Usado em: Feed, AdDetail, MyAds, EditAd.
 
 **CORS:**
 
 - O backend deve ter `CORS_ALLOWED_ORIGINS` com a URL do frontend Vercel.
 
-### 9.3 Produção
+### 9.3 Produção e homologação
 
-- Definir `VITE_API_URL` na Vercel com a URL do backend em produção
-- Garantir que o backend tenha CORS configurado para o domínio do frontend
+- No Vercel, usar **duas variáveis** e atribuir cada uma a **um único ambiente** (assim ao mudar uma, a outra não altera):
+  - **VITE_API_URL_PRODUCTION** → marcar só **Production** → URL do backend de produção
+  - **VITE_API_URL_PREVIEW** → marcar só **Preview** → URL do backend de homolog
+  - **VITE_APP_ENV** (opcional) → um valor por ambiente
+- Garantir que cada backend tenha CORS configurado para a origem do front correspondente
 
 ## 10. Dependências principais
 

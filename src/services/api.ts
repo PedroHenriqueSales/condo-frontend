@@ -1,4 +1,5 @@
 import axios from "axios";
+import { apiPrefix } from "../config/env";
 
 const TOKEN_KEY = "aquidolado.token";
 
@@ -14,12 +15,8 @@ export function setStoredToken(token: string | null) {
   localStorage.setItem(TOKEN_KEY, token);
 }
 
-const apiBaseUrl = import.meta.env.VITE_API_URL
-  ? `${import.meta.env.VITE_API_URL.replace(/\/$/, "")}/api`
-  : "/api";
-
 export const api = axios.create({
-  baseURL: apiBaseUrl,
+  baseURL: apiPrefix,
   timeout: 15000,
 });
 
