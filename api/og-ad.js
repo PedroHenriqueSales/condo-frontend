@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.status(200).send(renderOgHtml({
       title: "Aqui",
-      description: "Anúncios entre moradores do seu condomínio.",
+      description: "Anúncios entre membros da sua comunidade.",
       imageUrl: `${frontendOrigin}/logo-icon.png`,
     }));
     return;
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       res.status(200).send(renderOgHtml({
         title: "Aqui",
-        description: "Anúncios entre moradores do seu condomínio.",
+        description: "Anúncios entre membros da sua comunidade.",
         imageUrl: `${frontendOrigin}/logo-icon.png`,
       }));
       return;
@@ -51,14 +51,14 @@ export default async function handler(req, res) {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.status(200).send(renderOgHtml({
       title: title + " – Aqui",
-      description: "Anúncio no Aqui – entre moradores do seu condomínio.",
+      description: "Anúncio no Aqui – entre membros da sua comunidade.",
       imageUrl,
     }));
   } catch (e) {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.status(200).send(renderOgHtml({
       title: "Aqui",
-      description: "Anúncios entre moradores do seu condomínio.",
+      description: "Anúncios entre membros da sua comunidade.",
       imageUrl: `${frontendOrigin}/logo-icon.png`,
     }));
   }
