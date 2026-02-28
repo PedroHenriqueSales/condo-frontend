@@ -293,10 +293,10 @@ export function Feed() {
                 onClick={() => setTab(t)}
                 title={t === "INDICACOES" ? "Indicações" : undefined}
                 className={
-                  "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg border-2 px-1 py-1.5 text-[9px] font-semibold transition sm:gap-1 sm:py-2 sm:text-[10px] dark:[&_svg]:stroke-white dark:[&_span]:text-white " +
+                  "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg border-2 px-1 py-1.5 text-[9px] font-semibold transition sm:gap-1 sm:py-2 sm:text-[10px] " +
                   (active
-                    ? "border-accent bg-accent/15 text-accent-strong dark:bg-card dark:border-white/40"
-                    : "border-border bg-surface text-muted hover:border-accent/50 hover:text-text dark:bg-card dark:border-white/25")
+                    ? "border-accent bg-accent/15 text-accent-strong dark:border-accent dark:bg-accent/20 dark:[&_svg]:stroke-white dark:[&_span]:text-white"
+                    : "border-border bg-surface text-muted hover:border-accent/50 hover:text-text dark:bg-card dark:border-white/25 dark:[&_svg]:stroke-white/80 dark:[&_span]:text-white/90")
                 }
               >
                 <FilterIcon tab={t} />
