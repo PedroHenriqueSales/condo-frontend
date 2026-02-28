@@ -15,7 +15,7 @@ export function AdPlaceholder({ className = "", compact = false }: AdPlaceholder
 
   return (
     <div
-      className={`flex flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-surface ${size} ${className}`.trim()}
+      className={`flex flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#423729] dark:bg-surface ${size} ${className}`.trim()}
     >
       <img
         src={logoIcon}

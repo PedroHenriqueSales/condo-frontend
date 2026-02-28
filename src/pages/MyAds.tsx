@@ -131,7 +131,7 @@ export function MyAds() {
                       <span className="text-info">• {ad.serviceType}</span>
                     ) : null}
                     {ad.type !== "RECOMMENDATION" && ad.price != null ? (
-                      <span className="whitespace-nowrap font-medium text-info">
+                      <span className="whitespace-nowrap font-medium text-price">
                         • {formatPriceCompact(Number(ad.price))}
                       </span>
                     ) : null}

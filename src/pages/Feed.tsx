@@ -293,10 +293,10 @@ export function Feed() {
                 onClick={() => setTab(t)}
                 title={t === "INDICACOES" ? "Indicações" : undefined}
                 className={
-                  "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg border-2 px-1 py-1.5 text-[9px] font-semibold transition sm:gap-1 sm:py-2 sm:text-[10px] " +
+                  "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg border-2 px-1 py-1.5 text-[9px] font-semibold transition sm:gap-1 sm:py-2 sm:text-[10px] dark:[&_svg]:stroke-white dark:[&_span]:text-white " +
                   (active
-                    ? "border-accent bg-accent/15 text-accent-strong"
-                    : "border-border bg-surface text-muted hover:border-accent/50 hover:text-text")
+                    ? "border-accent bg-accent/15 text-accent-strong dark:bg-card dark:border-white/40"
+                    : "border-border bg-surface text-muted hover:border-accent/50 hover:text-text dark:bg-card dark:border-white/25")
                 }
               >
                 <FilterIcon tab={t} />
@@ -316,7 +316,7 @@ export function Feed() {
         <div className="flex items-center gap-2">
           <div className="min-h-[2.5rem] min-w-0 flex-1">
             <input
-              className="h-full min-h-[2.5rem] w-full rounded-xl border border-border bg-surface px-4 text-base shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+              className="h-full min-h-[2.5rem] w-full rounded-xl border border-border bg-card px-4 text-base placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
               placeholder="Buscar anúncios..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -326,7 +326,7 @@ export function Feed() {
             <button
               type="button"
               onClick={() => setSortMenuOpen((o) => !o)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface text-muted shadow-soft transition hover:border-primary/50 hover:text-text focus:outline-none focus:ring-2 focus:ring-primary/25 sm:h-12 sm:w-12"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-text transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary/25 dark:text-white sm:h-12 sm:w-12"
               aria-label="Ordenar anúncios"
               aria-expanded={sortMenuOpen}
               aria-haspopup="listbox"
@@ -397,7 +397,7 @@ export function Feed() {
                         {ad.type === "DONATION" ? (
                           <span className="mt-1 inline-block text-xs text-muted">Doação</span>
                         ) : ad.price != null ? (
-                          <span className="mt-1 inline-block text-sm font-semibold text-info">
+                          <span className="mt-1 inline-block text-sm font-semibold text-price">
                             {formatPriceCompact(Number(ad.price))}
                           </span>
                         ) : (
@@ -467,7 +467,7 @@ export function Feed() {
           ))}
 
           {!loading && items.length === 0 ? (
-            <div className="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted shadow-soft">
+            <div className="rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted dark:shadow-none">
               Nenhum anúncio encontrado.
             </div>
           ) : null}

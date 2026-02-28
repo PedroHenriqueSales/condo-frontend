@@ -201,6 +201,13 @@ export function AdDetail() {
     </svg>
   );
 
+  const EditIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+  );
+
   return (
     <div className="min-h-screen bg-bg pb-24">
       <Navbar />
@@ -233,7 +240,7 @@ export function AdDetail() {
                 ) : ad.type === "DONATION" ? (
                   <span className="text-sm text-muted">Doação</span>
                 ) : ad.price != null ? (
-                  <span className="whitespace-nowrap text-lg font-semibold text-info">
+                  <span className="whitespace-nowrap text-lg font-semibold text-price">
                     {formatPrice(Number(ad.price))}
                   </span>
                 ) : (
@@ -438,15 +445,19 @@ export function AdDetail() {
                     <WhatsAppIcon />
                     Compartilhar
                   </Button>
+                  {ad.userId === user?.id && (ad.status === "ACTIVE" || ad.status === "PAUSED") ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full min-w-0 sm:w-auto sm:shrink-0 !bg-amber-500/50 !text-amber-900 hover:!bg-amber-500/65 dark:!text-amber-100 dark:hover:!bg-amber-500/55"
+                      onClick={() => nav(`/ads/${ad.id}/edit`)}
+                    >
+                      <EditIcon />
+                      Editar
+                    </Button>
+                  ) : null}
                 </div>
               </div>
-              {ad.userId === user?.id && (ad.status === "ACTIVE" || ad.status === "PAUSED") ? (
-                <div className="text-center">
-                  <Button variant="ghost" onClick={() => nav(`/ads/${ad.id}/edit`)}>
-                    Editar
-                  </Button>
-                </div>
-              ) : null}
               <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-sm">
                 <button
                   type="button"

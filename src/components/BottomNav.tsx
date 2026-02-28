@@ -58,7 +58,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-bg/95 backdrop-blur supports-[backdrop-filter]:bg-bg/90"
+      className="fixed bottom-0 left-0 right-0 z-20 border-t border-white/10 bg-[#382D20] dark:border-border dark:bg-bg/95 dark:backdrop-blur supports-[backdrop-filter]:dark:bg-bg/90"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0)" }}
       aria-label="Navegação principal"
     >
@@ -69,7 +69,9 @@ export function BottomNav() {
 
           const linkClass =
             "flex flex-col items-center gap-1 min-w-0 flex-1 py-1 rounded-xl transition " +
-            (isActive ? "text-accent-strong" : "text-muted hover:text-text active:bg-surface/60");
+            (isActive
+              ? "text-white dark:text-accent-strong"
+              : "text-white/85 hover:text-white dark:text-muted dark:hover:text-text active:bg-white/10 dark:active:bg-surface/60");
           const labelClass = "text-[10px] font-medium leading-tight text-center max-w-[4.5rem] line-clamp-2 min-h-[2.25rem]";
 
           return (

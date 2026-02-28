@@ -8,7 +8,7 @@ import { Navbar } from "../components/Navbar";
 import { BottomNav } from "../components/BottomNav";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
-import { WHATSAPP_PLACEHOLDER } from "../utils/whatsapp";
+import { isValidBrazilianPhone, WHATSAPP_PLACEHOLDER, WHATSAPP_VALIDATION_ERROR } from "../utils/whatsapp";
 import * as UsersService from "../services/users.service";
 
 export function MyAccount() {
@@ -52,12 +52,17 @@ export function MyAccount() {
     e.preventDefault();
     setError(null);
     setFieldErrors({});
+    const whatsappTrimmed = whatsapp.trim();
+    if (whatsappTrimmed && !isValidBrazilianPhone(whatsappTrimmed)) {
+      setFieldErrors({ whatsapp: WHATSAPP_VALIDATION_ERROR });
+      return;
+    }
     setSaving(true);
     setSuccess(false);
     try {
       const profile = await UsersService.updateProfile({
         name: name.trim(),
-        whatsapp: whatsapp.trim(),
+        whatsapp: whatsappTrimmed,
         address: address.trim() || undefined,
       });
       updateUser({ name: profile.name });
@@ -124,7 +129,17 @@ export function MyAccount() {
                 inputMode="tel"
                 placeholder={WHATSAPP_PLACEHOLDER}
                 value={whatsapp}
-                onChange={(e) => setWhatsapp(e.target.value)}
+                onChange={(e) => {
+                  setWhatsapp(e.target.value);
+                  if (fieldErrors.whatsapp) {
+                    setFieldErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.whatsapp;
+                      return next;
+                    });
+                    setError(null);
+                  }
+                }}
                 error={fieldErrors.whatsapp}
                 required
               />

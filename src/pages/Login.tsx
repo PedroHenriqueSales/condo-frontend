@@ -19,11 +19,27 @@ export function Login() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (token) {
-      const target = from ? `${from.pathname}${from.search ?? ""}` : "/communities";
-      nav(target, { replace: true });
-    }
-  }, [token, from, nav]);
+    if (!token) return;
+    refresh().then((list) => {
+      const isInviteToGate = from?.pathname === "/gate" && from?.search;
+      const isAdLink = from?.pathname?.startsWith("/ads/");
+      if (isInviteToGate) {
+        nav(`/gate${from.search ?? ""}`, { replace: true });
+      } else if (isAdLink && from && list.length > 0) {
+        if (list.length === 1) setActiveCommunityId(list[0].id);
+        nav(`${from.pathname}${from.search ?? ""}`, { replace: true });
+      } else if (list.length === 0) {
+        nav("/gate", { replace: true });
+      } else if (list.length === 1) {
+        setActiveCommunityId(list[0].id);
+        nav("/feed", { replace: true });
+      } else if (from) {
+        nav(`${from.pathname}${from.search ?? ""}`, { replace: true });
+      } else {
+        nav("/communities", { replace: true });
+      }
+    });
+  }, [token, from, nav, refresh, setActiveCommunityId]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -31,19 +47,7 @@ export function Login() {
     setIsLoading(true);
     try {
       await login({ email, password });
-      if (from) {
-        nav(`${from.pathname}${from.search ?? ""}`, { replace: true });
-        return;
-      }
-      const list = await refresh();
-      if (list.length === 0) {
-        nav("/gate", { replace: true });
-      } else if (list.length === 1) {
-        setActiveCommunityId(list[0].id);
-        nav("/feed", { replace: true });
-      } else {
-        nav("/communities", { replace: true });
-      }
+      // Redirecionamento: o useEffect (ao detectar token) faz refresh e redireciona (1 comunidade → feed, várias → from ou seleção)
     } catch (err: any) {
       setError(err?.response?.data?.error ?? "Falha no login. Verifique suas credenciais.");
     } finally {

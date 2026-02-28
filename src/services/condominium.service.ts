@@ -78,6 +78,13 @@ export async function leaveAdminRole(communityId: number): Promise<void> {
   await api.delete(`/communities/${communityId}/admin/me`);
 }
 
+export async function removeMember(
+  communityId: number,
+  memberId: number
+): Promise<void> {
+  await api.delete(`/communities/${communityId}/admin/members/${memberId}`);
+}
+
 export async function updateCommunityName(
   communityId: number,
   payload: UpdateCommunityRequest
@@ -96,5 +103,9 @@ export async function regenerateAccessCode(
     `/communities/${communityId}/admin/regenerate-access-code`
   );
   return data;
+}
+
+export async function deleteCommunity(communityId: number): Promise<void> {
+  await api.delete(`/communities/${communityId}/admin`);
 }
 

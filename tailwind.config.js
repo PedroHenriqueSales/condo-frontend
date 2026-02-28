@@ -24,6 +24,8 @@ export default {
         accent: "rgb(var(--c-accent) / <alpha-value>)",
         "accent-strong": "rgb(var(--c-accent-strong) / <alpha-value>)",
         info: "rgb(var(--c-info) / <alpha-value>)",
+        price: "rgb(var(--c-price) / <alpha-value>)",
+        card: "rgb(var(--c-card) / <alpha-value>)",
         danger: "rgb(var(--c-danger) / <alpha-value>)",
       },
       boxShadow: {

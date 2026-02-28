@@ -8,7 +8,7 @@ type Props = React.ComponentPropsWithoutRef<"div"> & {
 export function Card({ children, className = "", ...props }: Props) {
   return (
     <div
-      className={`rounded-2xl border border-border bg-surface p-4 shadow-card ${className}`}
+      className={`rounded-2xl border border-border bg-card p-4 dark:shadow-none ${className}`}
       {...props}
     >
       {children}

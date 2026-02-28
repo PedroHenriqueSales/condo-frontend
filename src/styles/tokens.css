@@ -9,7 +9,9 @@
   --c-primary-strong: 64 160 146; /* hover */
   --c-accent: 76 184 169; /* #4CB8A9 - verde/teal, alternativa para ações */
   --c-accent-strong: 64 160 146; /* hover */
-  --c-info: 112 80 52; /* #705034 - informações relevantes (ex.: valor dos anúncios) */
+  --c-info: 112 80 52; /* #705034 - informações relevantes */
+  --c-price: 215 166 75; /* #D7A64B - preços (amarelo/dourado) em ambos os temas */
+  --c-card: 233 230 223; /* #E9E6DF - tema claro: cards, barra de busca, botão ordenar */
   --c-danger: 239 68 68; /* red-500 */
 }
 
@@ -26,6 +28,8 @@
     --c-accent: 76 184 169; /* #4CB8A9 - verde/teal */
     --c-accent-strong: 64 160 146;
     --c-info: 220 210 195;
+    --c-price: 215 166 75; /* #D7A64B - preços (amarelo/dourado) em ambos os temas */
+    --c-card: 81 67 46; /* #51432E - cards e barra de buscar (só tema escuro) */
     --c-danger: 248 113 113;
   }
 }

@@ -5,12 +5,16 @@ import { Card } from "../components/Card";
 import { Navbar } from "../components/Navbar";
 import { BottomNav } from "../components/BottomNav";
 import { ShareCommunityModal } from "../components/ShareCommunityModal";
+import { useAuth } from "../hooks/useAuth";
+import { useCondominium } from "../hooks/useCondominium";
 import * as CondominiumService from "../services/condominium.service";
 import type { CommunityResponse, JoinRequestResponse } from "../services/contracts";
 
 export function CommunityAdmin() {
   const { id } = useParams<{ id: string }>();
   const nav = useNavigate();
+  const { user } = useAuth();
+  const { refresh, setActiveCommunityId } = useCondominium();
   const [community, setCommunity] = useState<CommunityResponse | null>(null);
   const [requests, setRequests] = useState<JoinRequestResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,6 +110,23 @@ export function CommunityAdmin() {
     }
   }
 
+  async function handleRemoveMember(memberId: number, memberName: string) {
+    const ok = confirm(
+      `Remover "${memberName}" da comunidade? O usuário deixará de ter acesso e não poderá ver os anúncios desta comunidade.`
+    );
+    if (!ok) return;
+    setActionBusy(`remove-${memberId}`);
+    try {
+      await CondominiumService.removeMember(communityId, memberId);
+      const updated = await CondominiumService.getCommunityById(communityId);
+      setCommunity(updated);
+    } catch (err: any) {
+      setError(err?.response?.data?.error ?? "Falha ao remover membro.");
+    } finally {
+      setActionBusy(null);
+    }
+  }
+
   async function handleLeaveAdminRole() {
     if (!confirm("Deixar de ser administrador desta comunidade? Você continuará como membro.")) return;
     setActionBusy("leave-role");
@@ -171,6 +192,24 @@ export function CommunityAdmin() {
     }
   }
 
+  async function handleDeleteCommunity() {
+    const ok = confirm(
+      "A comunidade será apagada permanentemente, junto com todos os anúncios e dados. Esta ação não pode ser desfeita. Deseja realmente apagar a comunidade?"
+    );
+    if (!ok) return;
+    setActionBusy("delete-community");
+    try {
+      await CondominiumService.deleteCommunity(communityId);
+      setActiveCommunityId(null);
+      await refresh();
+      nav("/communities", { replace: true });
+    } catch (err: any) {
+      setError(err?.response?.data?.error ?? "Falha ao apagar a comunidade.");
+    } finally {
+      setActionBusy(null);
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-bg pb-24">
@@ -231,6 +270,7 @@ export function CommunityAdmin() {
                         autoFocus
                       />
                       <Button
+                        variant="primary"
                         size="sm"
                         disabled={actionBusy !== null}
                         onClick={handleSaveName}
@@ -292,7 +332,7 @@ export function CommunityAdmin() {
               </div>
             </dl>
             <Button
-              variant="ghost"
+              variant="accent"
               className="mt-3 w-full sm:w-auto"
               onClick={() => setShareOpen(true)}
             >
@@ -318,8 +358,9 @@ export function CommunityAdmin() {
                           {new Date(r.createdAt).toLocaleDateString("pt-BR")}
                         </span>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <Button
+                          variant="primary"
                           size="sm"
                           disabled={actionBusy !== null}
                           onClick={() => handleApprove(r.id)}
@@ -359,37 +400,55 @@ export function CommunityAdmin() {
                     <span className="min-w-0 flex-1 truncate text-sm font-medium" title={m.name}>
                       {m.name}
                     </span>
-                    {adminIds.has(m.id) ? (
-                      <span className="shrink-0 text-xs text-muted">Administrador</span>
+                    {user && m.id === user.id ? (
+                      <span className="shrink-0 text-xs text-muted">Você</span>
                     ) : (
-                      <div className="relative shrink-0" ref={memberMenuOpen === m.id ? memberMenuRef : null}>
-                        <button
-                          type="button"
-                          onClick={() => setMemberMenuOpen((prev) => (prev === m.id ? null : m.id))}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-surface/80 hover:text-text"
-                          aria-label="Opções do membro"
-                          aria-expanded={memberMenuOpen === m.id}
-                        >
-                          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-                            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-                          </svg>
-                        </button>
-                        {memberMenuOpen === m.id ? (
-                          <div className="absolute right-0 top-full z-10 mt-1 min-w-[10rem] rounded-lg border border-border bg-bg py-1 shadow-xl">
-                            <button
-                              type="button"
-                              className="w-full px-3 py-2 text-left text-sm text-text hover:bg-surface/80 disabled:opacity-50"
-                              disabled={actionBusy !== null}
-                              onClick={() => {
-                                handleAddAdmin(m.id);
-                                setMemberMenuOpen(null);
-                              }}
-                            >
-                              {actionBusy === `admin-${m.id}` ? "Adicionando..." : "Tornar admin"}
-                            </button>
-                          </div>
+                      <>
+                        {adminIds.has(m.id) ? (
+                          <span className="shrink-0 text-xs text-muted">Administrador</span>
                         ) : null}
-                      </div>
+                        <div className="relative shrink-0" ref={memberMenuOpen === m.id ? memberMenuRef : null}>
+                          <button
+                            type="button"
+                            onClick={() => setMemberMenuOpen((prev) => (prev === m.id ? null : m.id))}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-surface/80 hover:text-text"
+                            aria-label="Opções do membro"
+                            aria-expanded={memberMenuOpen === m.id}
+                          >
+                            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                              <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                            </svg>
+                          </button>
+                          {memberMenuOpen === m.id ? (
+                            <div className="absolute right-0 top-full z-10 mt-1 min-w-[10rem] rounded-lg border border-border bg-bg py-1 shadow-xl">
+                              {!adminIds.has(m.id) ? (
+                                <button
+                                  type="button"
+                                  className="w-full px-3 py-2 text-left text-sm text-text hover:bg-surface/80 disabled:opacity-50"
+                                  disabled={actionBusy !== null}
+                                  onClick={() => {
+                                    handleAddAdmin(m.id);
+                                    setMemberMenuOpen(null);
+                                  }}
+                                >
+                                  {actionBusy === `admin-${m.id}` ? "Adicionando..." : "Tornar admin"}
+                                </button>
+                              ) : null}
+                              <button
+                                type="button"
+                                className="w-full px-3 py-2 text-left text-sm text-danger hover:bg-danger/10 disabled:opacity-50"
+                                disabled={actionBusy !== null}
+                                onClick={() => {
+                                  handleRemoveMember(m.id, m.name);
+                                  setMemberMenuOpen(null);
+                                }}
+                              >
+                                {actionBusy === `remove-${m.id}` ? "Removendo..." : "Remover membro"}
+                              </button>
+                            </div>
+                          ) : null}
+                        </div>
+                      </>
                     )}
                   </li>
                 ))}
@@ -403,13 +462,31 @@ export function CommunityAdmin() {
               Você continuará como membro da comunidade, mas não poderá mais gerenciar solicitações nem administradores.
             </p>
             <Button
-              variant="ghost"
+              variant="danger"
+              className="w-full sm:w-auto"
               disabled={actionBusy !== null}
               onClick={handleLeaveAdminRole}
             >
               {actionBusy === "leave-role" ? "Saindo do cargo..." : "Deixar de ser administrador"}
             </Button>
           </Card>
+
+          {members.length === 1 ? (
+            <Card>
+              <h2 className="mb-2 text-base font-semibold text-text">Apagar comunidade</h2>
+              <p className="mb-3 text-xs text-muted">
+                Como você é o único membro, pode apagar a comunidade. Todos os anúncios e dados serão removidos permanentemente.
+              </p>
+              <Button
+                variant="danger"
+                className="w-full sm:w-auto"
+                disabled={actionBusy !== null}
+                onClick={handleDeleteCommunity}
+              >
+                {actionBusy === "delete-community" ? "Apagando..." : "Apagar comunidade"}
+              </Button>
+            </Card>
+          ) : null}
         </div>
       </div>
 

@@ -69,8 +69,8 @@ export function MyCommunities() {
             title="Criar comunidade"
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white shadow-soft">
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2 21V5a2 2 0 012-2h16a2 2 0 012 2v16M4 9h16M4 13h8M4 17h4" />
               </svg>
             </span>
             <span className="text-xs font-medium text-text">Criar</span>
