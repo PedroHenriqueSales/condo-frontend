@@ -18,7 +18,8 @@ export async function verifyEmail(token: string): Promise<void> {
 }
 
 export async function resendVerification(): Promise<void> {
-  await api.post("/auth/resend-verification");
+  // Timeout maior: o backend agenda o envio e responde rápido; manter 35s como fallback se o servidor ainda estiver sincrono
+  await api.post("/auth/resend-verification", {}, { timeout: 35000 });
 }
 
 export async function forgotPassword(email: string): Promise<void> {
