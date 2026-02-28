@@ -7,7 +7,7 @@ type CondominiumContextValue = {
   activeCommunityId: number | null;
   isLoading: boolean;
   refresh: () => Promise<CommunityResponse[]>;
-  setActiveCommunityId: (id: number) => void;
+  setActiveCommunityId: (id: number | null) => void;
   clear: () => void;
 };
 
@@ -33,10 +33,14 @@ export function CondominiumProvider({ children }: { children: React.ReactNode })
     }
   }, []);
 
-  const setActiveCommunityId = useCallback((id: number) => {
+  const setActiveCommunityId = useCallback((id: number | null) => {
     setActiveCommunityIdState(id);
     activeCommunityIdRef.current = id;
-    localStorage.setItem(ACTIVE_COMMUNITY_KEY, String(id));
+    if (id == null) {
+      localStorage.removeItem(ACTIVE_COMMUNITY_KEY);
+    } else {
+      localStorage.setItem(ACTIVE_COMMUNITY_KEY, String(id));
+    }
   }, []);
 
   const refresh = useCallback(async (): Promise<CommunityResponse[]> => {
