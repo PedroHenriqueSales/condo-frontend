@@ -17,13 +17,14 @@ export function AdDetailGate() {
   const { id } = useParams();
   const { communities, isLoading, refresh, setActiveCommunityId } = useCondominium();
   const [adCheckStatus, setAdCheckStatus] = useState<AdCheckStatus>("pending");
+  const [communitiesLoadDone, setCommunitiesLoadDone] = useState(false);
 
   useEffect(() => {
-    refresh();
+    refresh().then(() => setCommunitiesLoadDone(true));
   }, [refresh]);
 
   useEffect(() => {
-    if (!id || isLoading || communities.length === 0) return;
+    if (!communitiesLoadDone || !id || communities.length === 0) return;
     const adId = Number(id);
     if (!adId) {
       setAdCheckStatus("not_in_community");
@@ -39,9 +40,10 @@ export function AdDetailGate() {
       .catch(() => {
         setAdCheckStatus("not_in_community");
       });
-  }, [id, isLoading, communities.length, setActiveCommunityId]);
+  }, [id, communitiesLoadDone, communities.length, setActiveCommunityId]);
 
-  if (isLoading) {
+  // Só decidir após a primeira carga de comunidades (evita redirecionar com lista ainda vazia).
+  if (!communitiesLoadDone || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-bg">
         <span className="text-sm text-muted">Carregando...</span>
