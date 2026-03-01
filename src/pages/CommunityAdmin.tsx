@@ -10,6 +10,12 @@ import { useCondominium } from "../hooks/useCondominium";
 import * as CondominiumService from "../services/condominium.service";
 import type { CommunityResponse, JoinRequestResponse } from "../services/contracts";
 
+function formatPostalCode(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 8);
+  if (digits.length <= 5) return digits;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+}
+
 export function CommunityAdmin() {
   const { id } = useParams<{ id: string }>();
   const nav = useNavigate();
@@ -22,6 +28,10 @@ export function CommunityAdmin() {
   const [actionBusy, setActionBusy] = useState<string | null>(null);
   const [editingName, setEditingName] = useState(false);
   const [editNameValue, setEditNameValue] = useState("");
+  const [editingType, setEditingType] = useState(false);
+  const [editTypeValue, setEditTypeValue] = useState(false);
+  const [editingPostalCode, setEditingPostalCode] = useState(false);
+  const [editPostalCodeValue, setEditPostalCodeValue] = useState("");
   const [shareOpen, setShareOpen] = useState(false);
   const [memberMenuOpen, setMemberMenuOpen] = useState<number | null>(null);
   const memberMenuRef = useRef<HTMLDivElement>(null);
@@ -140,6 +150,29 @@ export function CommunityAdmin() {
     }
   }
 
+  async function saveCommunityData(payload: { name: string; isPrivate?: boolean; postalCode?: string }) {
+    if (!community) return;
+    setActionBusy("save-data");
+    try {
+      const updated = await CondominiumService.updateCommunityName(communityId, {
+        name: payload.name,
+        ...(payload.isPrivate !== undefined && { isPrivate: payload.isPrivate }),
+        ...(payload.postalCode !== undefined && payload.postalCode !== "" && { postalCode: payload.postalCode.replace(/\D/g, "") }),
+      });
+      setCommunity(updated);
+      setEditingName(false);
+      setEditNameValue("");
+      setEditingType(false);
+      setEditingPostalCode(false);
+      setEditPostalCodeValue("");
+      if (updated.isPrivate !== community.isPrivate) loadRequests();
+    } catch (err: any) {
+      setError(err?.response?.data?.error ?? "Falha ao salvar.");
+    } finally {
+      setActionBusy(null);
+    }
+  }
+
   async function handleSaveName() {
     const name = editNameValue.trim();
     if (!community || !name || name === community.name) {
@@ -157,6 +190,40 @@ export function CommunityAdmin() {
     } finally {
       setActionBusy(null);
     }
+  }
+
+  async function handleSaveType() {
+    if (!community || editTypeValue === (community.isPrivate ?? false)) {
+      setEditingType(false);
+      return;
+    }
+    await saveCommunityData({
+      name: community.name,
+      isPrivate: editTypeValue,
+      postalCode: community.postalCode ?? "",
+    });
+    setEditingType(false);
+  }
+
+  async function handleSavePostalCode() {
+    const raw = editPostalCodeValue.replace(/\D/g, "");
+    if (!community || raw.length !== 8) {
+      setEditingPostalCode(false);
+      setEditPostalCodeValue("");
+      return;
+    }
+    await saveCommunityData({
+      name: community.name,
+      isPrivate: community.isPrivate ?? false,
+      postalCode: raw,
+    });
+    setEditingPostalCode(false);
+    setEditPostalCodeValue("");
+  }
+
+  function startEditingPostalCode() {
+    setEditPostalCodeValue(community?.postalCode ? formatPostalCode(community.postalCode) : "");
+    setEditingPostalCode(true);
   }
 
   function startEditingName() {
@@ -302,11 +369,95 @@ export function CommunityAdmin() {
               </div>
               <div>
                 <dt className="text-muted">Tipo</dt>
-                <dd className="font-medium">{community.isPrivate ? "Privada" : "Aberta"}</dd>
+                <dd className="font-medium">
+                  {editingType ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <label className="flex cursor-pointer items-center gap-2">
+                        <input
+                          type="radio"
+                          name="edit-type"
+                          checked={!editTypeValue}
+                          onChange={() => setEditTypeValue(false)}
+                          className="text-primary"
+                        />
+                        <span className="text-sm">Aberta</span>
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-2">
+                        <input
+                          type="radio"
+                          name="edit-type"
+                          checked={editTypeValue}
+                          onChange={() => setEditTypeValue(true)}
+                          className="text-primary"
+                        />
+                        <span className="text-sm">Privada</span>
+                      </label>
+                      <Button variant="primary" size="sm" disabled={actionBusy !== null} onClick={handleSaveType}>
+                        {actionBusy === "save-data" ? "Salvando..." : "Salvar"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={actionBusy !== null}
+                        onClick={() => { setEditingType(false); setEditTypeValue(community?.isPrivate ?? false); }}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      {community.isPrivate ? "Privada" : "Aberta"}
+                      <button
+                        type="button"
+                        className="text-xs font-medium text-primary-strong hover:underline"
+                        onClick={() => { setEditTypeValue(community.isPrivate ?? false); setEditingType(true); }}
+                      >
+                        Editar
+                      </button>
+                    </span>
+                  )}
+                </dd>
               </div>
               <div>
                 <dt className="text-muted">CEP</dt>
-                <dd className="font-medium">{community.postalCode ?? "—"}</dd>
+                <dd className="font-medium">
+                  {editingPostalCode ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={editPostalCodeValue}
+                        onChange={(e) => setEditPostalCodeValue(formatPostalCode(e.target.value))}
+                        className="h-9 w-32 rounded-lg border border-border bg-surface px-2 text-text"
+                        placeholder="00000-000"
+                        maxLength={9}
+                        autoFocus
+                      />
+                      <Button variant="primary" size="sm" disabled={actionBusy !== null} onClick={handleSavePostalCode}>
+                        {actionBusy === "save-data" ? "Salvando..." : "Salvar"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={actionBusy !== null}
+                        onClick={() => { setEditingPostalCode(false); setEditPostalCodeValue(""); }}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      {community.postalCode ? formatPostalCode(community.postalCode) : "—"}
+                      <button
+                        type="button"
+                        className="text-xs font-medium text-primary-strong hover:underline"
+                        onClick={startEditingPostalCode}
+                      >
+                        Editar
+                      </button>
+                    </span>
+                  )}
+                </dd>
               </div>
               <div>
                 <dt className="text-muted">Código de acesso</dt>

@@ -32,6 +32,8 @@ export interface CreateCommunityRequest {
 
 export interface UpdateCommunityRequest {
   name: string;
+  isPrivate?: boolean;
+  postalCode?: string;
 }
 
 export interface JoinCommunityRequest {
