@@ -19,6 +19,8 @@ export function CondominiumGate() {
   const from = state?.from;
   const gateMessage = state?.message ?? null;
   const codeFromUrl = searchParams.get("code") ?? "";
+  /** Link de convite: code na query string (usa location.search para evitar race na navegação) */
+  const isInviteLink = location.search.includes("code=");
   const {
     communities,
     activeCommunityId,
@@ -42,13 +44,14 @@ export function CondominiumGate() {
     });
   }, [refresh]);
 
-  // Redireciona só quando chegou na gate sem "from" e já tem comunidade ativa.
-  // Não redireciona quando há code na URL (link de convite): usuário deve poder ver o código e entrar.
+  // Link de convite (?code=...): nunca redirecionar — sempre mostrar a gate com o código.
+  // Usa isInviteLink (location.search) para não depender de searchParams no primeiro render.
   useEffect(() => {
-    if (!from && communities.length > 0 && activeCommunityId && !codeFromUrl) {
+    if (isInviteLink) return;
+    if (!from && communities.length > 0 && activeCommunityId) {
       nav("/communities", { replace: true });
     }
-  }, [from, communities.length, activeCommunityId, codeFromUrl, nav]);
+  }, [from, communities.length, activeCommunityId, isInviteLink, nav]);
 
   async function onJoin(e: FormEvent) {
     e.preventDefault();
@@ -64,8 +67,10 @@ export function CondominiumGate() {
       }
       setActiveCommunityId(c.id);
       await refresh();
-      const target = from ? `${from.pathname}${from.search ?? ""}` : "/communities";
-      nav(target, { replace: true });
+      // Link de convite: sempre ir para a lista; navegação no próximo tick para não ser sobrescrita por outro redirect.
+      const target = isInviteLink ? "/communities" : (from ? `${from.pathname}${from.search ?? ""}` : "/communities");
+      const state = isInviteLink ? { fromGateInvite: true } : undefined;
+      queueMicrotask(() => nav(target, { replace: true, state }));
     } catch (err: any) {
       const msg = err?.response?.data?.error;
       if (msg) {

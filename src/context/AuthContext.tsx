@@ -14,6 +14,8 @@ type AuthState = {
   token: string | null;
   user: AuthUser | null;
   emailVerified: boolean | null;
+  /** false até o primeiro efeito rodar (leitura do localStorage); evita redirect em /gate antes do token carregar */
+  authReady: boolean;
 };
 
 type AuthContextValue = AuthState & {
@@ -33,23 +35,24 @@ function toState(res: AuthResponse): AuthState {
     token: res.token,
     user: { id: res.userId, email: res.email, name: res.name },
     emailVerified: res.emailVerified ?? null,
+    authReady: true,
   };
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AuthState>({ token: null, user: null, emailVerified: null });
+  const [state, setState] = useState<AuthState>({ token: null, user: null, emailVerified: null, authReady: false });
 
   useEffect(() => {
     const token = getStoredToken();
     const raw = localStorage.getItem(AUTH_STATE_KEY);
     if (raw) {
       try {
-        const parsed = JSON.parse(raw) as AuthState;
-        // Se houver token armazenado, preferimos esse token
+        const parsed = JSON.parse(raw) as Omit<AuthState, "authReady"> & Partial<Pick<AuthState, "authReady">>;
         setState({
           token: token ?? parsed.token ?? null,
           user: parsed.user ?? null,
           emailVerified: parsed.emailVerified ?? null,
+          authReady: true,
         });
         return;
       } catch {
@@ -57,7 +60,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
     if (token) {
-      setState((s) => ({ ...s, token }));
+      setState((s) => ({ ...s, token, authReady: true }));
+    } else {
+      setState((s) => ({ ...s, authReady: true }));
     }
   }, []);
 
@@ -97,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     AuthService.logout();
     setStoredToken(null);
     localStorage.removeItem(AUTH_STATE_KEY);
-    setState({ token: null, user: null, emailVerified: null });
+    setState({ token: null, user: null, emailVerified: null, authReady: true });
   }, []);
 
   const updateUser = useCallback((updates: Partial<AuthUser>) => {

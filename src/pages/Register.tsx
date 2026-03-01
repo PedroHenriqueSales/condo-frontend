@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
@@ -10,7 +10,9 @@ import * as AuthService from "../services/auth.service";
 
 export function Register() {
   const nav = useNavigate();
+  const location = useLocation();
   const { register } = useAuth();
+  const from = (location.state as { from?: { pathname: string; search: string } } | null)?.from;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -94,7 +96,7 @@ export function Register() {
                 >
                   {resendLoading ? "Enviando..." : "Reenviar email de verificação"}
                 </Button>
-                <Button type="button" className="w-full" onClick={() => nav("/gate", { replace: true })}>
+                <Button type="button" className="w-full" onClick={() => nav(`/gate${from?.search ?? ""}`, { replace: true })}>
                   Continuar para o app
                 </Button>
               </div>

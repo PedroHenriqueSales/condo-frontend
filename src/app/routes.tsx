@@ -24,9 +24,16 @@ import { VerifyEmail } from "../pages/VerifyEmail";
 import * as AuthService from "../services/auth.service";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { token, emailVerified } = useAuth();
+  const { token, emailVerified, authReady } = useAuth();
   const location = useLocation();
   const [resendLoading, setResendLoading] = useState(false);
+  if (!authReady) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-bg">
+        <span className="text-sm text-muted">Carregando...</span>
+      </div>
+    );
+  }
   if (!token) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
@@ -84,6 +91,7 @@ function RequireCommunity({ children }: { children: React.ReactNode }) {
 
 function IndexRedirect() {
   const nav = useNavigate();
+  const location = useLocation();
   const { token } = useAuth();
   const { refresh, setActiveCommunityId, activeCommunityId } = useCondominium();
   const [list, setList] = useState<CommunityResponse[] | null>(null);
@@ -95,6 +103,8 @@ function IndexRedirect() {
 
   useEffect(() => {
     if (list === null) return;
+    // Só redirecionar quando estamos de fato na raiz (evita mandar para /feed quem veio de /gate?code=...).
+    if (location.pathname !== "/") return;
     if (list.length === 0) {
       nav("/gate", { replace: true });
     } else if (list.length === 1) {
@@ -108,7 +118,7 @@ function IndexRedirect() {
         nav("/communities", { replace: true });
       }
     }
-  }, [list, activeCommunityId, nav, setActiveCommunityId]);
+  }, [list, activeCommunityId, location.pathname, nav, setActiveCommunityId]);
 
   if (!token) return <Navigate to="/login" replace />;
   if (list === null) {

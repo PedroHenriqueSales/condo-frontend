@@ -1,8 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import logoNameDark from "../assets/logo-name-dark.png";
 import { Button } from "../components/Button";
 
 export function Landing() {
+  const location = useLocation();
+  /** Preserva state.from (ex.: /gate?code=...) ao ir para login/registro, para redirecionar depois do auth */
+  const authState = location.state && typeof location.state === "object" && "from" in location.state ? location.state : undefined;
+
   return (
     <div className="min-h-screen flex flex-col bg-bg">
       {/* Header — mesmo padrão visual da Navbar do app */}
@@ -22,11 +26,12 @@ export function Landing() {
           <nav className="flex flex-shrink-0 items-center gap-1 sm:gap-2">
             <Link
               to="/login"
+              state={authState}
               className="rounded-lg px-3 py-2 text-sm font-medium text-white/95 transition hover:bg-white/10 hover:text-white"
             >
               Entrar
             </Link>
-            <Link to="/register">
+            <Link to="/register" state={authState}>
               <Button
                 variant="ghost"
                 size="sm"
@@ -49,12 +54,12 @@ export function Landing() {
             Compre, venda, doe e troque com quem mora perto. Entre com o código da sua comunidade e comece a usar em segundos.
           </p>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
-            <Link to="/register">
+            <Link to="/register" state={authState}>
               <Button variant="accent" size="md" className="w-full min-w-[10rem] sm:w-auto">
                 Criar conta grátis
               </Button>
             </Link>
-            <Link to="/login">
+            <Link to="/login" state={authState}>
               <Button variant="ghost" size="md" className="w-full min-w-[10rem] sm:w-auto">
                 Já tenho conta · Entrar
               </Button>
@@ -157,12 +162,12 @@ export function Landing() {
               Crie sua conta, entre na sua comunidade com o código de acesso e comece a publicar ou a procurar anúncios.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
-              <Link to="/register">
+              <Link to="/register" state={authState}>
                 <Button variant="accent" size="md" className="w-full sm:w-auto sm:min-w-[10rem]">
                   Criar conta grátis
                 </Button>
               </Link>
-              <Link to="/login">
+              <Link to="/login" state={authState}>
                 <Button variant="ghost" size="md" className="w-full sm:w-auto sm:min-w-[10rem]">
                   Entrar na minha conta
                 </Button>
