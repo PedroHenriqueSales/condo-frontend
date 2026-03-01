@@ -9,22 +9,38 @@ body {
   height: 100%;
 }
 
+/* Mesma cor em html para fallback; overscroll-behavior evita o “puxar” (rubber band) no iOS/Chrome */
+html {
+  background: rgb(var(--c-bg));
+  overscroll-behavior: none;
+}
+
 body {
   margin: 0;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background: rgb(var(--c-bg));
   color: rgb(var(--c-text));
+  overscroll-behavior: none;
 }
 
 @media (prefers-color-scheme: dark) {
+  html {
+    background: #1c1612;
+  }
   body {
     background: radial-gradient(ellipse at center, #1c1612 0%, #0d0b09 100%);
     background-attachment: fixed;
   }
 }
 
-* {
-  box-sizing: border-box;
+#root {
+  min-height: 100%;
+  background: rgb(var(--c-bg));
+}
+@media (prefers-color-scheme: dark) {
+  #root {
+    background: transparent; /* body já tem o gradiente; manter consistente */
+  }
 }
 
 ::selection {
