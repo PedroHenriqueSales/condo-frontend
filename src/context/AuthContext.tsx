@@ -14,8 +14,6 @@ type AuthState = {
   token: string | null;
   user: AuthUser | null;
   emailVerified: boolean | null;
-  /** false até o primeiro efeito rodar (leitura do localStorage); evita redirect em /gate antes do token carregar */
-  authReady: boolean;
 };
 
 type AuthContextValue = AuthState & {
@@ -30,41 +28,34 @@ const AUTH_STATE_KEY = "aquidolado.authState";
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
+function readStoredAuth(): AuthState {
+  try {
+    const token = getStoredToken();
+    const raw = localStorage.getItem(AUTH_STATE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as AuthState;
+      return {
+        token: token ?? parsed.token ?? null,
+        user: parsed.user ?? null,
+        emailVerified: parsed.emailVerified ?? null,
+      };
+    }
+    return { token: token ?? null, user: null, emailVerified: null };
+  } catch {
+    return { token: getStoredToken(), user: null, emailVerified: null };
+  }
+}
+
 function toState(res: AuthResponse): AuthState {
   return {
     token: res.token,
     user: { id: res.userId, email: res.email, name: res.name },
     emailVerified: res.emailVerified ?? null,
-    authReady: true,
   };
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AuthState>({ token: null, user: null, emailVerified: null, authReady: false });
-
-  useEffect(() => {
-    const token = getStoredToken();
-    const raw = localStorage.getItem(AUTH_STATE_KEY);
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw) as Omit<AuthState, "authReady"> & Partial<Pick<AuthState, "authReady">>;
-        setState({
-          token: token ?? parsed.token ?? null,
-          user: parsed.user ?? null,
-          emailVerified: parsed.emailVerified ?? null,
-          authReady: true,
-        });
-        return;
-      } catch {
-        // ignore
-      }
-    }
-    if (token) {
-      setState((s) => ({ ...s, token, authReady: true }));
-    } else {
-      setState((s) => ({ ...s, authReady: true }));
-    }
-  }, []);
+  const [state, setState] = useState<AuthState>(readStoredAuth);
 
   /* Sincroniza emailVerified com o backend quando o usuário está logado e ainda consta como não verificado */
   useEffect(() => {
@@ -102,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     AuthService.logout();
     setStoredToken(null);
     localStorage.removeItem(AUTH_STATE_KEY);
-    setState({ token: null, user: null, emailVerified: null, authReady: true });
+    setState({ token: null, user: null, emailVerified: null });
   }, []);
 
   const updateUser = useCallback((updates: Partial<AuthUser>) => {

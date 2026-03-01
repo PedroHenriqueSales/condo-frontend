@@ -24,16 +24,9 @@ import { VerifyEmail } from "../pages/VerifyEmail";
 import * as AuthService from "../services/auth.service";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { token, emailVerified, authReady } = useAuth();
+  const { token, emailVerified } = useAuth();
   const location = useLocation();
   const [resendLoading, setResendLoading] = useState(false);
-  if (!authReady) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-bg">
-        <span className="text-sm text-muted">Carregando...</span>
-      </div>
-    );
-  }
   if (!token) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
@@ -73,7 +66,9 @@ function RequireCommunity({ children }: { children: React.ReactNode }) {
     refresh().then(() => setLoadDone(true));
   }, [refresh]);
 
-  if (!loadDone || isLoading) {
+  // Só bloqueia com "Carregando..." quando ainda não temos lista (primeira carga). Em troca de rota, o context já tem dados.
+  const waitingForData = (!loadDone || isLoading) && communities.length === 0;
+  if (waitingForData) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-bg">
         <span className="text-sm text-muted">Carregando...</span>
