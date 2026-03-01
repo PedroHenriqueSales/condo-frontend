@@ -281,8 +281,8 @@ export function Feed() {
     <div className="min-h-screen bg-bg pb-24">
       <div className="sticky top-0 z-10">
         <Navbar sticky={false} />
-        {/* Barra de filtros logo abaixo da Navbar — grudam juntas ao rolar */}
-        <div className="border-b border-border bg-bg/95 shadow-[0_2px_8px_rgba(0,0,0,0.04)] backdrop-blur supports-[backdrop-filter]:bg-bg/90">
+        {/* Barra de filtros — tema claro: padrão; tema escuro: mesma coloração da barra da comunidade (Navbar) */}
+        <div className="border-b border-border bg-bg/95 shadow-[0_2px_8px_rgba(0,0,0,0.04)] backdrop-blur supports-[backdrop-filter]:bg-bg/90 dark:border-white/10 dark:bg-[#1c1612] dark:shadow-none">
         <div className="mx-auto flex max-w-5xl items-stretch gap-1 px-2 py-2 sm:gap-2 sm:px-3">
           {TAB_ORDER.map((t) => {
             const active = tab === t;
@@ -293,10 +293,10 @@ export function Feed() {
                 onClick={() => setTab(t)}
                 title={t === "INDICACOES" ? "Indicações" : undefined}
                 className={
-                  "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg border-2 px-1 py-1.5 text-[9px] font-semibold transition sm:gap-1 sm:py-2 sm:text-[10px] " +
+                  "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg border-2 px-1 py-1.5 text-[9px] font-semibold transition sm:gap-1 sm:py-2 sm:text-[10px] [&_svg]:stroke-current " +
                   (active
-                    ? "border-accent bg-accent/15 text-accent-strong dark:border-accent dark:bg-accent/20 dark:[&_svg]:stroke-white dark:[&_span]:text-white"
-                    : "border-border bg-surface text-muted hover:border-accent/50 hover:text-text dark:bg-card dark:border-white/25 dark:[&_svg]:stroke-white/80 dark:[&_span]:text-white/90")
+                    ? "border-accent bg-accent/15 text-accent-strong"
+                    : "border-border bg-surface text-muted hover:border-accent/50 hover:text-text dark:border-white/15 dark:bg-white/5 dark:text-white/90 dark:hover:border-white/25 dark:hover:bg-white/10 dark:hover:text-white dark:[&_span]:text-white/90")
                 }
               >
                 <FilterIcon tab={t} />

@@ -141,7 +141,7 @@ export function CondominiumGate() {
             </form>
           </Card>
 
-          <Card className="border-2 border-dashed border-border">
+          <Card>
             <p className="mb-3 text-sm text-muted">
               Quer criar uma nova comunidade? Você será o administrador inicial.
             </p>
