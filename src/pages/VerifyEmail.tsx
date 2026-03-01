@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
+import { useAuth } from "../hooks/useAuth";
 import * as AuthService from "../services/auth.service";
 
 type Status = "loading" | "success" | "error";
@@ -9,6 +10,7 @@ type Status = "loading" | "success" | "error";
 export function VerifyEmail() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
+  const { token: authToken, setEmailVerified } = useAuth();
   const [status, setStatus] = useState<Status>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -19,13 +21,16 @@ export function VerifyEmail() {
       return;
     }
     AuthService.verifyEmail(token)
-      .then(() => setStatus("success"))
+      .then(() => {
+        if (authToken) setEmailVerified(true);
+        setStatus("success");
+      })
       .catch((err: any) => {
         setStatus("error");
         const msg = err?.response?.data?.message ?? err?.response?.data?.error ?? err?.message;
         setErrorMessage(msg || "Token inválido ou expirado.");
       });
-  }, [token]);
+  }, [token, authToken, setEmailVerified]);
 
   return (
     <div className="min-h-screen bg-bg">

@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useEffect, useMemo, useState } from "react";
 import type { AuthResponse, LoginRequest, RegisterRequest } from "../services/contracts";
 import * as AuthService from "../services/auth.service";
+import * as UsersService from "../services/users.service";
 import { getStoredToken, setStoredToken } from "../services/api";
 
 type AuthUser = {
@@ -20,6 +21,7 @@ type AuthContextValue = AuthState & {
   register: (payload: RegisterRequest) => Promise<void>;
   logout: () => void;
   updateUser: (updates: Partial<AuthUser>) => void;
+  setEmailVerified: (value: boolean) => void;
 };
 
 const AUTH_STATE_KEY = "aquidolado.authState";
@@ -59,6 +61,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  /* Sincroniza emailVerified com o backend quando o usuário está logado e ainda consta como não verificado */
+  useEffect(() => {
+    if (!state.token || state.user == null || state.emailVerified !== false) return;
+    UsersService.getProfile()
+      .then((profile) => {
+        if (profile.emailVerified === true) {
+          setState((s) => {
+            const next = { ...s, emailVerified: true };
+            localStorage.setItem(AUTH_STATE_KEY, JSON.stringify(next));
+            return next;
+          });
+        }
+      })
+      .catch(() => {});
+  }, [state.token, state.user, state.emailVerified]);
+
   const persist = useCallback((next: AuthState) => {
     setState(next);
     setStoredToken(next.token);
@@ -91,9 +109,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const setEmailVerified = useCallback((value: boolean) => {
+    setState((s) => {
+      const next = { ...s, emailVerified: value };
+      localStorage.setItem(AUTH_STATE_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ ...state, login, register, logout, updateUser }),
-    [state, login, register, logout, updateUser]
+    () => ({ ...state, login, register, logout, updateUser, setEmailVerified }),
+    [state, login, register, logout, updateUser, setEmailVerified]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

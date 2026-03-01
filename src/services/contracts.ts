@@ -179,6 +179,7 @@ export interface UserProfileResponse {
   name: string;
   whatsapp?: string;
   address?: string;
+  emailVerified?: boolean;
 }
 
 export interface UpdateProfileRequest {
