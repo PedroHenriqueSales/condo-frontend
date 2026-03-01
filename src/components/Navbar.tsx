@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
 import logoNameDark from "../assets/logo-name-dark.png";
@@ -10,6 +10,7 @@ import type { CommunityResponse } from "../services/contracts";
 type NavbarProps = { sticky?: boolean };
 
 export function Navbar({ sticky = true }: NavbarProps) {
+  const nav = useNavigate();
   const { user, logout } = useAuth();
   const { communities, activeCommunityId } = useCondominium();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -74,7 +75,7 @@ export function Navbar({ sticky = true }: NavbarProps) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={logout}
+              onClick={() => { logout(); nav("/", { replace: true }); }}
               className="hidden sm:inline-flex !text-white hover:!bg-white/10 !border-white/30"
             >
               Sair
@@ -205,6 +206,7 @@ export function Navbar({ sticky = true }: NavbarProps) {
                 onClick={() => {
                   setMenuOpen(false);
                   logout();
+                  nav("/", { replace: true });
                 }}
               >
                 Sair

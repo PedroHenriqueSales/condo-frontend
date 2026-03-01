@@ -88,7 +88,7 @@ export function MyAccount() {
       await UsersService.deleteAccount();
       clearCondominium();
       logout();
-      nav("/login", { replace: true });
+      nav("/", { replace: true });
     } catch (err: any) {
       setDeleteError(err?.response?.data?.error ?? "Não foi possível excluir a conta. Tente novamente.");
     } finally {

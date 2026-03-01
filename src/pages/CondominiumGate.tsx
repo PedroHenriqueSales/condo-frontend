@@ -95,7 +95,7 @@ export function CondominiumGate() {
             <Button
               variant="ghost"
               size="md"
-              onClick={logout}
+              onClick={() => { logout(); nav("/", { replace: true }); }}
               className="flex-shrink-0 whitespace-nowrap"
             >
               Sair da conta

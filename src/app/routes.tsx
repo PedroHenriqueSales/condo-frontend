@@ -13,6 +13,7 @@ import { EditAd } from "../pages/EditAd";
 import { Feed } from "../pages/Feed";
 import { ForgotPassword } from "../pages/ForgotPassword";
 import { Login } from "../pages/Login";
+import { Landing } from "../pages/Landing";
 import { MyAccount } from "../pages/MyAccount";
 import { MyAds } from "../pages/MyAds";
 import { MyCommunities } from "../pages/MyCommunities";
@@ -27,7 +28,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [resendLoading, setResendLoading] = useState(false);
   if (!token) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
   const showUnverifiedBanner = emailVerified === false;
   return (
@@ -59,12 +60,13 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 function RequireCommunity({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const { communities, activeCommunityId, isLoading, refresh } = useCondominium();
+  const [loadDone, setLoadDone] = useState(false);
 
   useEffect(() => {
-    refresh();
+    refresh().then(() => setLoadDone(true));
   }, [refresh]);
 
-  if (isLoading) {
+  if (!loadDone || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-bg">
         <span className="text-sm text-muted">Carregando...</span>
@@ -119,10 +121,16 @@ function IndexRedirect() {
   return null;
 }
 
+function HomeOrApp() {
+  const { token } = useAuth();
+  if (token) return <IndexRedirect />;
+  return <Landing />;
+}
+
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<IndexRedirect />} />
+      <Route path="/" element={<HomeOrApp />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/verify-email" element={<VerifyEmail />} />

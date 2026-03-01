@@ -1,4 +1,4 @@
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, useNavigate } from "react-router-dom";
 import { AuthProvider } from "../context/AuthContext";
 import { CondominiumProvider } from "../context/CondominiumContext";
 import { AppRoutes } from "./routes";
@@ -7,6 +7,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
 
 function Bootstrap() {
+  const nav = useNavigate();
   const { token, logout } = useAuth();
   const { refresh, clear } = useCondominium();
 
@@ -20,9 +21,10 @@ function Bootstrap() {
       const status = err?.response?.status;
       if (status === 401 || status === 403) {
         logout();
+        nav("/", { replace: true });
       }
     });
-  }, [token, logout, refresh, clear]);
+  }, [token, logout, refresh, clear, nav]);
 
   return <AppRoutes />;
 }
