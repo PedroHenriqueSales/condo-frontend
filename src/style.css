@@ -21,6 +21,20 @@ body {
   background: rgb(var(--c-bg));
   color: rgb(var(--c-text));
   overscroll-behavior: none;
+  /* Oculta a barra de rolagem mantendo o scroll */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE / Edge */
+}
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+/* Oculta barra de rolagem em qualquer elemento que role (modais, listas, etc.) */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
 }
 
 @media (prefers-color-scheme: dark) {
