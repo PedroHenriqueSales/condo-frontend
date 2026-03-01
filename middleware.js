@@ -4,7 +4,7 @@
  */
 
 const BOT_UA =
-  /bot|crawler|spider|crawling|facebookexternalhit|WhatsApp|Telegram|Slurp|Twitterbot|LinkedInBot|embedly|quora link preview|mediapartners-google/i;
+  /bot|crawler|spider|crawling|facebookexternalhit|Facebot|WhatsApp|Telegram|Slurp|Twitterbot|LinkedInBot|embedly|quora link preview|mediapartners-google|Pinterest|Googlebot|facebook/i;
 
 function isCrawler(userAgent) {
   return !userAgent || BOT_UA.test(userAgent);

@@ -1,7 +1,7 @@
 /**
- * Serverless function para retornar HTML com Open Graph para compartilhamento de anúncios (WhatsApp, etc.).
- * Chamada quando um crawler acessa /ads/:id (via middleware).
- * Variáveis Vercel: BACKEND_API_URL (ou VITE_API_URL_PRODUCTION), FRONTEND_PUBLIC_ORIGIN (opcional).
+ * Serverless function: HTML com Open Graph para /ads/:id (WhatsApp, Facebook, etc.).
+ * OBRIGATÓRIO no Vercel: BACKEND_API_URL = URL pública do backend (ex.: https://sua-api.railway.app).
+ * Sem BACKEND_API_URL o preview de anúncios usa sempre a logo. FRONTEND_PUBLIC_ORIGIN opcional.
  */
 
 function escapeHtml(s) {
@@ -14,10 +14,18 @@ function escapeHtml(s) {
     .replace(/'/g, "&#39;");
 }
 
+/** Garante que a URL do backend tenha esquema (https). */
+function normalizeBackendUrl(url) {
+  if (!url || typeof url !== "string") return "";
+  const u = url.trim().replace(/\/$/, "");
+  if (u.startsWith("http://") || u.startsWith("https://")) return u;
+  return `https://${u}`;
+}
+
 export default async function handler(req, res) {
   const adId = req.query?.id;
-  const backendUrl = process.env.BACKEND_API_URL || process.env.VITE_API_URL_PRODUCTION;
-  const frontendOrigin = process.env.FRONTEND_PUBLIC_ORIGIN || "https://www.aquiapp.com.br";
+  const backendUrl = normalizeBackendUrl(process.env.BACKEND_API_URL || process.env.VITE_API_URL_PRODUCTION);
+  const frontendOrigin = (process.env.FRONTEND_PUBLIC_ORIGIN || "https://www.aquiapp.com.br").trim().replace(/\/$/, "");
 
   const fbAppId = process.env.FB_APP_ID || "";
 
@@ -34,7 +42,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const apiUrl = `${backendUrl.replace(/\/$/, "")}/api/public/ads/${adId}/og`;
+    const apiUrl = `${backendUrl}/api/public/ads/${adId}/og`;
     const response = await fetch(apiUrl);
     if (!response.ok) {
       res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -51,8 +59,13 @@ export default async function handler(req, res) {
     const title = data?.title ? data.title : "Aqui";
     let imageUrl = `${frontendOrigin}/logo-icon.png`;
     if (data?.imagePath) {
-      const path = data.imagePath.startsWith("/") ? data.imagePath : `/${data.imagePath}`;
-      imageUrl = `${backendUrl.replace(/\/$/, "")}${path}`;
+      const raw = data.imagePath.trim();
+      if (raw.startsWith("http://") || raw.startsWith("https://")) {
+        imageUrl = raw;
+      } else {
+        const path = raw.startsWith("/") ? raw : `/${raw}`;
+        imageUrl = `${backendUrl}${path}`;
+      }
     }
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.status(200).send(renderOgHtml({
