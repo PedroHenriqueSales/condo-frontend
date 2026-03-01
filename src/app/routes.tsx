@@ -3,7 +3,7 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
 import type { CommunityResponse } from "../services/contracts";
-import { AdDetail } from "../pages/AdDetail";
+import { AdDetailGate } from "../components/AdDetailGate";
 import { CommunityDetail } from "../pages/CommunityDetail";
 import { CommunityAdmin } from "../pages/CommunityAdmin";
 import { CondominiumGate } from "../pages/CondominiumGate";
@@ -134,7 +134,7 @@ export function AppRoutes() {
       <Route path="/communities/new" element={<RequireAuth><CreateCommunity /></RequireAuth>} />
       <Route path="/feed" element={<RequireAuth><RequireCommunity><Feed /></RequireCommunity></RequireAuth>} />
       <Route path="/ads/new" element={<RequireAuth><RequireCommunity><CreateAd /></RequireCommunity></RequireAuth>} />
-      <Route path="/ads/:id" element={<RequireAuth><RequireCommunity><AdDetail /></RequireCommunity></RequireAuth>} />
+      <Route path="/ads/:id" element={<RequireAuth><AdDetailGate /></RequireAuth>} />
       <Route path="/ads/:id/edit" element={<RequireAuth><RequireCommunity><EditAd /></RequireCommunity></RequireAuth>} />
       <Route path="/my-ads" element={<RequireAuth><RequireCommunity><MyAds /></RequireCommunity></RequireAuth>} />
       <Route path="/communities" element={<RequireAuth><RequireCommunity><MyCommunities /></RequireCommunity></RequireAuth>} />

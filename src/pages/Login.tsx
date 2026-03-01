@@ -29,7 +29,7 @@ export function Login() {
         if (list.length === 1) setActiveCommunityId(list[0].id);
         nav(`${from.pathname}${from.search ?? ""}`, { replace: true });
       } else if (list.length === 0) {
-        nav("/gate", { replace: true });
+        nav("/gate", { replace: true, state: from ? { from } : undefined });
       } else if (list.length === 1) {
         setActiveCommunityId(list[0].id);
         nav("/feed", { replace: true });

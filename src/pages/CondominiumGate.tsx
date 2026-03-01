@@ -15,7 +15,9 @@ export function CondominiumGate() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { logout } = useAuth();
-  const from = (location.state as { from?: { pathname: string; search: string } } | null)?.from;
+  const state = location.state as { from?: { pathname: string; search: string }; message?: string } | null;
+  const from = state?.from;
+  const gateMessage = state?.message ?? null;
   const codeFromUrl = searchParams.get("code") ?? "";
   const {
     communities,
@@ -103,6 +105,12 @@ export function CondominiumGate() {
 
         {isLoading ? (
           <div className="text-sm text-muted">Carregando...</div>
+        ) : null}
+
+        {gateMessage ? (
+          <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
+            {gateMessage}
+          </div>
         ) : null}
 
         {error ? (

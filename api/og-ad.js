@@ -29,14 +29,15 @@ export default async function handler(req, res) {
 
   const fbAppId = process.env.FB_APP_ID || "";
 
+  const logoOg = { imageUrl: `${frontendOrigin}/logo-og.png`, imageWidth: 512, imageHeight: 512 };
   if (!adId || !backendUrl) {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.status(200).send(renderOgHtml({
       title: "Aqui",
       description: "Anúncios entre membros da sua comunidade.",
-      imageUrl: `${frontendOrigin}/logo-icon.png`,
       canonicalUrl: frontendOrigin + "/",
       fbAppId,
+      ...logoOg,
     }));
     return;
   }
@@ -49,15 +50,15 @@ export default async function handler(req, res) {
       res.status(200).send(renderOgHtml({
         title: "Aqui",
         description: "Anúncios entre membros da sua comunidade.",
-        imageUrl: `${frontendOrigin}/logo-icon.png`,
         canonicalUrl: frontendOrigin + "/ads/" + adId,
         fbAppId,
+        ...logoOg,
       }));
       return;
     }
     const data = await response.json();
     const title = data?.title ? data.title : "Aqui";
-    let imageUrl = `${frontendOrigin}/logo-icon.png`;
+    let imageUrl = `${frontendOrigin}/logo-og.png`;
     if (data?.imagePath) {
       let raw = data.imagePath.trim();
       // Backend pode ter devolvido URL absoluta com "/" na frente (ex.: "/https://..."); normaliza.
@@ -84,14 +85,14 @@ export default async function handler(req, res) {
     res.status(200).send(renderOgHtml({
       title: "Aqui",
       description: "Anúncios entre membros da sua comunidade.",
-      imageUrl: `${frontendOrigin}/logo-icon.png`,
       canonicalUrl: frontendOrigin + "/ads/" + adId,
       fbAppId,
+      ...logoOg,
     }));
   }
 }
 
-function renderOgHtml({ title, description, imageUrl, canonicalUrl = "", fbAppId = "" }) {
+function renderOgHtml({ title, description, imageUrl, canonicalUrl = "", fbAppId = "", imageWidth = 1200, imageHeight = 630 }) {
   const ogUrlMeta = canonicalUrl ? `  <meta property="og:url" content="${escapeHtml(canonicalUrl)}" />\n  ` : "";
   const fbAppIdMeta = fbAppId ? `  <meta property="fb:app_id" content="${escapeHtml(fbAppId)}" />\n  ` : "";
   return `<!DOCTYPE html>
@@ -103,8 +104,8 @@ function renderOgHtml({ title, description, imageUrl, canonicalUrl = "", fbAppId
   <meta property="og:title" content="${escapeHtml(title)}" />
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:image" content="${escapeHtml(imageUrl)}" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
+  <meta property="og:image:width" content="${imageWidth}" />
+  <meta property="og:image:height" content="${imageHeight}" />
   <meta property="og:locale" content="pt_BR" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${escapeHtml(title)}" />
