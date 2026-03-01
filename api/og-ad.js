@@ -59,7 +59,11 @@ export default async function handler(req, res) {
     const title = data?.title ? data.title : "Aqui";
     let imageUrl = `${frontendOrigin}/logo-icon.png`;
     if (data?.imagePath) {
-      const raw = data.imagePath.trim();
+      let raw = data.imagePath.trim();
+      // Backend pode ter devolvido URL absoluta com "/" na frente (ex.: "/https://..."); normaliza.
+      if (raw.startsWith("/https://") || raw.startsWith("/http://")) {
+        raw = raw.slice(1);
+      }
       if (raw.startsWith("http://") || raw.startsWith("https://")) {
         imageUrl = raw;
       } else {
