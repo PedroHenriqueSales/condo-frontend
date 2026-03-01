@@ -219,15 +219,18 @@ export function LegalPage({ slug: slugProp }: Props = {}) {
             {renderMarkdown(content)}
           </div>
         </Card>
-        <p className="mt-4 text-center text-sm text-muted">
-          <Link to="/termos-de-uso" className="hover:underline">
-            Termos de Uso
-          </Link>
-          {" · "}
-          <Link to="/politica-de-privacidade" className="hover:underline">
-            Política de Privacidade
-          </Link>
-        </p>
+        <div className="mt-4 space-y-2 text-center text-sm text-muted">
+          <p>
+            <Link to="/termos-de-uso" className="hover:underline">Termos de Uso</Link>
+            {" · "}
+            <Link to="/politica-de-privacidade" className="hover:underline">Política de Privacidade</Link>
+          </p>
+          <p>
+            <a href="mailto:contato@aquiapp.com.br" className="font-medium text-accent-strong hover:underline">
+              Fale conosco: contato@aquiapp.com.br
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );

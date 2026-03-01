@@ -199,10 +199,17 @@ export function Register() {
             </div>
           </form>
         </Card>
-        <footer className="mt-8 text-center text-sm text-muted">
-          <Link to="/termos-de-uso" className="hover:underline">Termos de Uso</Link>
-          {" · "}
-          <Link to="/politica-de-privacidade" className="hover:underline">Política de Privacidade</Link>
+        <footer className="mt-8 space-y-2 text-center text-sm text-muted">
+          <p>
+            <Link to="/termos-de-uso" className="hover:underline">Termos de Uso</Link>
+            {" · "}
+            <Link to="/politica-de-privacidade" className="hover:underline">Política de Privacidade</Link>
+          </p>
+          <p>
+            <a href="mailto:contato@aquiapp.com.br" className="font-medium text-accent-strong hover:underline">
+              Fale conosco: contato@aquiapp.com.br
+            </a>
+          </p>
         </footer>
       </div>
     </div>
