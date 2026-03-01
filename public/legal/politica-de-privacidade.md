@@ -1,11 +1,11 @@
 # Política de Privacidade — Aqui
 
-**Última atualização:** 26/12/2026
+**Última atualização:** 01/03/2026
 
 ## 1. Controlador e contato
 
 CNPJ 41765550000189
-E-mail de contato do responsável pela plataforma Aqui pedrohsalesf@gmail.com
+E-mail de contato do responsável pela plataforma Aqui contato@aquiapp.com.br
 
 ## 2. Quais dados são coletados
 
