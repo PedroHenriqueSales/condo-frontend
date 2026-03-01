@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   const backendUrl = process.env.BACKEND_API_URL || process.env.VITE_API_URL_PRODUCTION;
   const frontendOrigin = process.env.FRONTEND_PUBLIC_ORIGIN || "https://www.aquiapp.com.br";
 
-  const fbAppId = process.env.FB_APP_ID || "0";
+  const fbAppId = process.env.FB_APP_ID || "";
 
   if (!adId || !backendUrl) {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -74,9 +74,9 @@ export default async function handler(req, res) {
   }
 }
 
-function renderOgHtml({ title, description, imageUrl, canonicalUrl = "", fbAppId = "0" }) {
+function renderOgHtml({ title, description, imageUrl, canonicalUrl = "", fbAppId = "" }) {
   const ogUrlMeta = canonicalUrl ? `  <meta property="og:url" content="${escapeHtml(canonicalUrl)}" />\n  ` : "";
-  const fbAppIdMeta = `  <meta property="fb:app_id" content="${escapeHtml(fbAppId)}" />\n  `;
+  const fbAppIdMeta = fbAppId ? `  <meta property="fb:app_id" content="${escapeHtml(fbAppId)}" />\n  ` : "";
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
