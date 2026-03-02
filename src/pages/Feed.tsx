@@ -440,8 +440,8 @@ export function Feed() {
                 )}
 
                 <div className="flex items-center justify-between gap-3 border-t border-border/50 px-4 py-3">
-                  <div className="min-w-0 shrink text-xs text-muted">
-                    <div className="truncate">por <span className="font-medium text-text">{ad.userName}</span></div>
+                  <div className="min-w-0 max-w-[65%] shrink text-xs text-muted">
+                    <div className="truncate" title={ad.userName}>por <span className="font-medium text-text">{ad.userName}</span></div>
                     {ad.createdAt ? (
                       <div>{formatPublishedAt(ad.createdAt)}</div>
                     ) : null}
