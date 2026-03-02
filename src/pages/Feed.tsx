@@ -364,12 +364,12 @@ export function Feed() {
 
         {error ? <div className="mt-4 text-sm text-danger">{error}</div> : null}
 
-        <div className="mt-4 grid gap-3">
+        <div className="mt-4 grid gap-3 min-w-0">
           {items.map((ad) => (
-            <Card key={ad.id} className="p-0">
+            <Card key={ad.id} className="min-w-0 overflow-hidden p-0">
               <button
                 type="button"
-                className="w-full rounded-2xl text-left hover:bg-surface/60"
+                className="w-full min-w-0 rounded-2xl text-left hover:bg-surface/60"
                 onClick={() => nav(`/ads/${ad.id}`)}
               >
                 {ad.type !== "RECOMMENDATION" ? (
@@ -439,9 +439,14 @@ export function Feed() {
                   </div>
                 )}
 
-                <div className="flex items-center justify-between gap-3 border-t border-border/50 px-4 py-3">
-                  <div className="min-w-0 max-w-[65%] shrink text-xs text-muted">
-                    <div className="truncate" title={ad.userName}>por <span className="font-medium text-text">{ad.userName}</span></div>
+                <div className="flex min-w-0 items-center justify-between gap-3 border-t border-border/50 px-4 py-3">
+                  <div className="flex min-w-0 shrink flex-col overflow-hidden text-xs text-muted">
+                    <div className="flex min-w-0 items-baseline gap-1 overflow-hidden">
+                      <span className="shrink-0">por</span>
+                      <span className="min-w-0 truncate font-medium text-text" title={ad.userName}>
+                        {ad.userName}
+                      </span>
+                    </div>
                     {ad.createdAt ? (
                       <div>{formatPublishedAt(ad.createdAt)}</div>
                     ) : null}
