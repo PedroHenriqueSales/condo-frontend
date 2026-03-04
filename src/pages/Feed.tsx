@@ -108,7 +108,10 @@ export function Feed() {
   );
 
   const adTypes = useMemo<AdType[] | undefined>(
-    () => (tab === "TODOS" ? ["SALE_TRADE", "RENT", "DONATION"] : undefined),
+    () =>
+      tab === "TODOS"
+        ? ["SALE_TRADE", "RENT", "SERVICE", "DONATION", "RECOMMENDATION"]
+        : undefined,
     [tab]
   );
   const touchStart = useRef<{ x: number; y: number } | null>(null);
