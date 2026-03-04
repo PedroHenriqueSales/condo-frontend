@@ -63,7 +63,7 @@ export function AdDetail() {
   }, [id]);
 
   useEffect(() => {
-    if (!ad?.id || ad.type !== "RECOMMENDATION") {
+    if (!ad?.id) {
       setComments([]);
       return;
     }
@@ -72,7 +72,7 @@ export function AdDetail() {
       .then((res) => setComments(res.content))
       .catch(() => setComments([]))
       .finally(() => setLoadingComments(false));
-  }, [ad?.id, ad?.type]);
+  }, [ad?.id]);
 
   async function onContact() {
     if (!ad || !activeCommunityId) return;
@@ -142,7 +142,7 @@ export function AdDetail() {
 
   async function onSubmitComment(e: React.FormEvent) {
     e.preventDefault();
-    if (!ad || ad.type !== "RECOMMENDATION" || !commentText.trim()) return;
+    if (!ad || !commentText.trim()) return;
     setSubmittingComment(true);
     try {
       await AdsService.createComment(ad.id, { text: commentText.trim() });
@@ -157,7 +157,7 @@ export function AdDetail() {
   }
 
   async function onToggleCommentLike(commentId: number) {
-    if (!ad || ad.type !== "RECOMMENDATION") return;
+    if (!ad) return;
     try {
       await AdsService.toggleCommentLike(ad.id, commentId);
       setComments((prev) =>
@@ -176,7 +176,7 @@ export function AdDetail() {
   }
 
   async function onDeleteComment(commentId: number) {
-    if (!ad || ad.type !== "RECOMMENDATION") return;
+    if (!ad) return;
     if (!window.confirm("Excluir este comentário?")) return;
     setDeletingCommentId(commentId);
     try {
@@ -222,6 +222,7 @@ export function AdDetail() {
         {error ? <div className="text-sm text-danger">{error}</div> : null}
 
         {ad ? (
+          <>
           <Card>
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -372,46 +373,62 @@ export function AdDetail() {
                     <div className="text-sm text-muted">Nenhum comentário ainda.</div>
                   ) : (
                     <ul className="space-y-3">
-                      {comments.map((c) => (
-                        <li key={c.id} className="rounded-lg border border-border bg-surface/60 p-3 text-sm">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="font-medium text-text">{c.userName}</div>
-                            {c.userId === user?.id ? (
-                              <button
-                                type="button"
-                                onClick={() => onDeleteComment(c.id)}
-                                disabled={deletingCommentId === c.id}
-                                className="rounded p-1 text-muted transition hover:bg-danger/15 hover:text-danger disabled:opacity-50"
-                                title="Excluir comentário"
-                                aria-label="Excluir comentário"
-                              >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <line x1="18" y1="6" x2="6" y2="18" />
-                                  <line x1="6" y1="6" x2="18" y2="18" />
-                                </svg>
-                              </button>
-                            ) : null}
-                          </div>
-                          <div className="mt-1 whitespace-pre-wrap text-text">{c.text}</div>
-                          <div className="mt-2 flex items-center gap-3 text-xs text-muted">
-                            <span>{formatPublishedAt(c.createdAt)}</span>
-                            {c.userId !== user?.id ? (
-                              <button
-                                type="button"
-                                onClick={() => onToggleCommentLike(c.id)}
-                                className={
-                                  "flex items-center gap-1 font-medium transition " +
-                                  (c.currentUserLiked ? "text-primary-strong" : "hover:text-primary-strong")
-                                }
-                              >
-                                {c.currentUserLiked ? "✓ " : ""}Curtir{c.likeCount > 0 ? ` (${c.likeCount})` : ""}
-                              </button>
-                            ) : (
-                              <span>Curtir{c.likeCount > 0 ? ` (${c.likeCount})` : ""}</span>
-                            )}
-                          </div>
-                        </li>
-                      ))}
+                      {comments.map((c) => {
+                        const isAuthor = c.userId === ad.userId;
+                        return (
+                          <li key={c.id} className="rounded-lg border border-border bg-surface/60 p-3 text-sm">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex min-w-0 flex-wrap items-baseline gap-1.5">
+                                <span
+                                  className={
+                                    isAuthor
+                                      ? "font-semibold text-primary-strong"
+                                      : "font-medium text-text"
+                                  }
+                                >
+                                  {c.userName}
+                                </span>
+                                {isAuthor ? (
+                                  <span className="text-xs font-medium text-primary-strong">(autor do anúncio)</span>
+                                ) : null}
+                              </div>
+                              {c.userId === user?.id ? (
+                                <button
+                                  type="button"
+                                  onClick={() => onDeleteComment(c.id)}
+                                  disabled={deletingCommentId === c.id}
+                                  className="rounded p-1 text-muted transition hover:bg-danger/15 hover:text-danger disabled:opacity-50"
+                                  title="Excluir comentário"
+                                  aria-label="Excluir comentário"
+                                >
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                  </svg>
+                                </button>
+                              ) : null}
+                            </div>
+                            <div className="mt-1 whitespace-pre-wrap text-text">{c.text}</div>
+                            <div className="mt-2 flex items-center gap-3 text-xs text-muted">
+                              <span>{formatPublishedAt(c.createdAt)}</span>
+                              {c.userId !== user?.id ? (
+                                <button
+                                  type="button"
+                                  onClick={() => onToggleCommentLike(c.id)}
+                                  className={
+                                    "flex items-center gap-1 font-medium transition " +
+                                    (c.currentUserLiked ? "text-primary-strong" : "hover:text-primary-strong")
+                                  }
+                                >
+                                  {c.currentUserLiked ? "✓ " : ""}Curtir{c.likeCount > 0 ? ` (${c.likeCount})` : ""}
+                                </button>
+                              ) : (
+                                <span>Curtir{c.likeCount > 0 ? ` (${c.likeCount})` : ""}</span>
+                              )}
+                            </div>
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                 </div>
@@ -482,6 +499,96 @@ export function AdDetail() {
               </div>
             </div>
           </Card>
+
+          {ad.type !== "RECOMMENDATION" ? (
+            <Card className="mt-4">
+              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">Comentários</h3>
+              <form onSubmit={onSubmitComment} className="mb-4 flex flex-col gap-2">
+                <textarea
+                  className="min-h-[80px] w-full resize-y rounded-xl border border-border bg-surface px-3 py-2 text-sm shadow-soft placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+                  placeholder="Escreva um comentário..."
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  maxLength={500}
+                  rows={2}
+                />
+                <Button
+                  type="submit"
+                  disabled={submittingComment || !commentText.trim()}
+                  size="sm"
+                  variant="accent"
+                  className="w-fit self-end px-3 py-1.5 text-xs"
+                >
+                  {submittingComment ? "..." : "Enviar"}
+                </Button>
+              </form>
+              {loadingComments ? (
+                <div className="text-sm text-muted">Carregando comentários...</div>
+              ) : comments.length === 0 ? (
+                <div className="text-sm text-muted">Nenhum comentário ainda.</div>
+              ) : (
+                <ul className="space-y-3">
+                  {comments.map((c) => {
+                    const isAuthor = c.userId === ad.userId;
+                    return (
+                      <li key={c.id} className="rounded-lg border border-border bg-surface/60 p-3 text-sm">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex min-w-0 flex-wrap items-baseline gap-1.5">
+                            <span
+                              className={
+                                isAuthor
+                                  ? "font-semibold text-primary-strong"
+                                  : "font-medium text-text"
+                              }
+                            >
+                              {c.userName}
+                            </span>
+                            {isAuthor ? (
+                              <span className="text-xs font-medium text-primary-strong">(autor do anúncio)</span>
+                            ) : null}
+                          </div>
+                          {c.userId === user?.id ? (
+                            <button
+                              type="button"
+                              onClick={() => onDeleteComment(c.id)}
+                              disabled={deletingCommentId === c.id}
+                              className="rounded p-1 text-muted transition hover:bg-danger/15 hover:text-danger disabled:opacity-50"
+                              title="Excluir comentário"
+                              aria-label="Excluir comentário"
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                              </svg>
+                            </button>
+                          ) : null}
+                        </div>
+                        <div className="mt-1 whitespace-pre-wrap text-text">{c.text}</div>
+                        <div className="mt-2 flex items-center gap-3 text-xs text-muted">
+                          <span>{formatPublishedAt(c.createdAt)}</span>
+                          {c.userId !== user?.id ? (
+                            <button
+                              type="button"
+                              onClick={() => onToggleCommentLike(c.id)}
+                              className={
+                                "flex items-center gap-1 font-medium transition " +
+                                (c.currentUserLiked ? "text-primary-strong" : "hover:text-primary-strong")
+                              }
+                            >
+                              {c.currentUserLiked ? "✓ " : ""}Curtir{c.likeCount > 0 ? ` (${c.likeCount})` : ""}
+                            </button>
+                          ) : (
+                            <span>Curtir{c.likeCount > 0 ? ` (${c.likeCount})` : ""}</span>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </Card>
+          ) : null}
+          </>
         ) : null}
       </div>
 
