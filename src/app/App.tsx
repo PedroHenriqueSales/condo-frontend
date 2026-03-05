@@ -1,6 +1,7 @@
 import { BrowserRouter, useNavigate } from "react-router-dom";
 import { AuthProvider } from "../context/AuthContext";
 import { CondominiumProvider } from "../context/CondominiumContext";
+import { NotificationProvider } from "../context/NotificationContext";
 import { AppRoutes } from "./routes";
 import { useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
@@ -34,7 +35,9 @@ export function App() {
     <AuthProvider>
       <CondominiumProvider>
         <BrowserRouter>
-          <Bootstrap />
+          <NotificationProvider>
+            <Bootstrap />
+          </NotificationProvider>
         </BrowserRouter>
       </CondominiumProvider>
     </AuthProvider>

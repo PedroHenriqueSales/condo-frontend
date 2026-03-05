@@ -19,6 +19,7 @@ import { MyAds } from "../pages/MyAds";
 import { MyCommunities } from "../pages/MyCommunities";
 import { Register } from "../pages/Register";
 import { LegalPage } from "../pages/LegalPage";
+import { NotificationsPage } from "../pages/Notifications";
 import { ResetPassword } from "../pages/ResetPassword";
 import { VerifyEmail } from "../pages/VerifyEmail";
 import * as AuthService from "../services/auth.service";
@@ -154,6 +155,7 @@ export function AppRoutes() {
       <Route path="/communities/:id" element={<RequireAuth><RequireCommunity><CommunityDetail /></RequireCommunity></RequireAuth>} />
       <Route path="/communities/:id/admin" element={<RequireAuth><RequireCommunity><CommunityAdmin /></RequireCommunity></RequireAuth>} />
       <Route path="/my-account" element={<RequireAuth><RequireCommunity><MyAccount /></RequireCommunity></RequireAuth>} />
+      <Route path="/notifications" element={<RequireAuth><RequireCommunity><NotificationsPage /></RequireCommunity></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

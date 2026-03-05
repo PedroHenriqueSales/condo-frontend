@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
+import { useNotifications } from "../hooks/useNotifications";
 import logoNameDark from "../assets/logo-name-dark.png";
 import { Button } from "./Button";
 import * as CondominiumService from "../services/condominium.service";
@@ -12,8 +13,10 @@ type NavbarProps = { sticky?: boolean };
 export function Navbar({ sticky = true }: NavbarProps) {
   const nav = useNavigate();
   const { user, logout } = useAuth();
-  const { communities, activeCommunityId } = useCondominium();
+  const { communities, activeCommunityId, setActiveCommunityId } = useCondominium();
+  const { summary, isLoadingSummary, markAsRead, markAllAsRead, markAdsAsViewed } = useNotifications();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [adminCommunities, setAdminCommunities] = useState<CommunityResponse[] | null>(null);
 
   const activeCommunity = activeCommunityId
@@ -72,6 +75,178 @@ export function Navbar({ sticky = true }: NavbarProps) {
             {user ? (
               <span className="hidden text-xs text-white/90 sm:inline">{user.name}</span>
             ) : null}
+
+            {/* Ícone de notificações — z-20 para o dropdown ficar acima da barra de filtros do feed */}
+            {user ? (
+              <div className="relative z-20">
+                <button
+                  type="button"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white hover:bg-white/10"
+                  aria-label="Notificações"
+                  onClick={() => setNotificationsOpen((open) => !open)}
+                >
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.8}
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                    />
+                  </svg>
+                  {summary && (() => {
+                    const unreadCount = summary.totalUnread ?? 0;
+                    const newAdsCount = (summary.newAdsByCommunity ?? []).reduce((s, i) => s + i.newAdsCount, 0);
+                    const totalBadgeCount = unreadCount + newAdsCount;
+                    return totalBadgeCount > 0 ? (
+                      <span className="absolute -right-1 -top-1 inline-flex min-h-[1.1rem] min-w-[1.1rem] items-center justify-center rounded-full bg-red-500 px-1.5 text-[0.65rem] font-semibold leading-tight text-white shadow-sm">
+                        {totalBadgeCount > 99 ? "99+" : totalBadgeCount > 9 ? "9+" : totalBadgeCount}
+                      </span>
+                    ) : null;
+                  })()}
+                </button>
+
+                {/* Dropdown de notificações — z-50 para ficar acima da barra de filtros do feed */}
+                {notificationsOpen ? (
+                  <div
+                    className="absolute right-0 z-50 mt-2 w-80 max-w-[85vw] rounded-xl border border-white/15 bg-[#241b14] text-sm shadow-xl"
+                    role="dialog"
+                    aria-label="Notificações"
+                  >
+                    <div className="flex items-center justify-between border-b border-white/10 px-3 py-2">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-white/70">
+                        Notificações
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {summary && ((summary.totalUnread ?? 0) > 0 || (summary.newAdsByCommunity?.length ?? 0) > 0) ? (
+                          <button
+                            type="button"
+                            className="rounded-full px-2 py-0.5 text-[0.7rem] font-medium text-white/80 hover:bg-white/10"
+                            onClick={() => {
+                              if ((summary?.totalUnread ?? 0) > 0) {
+                                markAllAsRead().catch(() => {});
+                              }
+                              if ((summary?.newAdsByCommunity?.length ?? 0) > 0) {
+                                markAdsAsViewed().catch(() => {});
+                              }
+                            }}
+                          >
+                            Marcar tudo como lido
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className="max-h-80 overflow-y-auto px-3 py-2">
+                      {isLoadingSummary ? (
+                        <div className="py-4 text-xs text-white/60">Carregando notificações…</div>
+                      ) : !summary ? (
+                        <div className="py-4 text-xs text-white/60">
+                          Entre para ver suas notificações.
+                        </div>
+                      ) : (
+                        <>
+                          {/* Novos anúncios por comunidade */}
+                          {summary.newAdsByCommunity.length > 0 ? (
+                            <div className="mb-3 rounded-lg bg-white/5 p-2">
+                              <div className="mb-1 text-[0.7rem] font-semibold uppercase tracking-wide text-white/70">
+                                Novos anúncios nas suas comunidades
+                              </div>
+                              <ul className="space-y-1.5">
+                                {summary.newAdsByCommunity.map((item) => (
+                                  <li key={item.communityId}>
+                                    <button
+                                      type="button"
+                                      className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-xs text-white/90 hover:bg-white/10"
+                                      onClick={() => {
+                                        // Define a comunidade ativa para o feed mostrar os anúncios certos
+                                        if (item.communityId) {
+                                          setActiveCommunityId(item.communityId);
+                                        }
+                                        markAdsAsViewed(item.communityId).catch(() => {});
+                                        nav("/feed");
+                                        setNotificationsOpen(false);
+                                      }}
+                                    >
+                                      <span className="mr-2 line-clamp-2">
+                                        {item.communityName ?? "Comunidade"}
+                                      </span>
+                                      <span className="ml-auto rounded-full bg-white/15 px-2 py-0.5 text-[0.7rem] font-semibold">
+                                        {item.newAdsCount}
+                                      </span>
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ) : null}
+
+                          {/* Lista de notificações recentes */}
+                          {summary.recentNotifications.length === 0 ? (
+                            <div className="py-4 text-xs text-white/60">
+                              Nenhuma notificação por aqui.
+                            </div>
+                          ) : (
+                            <ul className="space-y-1.5">
+                              {summary.recentNotifications.map((n) => {
+                                const isUnread = !n.readAt;
+                                const goToAd = n.adId != null ? () => {
+                                  setNotificationsOpen(false);
+                                  nav(`/ads/${n.adId}`);
+                                } : undefined;
+                                return (
+                                  <li key={n.id}>
+                                    <button
+                                      type="button"
+                                      className={`flex w-full items-start gap-2 rounded-lg px-2 py-1.5 text-left text-xs hover:bg-white/10 ${
+                                        isUnread ? "bg-white/5" : ""
+                                      }`}
+                                      onClick={() => {
+                                        if (isUnread) {
+                                          markAsRead(n.id).catch(() => {});
+                                        }
+                                        if (goToAd) goToAd();
+                                      }}
+                                    >
+                                      <span
+                                        className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
+                                          isUnread ? "bg-emerald-400" : "bg-white/20"
+                                        }`}
+                                      />
+                                      <span className="flex-1">
+                                        <span className="block text-[0.72rem] font-semibold text-white">
+                                          {n.title}
+                                        </span>
+                                        {n.body ? (
+                                          <span className="mt-0.5 block text-[0.7rem] text-white/80">
+                                            {n.body}
+                                          </span>
+                                        ) : null}
+                                        {n.communityName ? (
+                                          <span className="mt-0.5 block text-[0.68rem] text-white/60">
+                                            {n.communityName}
+                                          </span>
+                                        ) : null}
+                                      </span>
+                                    </button>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
             <Button
               variant="ghost"
               size="sm"

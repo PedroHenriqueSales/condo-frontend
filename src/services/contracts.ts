@@ -202,3 +202,37 @@ export interface EventLogRequest {
   eventType: EventType;
   communityId?: number;
 }
+
+// Notifications
+export type NotificationType =
+  | "NEW_AD"
+  | "COMMENT_ON_MY_AD"
+  | "COMMENT_ON_PARTICIPATED_AD"
+  | "COMMUNITY_JOIN_REQUEST"
+  | "REPORT_ON_MY_AD";
+
+export interface NotificationResponse {
+  id: number;
+  type: NotificationType;
+  title: string;
+  body?: string;
+  adId?: number;
+  communityId?: number;
+  communityName?: string;
+  joinRequestId?: number;
+  reportId?: number;
+  createdAt: string;
+  readAt?: string | null;
+}
+
+export interface NewAdsByCommunitySummary {
+  communityId: number;
+  communityName?: string;
+  newAdsCount: number;
+}
+
+export interface NotificationSummary {
+  totalUnread: number;
+  recentNotifications: NotificationResponse[];
+  newAdsByCommunity: NewAdsByCommunitySummary[];
+}
