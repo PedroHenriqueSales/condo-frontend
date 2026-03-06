@@ -66,7 +66,9 @@ export function CommunityAdmin() {
           : Promise.resolve([]);
         return Promise.all([joinReqs, codeReqs]);
       })
-      .then(([joinReqs, codeReqs]) => {
+      .then((result) => {
+        if (result == null || !Array.isArray(result)) return;
+        const [joinReqs, codeReqs] = result;
         if (Array.isArray(joinReqs)) setRequests(joinReqs);
         if (Array.isArray(codeReqs)) setAccessCodeRequests(codeReqs);
       })
