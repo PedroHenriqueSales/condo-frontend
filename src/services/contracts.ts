@@ -48,6 +48,22 @@ export interface JoinRequestResponse {
   createdAt: string;
 }
 
+/** Comunidade na listagem "próximas" (sem código de acesso). */
+export interface NearbyCommunityResponse {
+  id: number;
+  name: string;
+  postalCode: string;
+}
+
+/** Pedido de exibição do código de acesso (para admin). */
+export interface AccessCodeRequestResponse {
+  id: number;
+  userId: number;
+  userName: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  createdAt: string;
+}
+
 // Auth
 export interface AuthResponse {
   token: string;
@@ -209,7 +225,9 @@ export type NotificationType =
   | "COMMENT_ON_MY_AD"
   | "COMMENT_ON_PARTICIPATED_AD"
   | "COMMUNITY_JOIN_REQUEST"
-  | "REPORT_ON_MY_AD";
+  | "REPORT_ON_MY_AD"
+  | "ACCESS_CODE_REQUEST"
+  | "ACCESS_CODE_GRANTED";
 
 export interface NotificationResponse {
   id: number;
@@ -221,6 +239,8 @@ export interface NotificationResponse {
   communityName?: string;
   joinRequestId?: number;
   reportId?: number;
+  /** Preenchido apenas para ACCESS_CODE_GRANTED; usar para redirecionar para /gate?code= */
+  accessCode?: string;
   createdAt: string;
   readAt?: string | null;
 }

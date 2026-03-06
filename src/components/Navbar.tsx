@@ -199,6 +199,14 @@ export function Navbar({ sticky = true }: NavbarProps) {
                                   setNotificationsOpen(false);
                                   nav(`/ads/${n.adId}`);
                                 } : undefined;
+                                const goToGateWithCode =
+                                  n.type === "ACCESS_CODE_GRANTED" && n.accessCode
+                                    ? () => {
+                                        setNotificationsOpen(false);
+                                        nav(`/gate?code=${encodeURIComponent(n.accessCode!)}`);
+                                      }
+                                    : undefined;
+                                const goTo = goToAd ?? goToGateWithCode;
                                 return (
                                   <li key={n.id}>
                                     <button
@@ -210,7 +218,7 @@ export function Navbar({ sticky = true }: NavbarProps) {
                                         if (isUnread) {
                                           markAsRead(n.id).catch(() => {});
                                         }
-                                        if (goToAd) goToAd();
+                                        if (goTo) goTo();
                                       }}
                                     >
                                       <span

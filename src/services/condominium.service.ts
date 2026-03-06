@@ -1,9 +1,11 @@
 import { api } from "./api";
 import type {
+  AccessCodeRequestResponse,
   CommunityResponse,
   CreateCommunityRequest,
   JoinCommunityRequest,
   JoinRequestResponse,
+  NearbyCommunityResponse,
   UpdateCommunityRequest,
 } from "./contracts";
 
@@ -15,6 +17,20 @@ export async function listMyCommunities(): Promise<CommunityResponse[]> {
 export async function listAdminCommunities(): Promise<CommunityResponse[]> {
   const { data } = await api.get<CommunityResponse[]>("/communities/admin");
   return data;
+}
+
+export async function getNearbyCommunities(
+  cep: string
+): Promise<NearbyCommunityResponse[]> {
+  const { data } = await api.get<NearbyCommunityResponse[]>(
+    "/communities/nearby",
+    { params: { cep } }
+  );
+  return data;
+}
+
+export async function requestAccessCode(communityId: number): Promise<void> {
+  await api.post(`/communities/${communityId}/request-access-code`);
 }
 
 export async function createCommunity(
@@ -47,6 +63,33 @@ export async function getCommunityJoinRequests(
     `/communities/${communityId}/admin/requests`
   );
   return data;
+}
+
+export async function getAccessCodeRequests(
+  communityId: number
+): Promise<AccessCodeRequestResponse[]> {
+  const { data } = await api.get<AccessCodeRequestResponse[]>(
+    `/communities/${communityId}/admin/access-code-requests`
+  );
+  return data;
+}
+
+export async function approveAccessCodeRequest(
+  communityId: number,
+  requestId: number
+): Promise<void> {
+  await api.post(
+    `/communities/${communityId}/admin/access-code-requests/${requestId}/approve`
+  );
+}
+
+export async function rejectAccessCodeRequest(
+  communityId: number,
+  requestId: number
+): Promise<void> {
+  await api.post(
+    `/communities/${communityId}/admin/access-code-requests/${requestId}/reject`
+  );
 }
 
 export async function approveJoinRequest(

@@ -8,7 +8,11 @@ import { ShareCommunityModal } from "../components/ShareCommunityModal";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
 import * as CondominiumService from "../services/condominium.service";
-import type { CommunityResponse, JoinRequestResponse } from "../services/contracts";
+import type {
+  AccessCodeRequestResponse,
+  CommunityResponse,
+  JoinRequestResponse,
+} from "../services/contracts";
 
 function formatPostalCode(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 8);
@@ -23,6 +27,7 @@ export function CommunityAdmin() {
   const { refresh, setActiveCommunityId } = useCondominium();
   const [community, setCommunity] = useState<CommunityResponse | null>(null);
   const [requests, setRequests] = useState<JoinRequestResponse[]>([]);
+  const [accessCodeRequests, setAccessCodeRequests] = useState<AccessCodeRequestResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionBusy, setActionBusy] = useState<string | null>(null);
@@ -53,13 +58,17 @@ export function CommunityAdmin() {
           return;
         }
         setCommunity(c);
-        if (c.isPrivate) {
-          return CondominiumService.getCommunityJoinRequests(communityId);
-        }
-        return [];
+        const joinReqs = c.isPrivate
+          ? CondominiumService.getCommunityJoinRequests(communityId)
+          : Promise.resolve([]);
+        const codeReqs = !c.isPrivate
+          ? CondominiumService.getAccessCodeRequests(communityId)
+          : Promise.resolve([]);
+        return Promise.all([joinReqs, codeReqs]);
       })
-      .then((reqs) => {
-        if (Array.isArray(reqs)) setRequests(reqs);
+      .then(([joinReqs, codeReqs]) => {
+        if (Array.isArray(joinReqs)) setRequests(joinReqs);
+        if (Array.isArray(codeReqs)) setAccessCodeRequests(codeReqs);
       })
       .catch((err) => {
         const msg = err?.response?.data?.error ?? "Falha ao carregar.";
@@ -80,6 +89,39 @@ export function CommunityAdmin() {
       setRequests(reqs);
     } catch {
       // ignore
+    }
+  }
+
+  async function loadAccessCodeRequests() {
+    try {
+      const reqs = await CondominiumService.getAccessCodeRequests(communityId);
+      setAccessCodeRequests(reqs);
+    } catch {
+      // ignore
+    }
+  }
+
+  async function handleApproveAccessCodeRequest(requestId: number) {
+    setActionBusy(`code-approve-${requestId}`);
+    try {
+      await CondominiumService.approveAccessCodeRequest(communityId, requestId);
+      await loadAccessCodeRequests();
+    } catch (err: unknown) {
+      setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "Falha ao aceitar.");
+    } finally {
+      setActionBusy(null);
+    }
+  }
+
+  async function handleRejectAccessCodeRequest(requestId: number) {
+    setActionBusy(`code-reject-${requestId}`);
+    try {
+      await CondominiumService.rejectAccessCodeRequest(communityId, requestId);
+      await loadAccessCodeRequests();
+    } catch (err: unknown) {
+      setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "Falha ao recusar.");
+    } finally {
+      setActionBusy(null);
     }
   }
 
@@ -525,6 +567,52 @@ export function CommunityAdmin() {
                           onClick={() => handleReject(r.id)}
                         >
                           {actionBusy === `reject-${r.id}` ? "Rejeitando..." : "Rejeitar"}
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          ) : null}
+
+          {!community.isPrivate ? (
+            <Card>
+              <h2 className="mb-3 text-base font-semibold text-text">Solicitações de código</h2>
+              <p className="mb-3 text-xs text-muted">
+                Usuários que solicitaram o código de acesso (comunidades próximas). Ao aceitar, eles recebem uma notificação com o código.
+              </p>
+              {accessCodeRequests.length === 0 ? (
+                <p className="text-sm text-muted">Nenhuma solicitação pendente.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {accessCodeRequests.map((r) => (
+                    <li
+                      key={r.id}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface/30 p-3"
+                    >
+                      <div>
+                        <span className="font-medium">{r.userName}</span>
+                        <span className="ml-2 text-xs text-muted">
+                          {new Date(r.createdAt).toLocaleDateString("pt-BR")}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          disabled={actionBusy !== null}
+                          onClick={() => handleApproveAccessCodeRequest(r.id)}
+                        >
+                          {actionBusy === `code-approve-${r.id}` ? "Enviando..." : "Exibir código"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={actionBusy !== null}
+                          onClick={() => handleRejectAccessCodeRequest(r.id)}
+                        >
+                          {actionBusy === `code-reject-${r.id}` ? "Recusando..." : "Recusar"}
                         </Button>
                       </div>
                     </li>

@@ -142,13 +142,18 @@ export function NotificationsPage() {
             {page.content.map((n) => {
               const isUnread = !n.readAt;
               const goToAd = n.adId != null ? () => nav(`/ads/${n.adId}`) : undefined;
+              const goToGateWithCode =
+                n.type === "ACCESS_CODE_GRANTED" && n.accessCode
+                  ? () => nav(`/gate?code=${encodeURIComponent(n.accessCode!)}`)
+                  : undefined;
+              const goTo = goToAd ?? goToGateWithCode;
               return (
                 <li key={n.id}>
                   <button
                     type="button"
                     onClick={() => {
                       handleMarkAsRead(n);
-                      if (goToAd) goToAd();
+                      if (goTo) goTo();
                     }}
                     className={`flex w-full items-start gap-3 rounded-xl border px-3 py-2 text-left text-sm transition ${
                       isUnread
