@@ -18,6 +18,8 @@ export function CreateCommunity() {
   const [longitude, setLongitude] = useState<number | null>(null);
   const [locationDenied, setLocationDenied] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [locationObtainedFromBrowser, setLocationObtainedFromBrowser] = useState(false);
+  const [showMapPicker, setShowMapPicker] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -40,9 +42,12 @@ export function CreateCommunity() {
       setLatitude(position.coords.latitude);
       setLongitude(position.coords.longitude);
       setLocationDenied(false);
+      setLocationObtainedFromBrowser(true);
+      setShowMapPicker(true);
     } catch {
       setError("Não foi possível usar sua localização. Defina no mapa abaixo.");
       setLocationDenied(true);
+      setShowMapPicker(true);
     } finally {
       setLocationLoading(false);
     }
@@ -51,6 +56,7 @@ export function CreateCommunity() {
   function onMapPositionChange(lat: number, lng: number) {
     setLatitude(lat);
     setLongitude(lng);
+    setLocationObtainedFromBrowser(false);
   }
 
   async function onSubmit(e: FormEvent) {
@@ -137,26 +143,50 @@ export function CreateCommunity() {
 
             <div>
               <div className="mb-2 text-sm font-medium text-text">Localização da comunidade</div>
-              <p className="mb-2 text-xs text-muted">
-                Use sua localização ou arraste o pin no mapa para definir.
+              <p className="mb-3 text-xs text-muted">
+                Use sua localização atual ou marque no mapa.
               </p>
               <Button
                 type="button"
-                variant="ghost"
-                className="mb-3 w-full"
+                variant="primary"
+                className="mb-2 w-full"
                 disabled={locationLoading}
                 onClick={onUseLocation}
               >
                 {locationLoading ? "Obtendo localização..." : "Usar minha localização"}
               </Button>
-              {locationDenied && (
-                <LocationMapPicker
-                  initialPosition={
-                    latitude != null && longitude != null ? [latitude, longitude] : null
-                  }
-                  onPositionChange={onMapPositionChange}
-                  height={280}
-                />
+              <div className="mb-3 flex items-center gap-2">
+                <span className="text-xs text-muted">ou</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-text"
+                  onClick={() => setShowMapPicker(true)}
+                >
+                  Marcar no mapa
+                </Button>
+              </div>
+              {locationObtainedFromBrowser && latitude != null && longitude != null && (
+                <p className="mb-2 text-sm font-medium text-emerald-600 dark:text-emerald-400" role="status">
+                  Localização obtida com sucesso. Confira no mapa abaixo.
+                </p>
+              )}
+              {showMapPicker && (
+                <>
+                  {locationDenied && (
+                    <p className="mb-2 text-xs text-muted">
+                      Defina a localização no mapa (arraste o pin ou clique).
+                    </p>
+                  )}
+                  <LocationMapPicker
+                    initialPosition={
+                      latitude != null && longitude != null ? [latitude, longitude] : null
+                    }
+                    onPositionChange={onMapPositionChange}
+                    height={280}
+                  />
+                </>
               )}
             </div>
 

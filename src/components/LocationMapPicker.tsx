@@ -89,6 +89,12 @@ export function LocationMapPicker({
     onPositionChange(lat, lng);
   }, []);
 
+  useEffect(() => {
+    if (initialPosition != null) {
+      setMarkerPosition(initialPosition);
+    }
+  }, [initialPosition?.[0], initialPosition?.[1]]);
+
   return (
     <div className="overflow-hidden rounded-xl border border-border" style={{ height }}>
       <MapContainer

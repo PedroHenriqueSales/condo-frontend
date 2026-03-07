@@ -49,6 +49,8 @@ export function CondominiumGate() {
   const [requestedCommunityIds, setRequestedCommunityIds] = useState<Set<number>>(new Set());
   const [requestBusy, setRequestBusy] = useState<number | null>(null);
   const [hasSearchedNearby, setHasSearchedNearby] = useState(false);
+  const [locationObtainedFromBrowser, setLocationObtainedFromBrowser] = useState(false);
+  const [showMapPicker, setShowMapPicker] = useState(false);
 
   useEffect(() => {
     if (codeFromUrl) setAccessCode(codeFromUrl);
@@ -121,6 +123,8 @@ export function CondominiumGate() {
       });
       setUserLat(position.coords.latitude);
       setUserLng(position.coords.longitude);
+      setLocationObtainedFromBrowser(true);
+      setShowMapPicker(true);
     } catch (err: unknown) {
       const code = err && typeof err === "object" && "code" in err ? (err as { code: number }).code : null;
       if (code === 1) {
@@ -129,6 +133,7 @@ export function CondominiumGate() {
         setNearbyError("Não foi possível usar sua localização. Defina no mapa abaixo.");
       }
       setLocationDenied(true);
+      setShowMapPicker(true);
     } finally {
       setNearbyLocationLoading(false);
     }
@@ -137,6 +142,7 @@ export function CondominiumGate() {
   function onMapPositionChange(lat: number, lng: number) {
     setUserLat(lat);
     setUserLng(lng);
+    setLocationObtainedFromBrowser(false);
   }
 
   async function onSearchNearby(e: FormEvent) {
@@ -237,31 +243,50 @@ export function CondominiumGate() {
           <Card>
             <div className="mb-3 text-sm font-semibold">Comunidades próximas a você</div>
             <p className="mb-3 text-xs text-muted">
-              Encontre comunidades perto de você e solicite o código. O administrador pode liberar o acesso.
+              Use sua localização atual ou marque no mapa; depois escolha o raio e busque.
             </p>
-            <div className="space-y-3">
+            <Button
+              type="button"
+              variant="primary"
+              className="mb-2 w-full"
+              disabled={nearbyLoading || nearbyLocationLoading}
+              onClick={onUseLocation}
+            >
+              {nearbyLocationLoading ? "Obtendo localização..." : "Usar minha localização"}
+            </Button>
+            <div className="mb-3 flex items-center gap-2">
+              <span className="text-xs text-muted">ou</span>
               <Button
                 type="button"
-                variant="primary"
-                className="w-full"
-                disabled={nearbyLoading || nearbyLocationLoading}
-                onClick={onUseLocation}
+                variant="ghost"
+                size="sm"
+                className="text-text"
+                onClick={() => setShowMapPicker(true)}
               >
-                {nearbyLocationLoading ? "Obtendo localização..." : "Usar minha localização"}
+                Marcar no mapa
               </Button>
-              {locationDenied && (
-                <>
-                  <p className="text-xs text-muted">Defina sua localização no mapa (arraste o pin ou clique).</p>
-                  <LocationMapPicker
-                    initialPosition={
-                      userLat != null && userLng != null ? [userLat, userLng] : null
-                    }
-                    onPositionChange={onMapPositionChange}
-                    height={220}
-                  />
-                </>
-              )}
             </div>
+            {locationObtainedFromBrowser && userLat != null && userLng != null && (
+              <p className="mb-2 text-sm font-medium text-emerald-600 dark:text-emerald-400" role="status">
+                Localização obtida com sucesso. Confira no mapa abaixo.
+              </p>
+            )}
+            {showMapPicker && (
+              <>
+                {locationDenied && (
+                  <p className="mb-2 text-xs text-muted">
+                    Defina sua localização no mapa (arraste o pin ou clique).
+                  </p>
+                )}
+                <LocationMapPicker
+                  initialPosition={
+                    userLat != null && userLng != null ? [userLat, userLng] : null
+                  }
+                  onPositionChange={onMapPositionChange}
+                  height={220}
+                />
+              </>
+            )}
             {hasUserPosition && (
               <form className="mt-3 space-y-3" onSubmit={onSearchNearby}>
                 <div>
