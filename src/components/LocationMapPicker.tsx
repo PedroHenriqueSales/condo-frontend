@@ -96,7 +96,7 @@ export function LocationMapPicker({
   }, [initialPosition?.[0], initialPosition?.[1]]);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border" style={{ height }}>
+    <div className="relative z-0 isolate overflow-hidden rounded-xl border border-border" style={{ height }}>
       <MapContainer
         center={markerPosition}
         zoom={13}

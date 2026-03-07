@@ -1,6 +1,6 @@
 # Política de Privacidade — Aqui
 
-**Última atualização:** 01/03/2026
+**Última atualização:** 07/03/2026
 
 ## 1. Controlador e contato
 
@@ -16,6 +16,7 @@ O Aqui trata os seguintes dados pessoais:
 | Nome, e-mail e senha (esta armazenada de forma criptografada) | Criação e gestão da conta, autenticação |
 | WhatsApp e endereço (opcionais) | Exibição em anúncios e contato entre usuários |
 | Associação a condomínios (códigos de acesso utilizados) | Acesso ao feed de cada comunidade |
+| **Localização geográfica (latitude e longitude)** | **Definição da localização da comunidade (criação/edição) e busca por “Comunidades próximas a você”; obtida somente quando o usuário escolhe “Usar minha localização” ou “Marcar no mapa”. Não utilizamos localização para rastreamento contínuo.** |
 | Conteúdo dos anúncios (título, descrição, preço, fotos, contato indicado) | Exibição no feed e contato |
 | Denúncias (reports) | Moderação e segurança |
 | Logs de eventos (login, cadastro, criação de anúncio, clique em contato, denúncia) | Métricas e segurança |
@@ -23,7 +24,9 @@ O Aqui trata os seguintes dados pessoais:
 
 ## 3. Bases legais e finalidades
 
-Tratamos seus dados com base em **execução de contrato** (prestação do serviço de plataforma de anúncios) e, quando aplicável, em seu **consentimento** (ao aceitar os Termos de Uso e esta Política de Privacidade no cadastro). Logs de eventos podem ser tratados com base em **legítimo interesse** para segurança e métricas, sempre em conformidade com a LGPD.
+Tratamos seus dados com base em **execução de contrato** (prestação do serviço de plataforma de anúncios) e, quando aplicável, em seu **consentimento** (ao aceitar os Termos de Uso e esta Política de Privacidade no cadastro). **O tratamento de localização geográfica baseia-se no seu consentimento**, dado no momento em que você utiliza “Usar minha localização” ou “Marcar no mapa” nas funcionalidades de criação/edição de comunidade ou de busca por comunidades próximas. Logs de eventos podem ser tratados com base em **legítimo interesse** para segurança e métricas, sempre em conformidade com a LGPD.
+
+**Uso da localização em detalhe:** (i) **Comunidades:** ao criar ou editar uma comunidade, você pode informar a localização (pelo navegador ou marcando no mapa); essas coordenadas ficam associadas à comunidade e são usadas apenas para permitir que outros usuários encontrem “comunidades próximas” por raio de distância. (ii) **Comunidades próximas:** ao buscar comunidades próximas, você pode informar sua localização (pelo navegador ou no mapa) e um raio em km; essa localização é utilizada somente para calcular a distância e exibir resultados naquela busca — não é armazenada para rastreamento. Você pode revogar a permissão de geolocalização no navegador ou dispositivo a qualquer momento.
 
 ## 4. Retenção
 

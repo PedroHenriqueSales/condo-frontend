@@ -1,6 +1,6 @@
 # Termos de Uso — Aqui
 
-**Última atualização:** 01/03/2026
+**Última atualização:** 07/03/2026
 
 ## 1. Identificação do responsável
 
@@ -12,11 +12,14 @@ E-mail de contato do responsável pela plataforma Aqui contato@aquiapp.com.br
 
 O **Aqui** é uma plataforma que permite a moradores de condomínio criar, visualizar e gerenciar anúncios de venda, aluguel e serviços dentro de suas comunidades. O serviço é oferecido mediante cadastro, autenticação e associação a um ou mais condomínios por código de acesso.
 
+O Aqui utiliza **localização geográfica** para melhorar a experiência: (i) na **criação ou edição de comunidades**, a localização da comunidade pode ser definida pelo usuário mediante “Usar minha localização” (com permissão do navegador) ou “Marcar no mapa”; (ii) na funcionalidade **“Comunidades próximas a você”**, o usuário pode informar sua localização (pelo navegador ou no mapa) e escolher um raio de busca para encontrar comunidades públicas próximas e solicitar código de acesso. O uso de localização é opcional e depende da sua escolha ao utilizar essas funcionalidades. Os dados de localização são tratados conforme a [Política de Privacidade](/politica-de-privacidade).
+
 ## 3. Condições de uso
 
 - É necessário ter idade mínima para aceitar contratos conforme a legislação aplicável (em geral, 18 anos ou emancipação).
 - O usuário declara que as informações fornecidas no cadastro são verdadeiras e se compromete a mantê-las atualizadas.
 - O uso do Aqui é pessoal e não comercial, salvo para a finalidade de publicar e responder a anúncios conforme as funcionalidades oferecidas.
+- Ao utilizar as funcionalidades que envolvem localização (“Usar minha localização” ou “Marcar no mapa”), o usuário consente no tratamento da localização nos termos da Política de Privacidade. A permissão de geolocalização do navegador pode ser revogada a qualquer momento nas configurações do dispositivo ou do navegador.
 
 ## 4. Regras de conduta
 
