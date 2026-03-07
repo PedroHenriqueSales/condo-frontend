@@ -20,11 +20,13 @@ export async function listAdminCommunities(): Promise<CommunityResponse[]> {
 }
 
 export async function getNearbyCommunities(
-  cep: string
+  lat: number,
+  lng: number,
+  radiusKm: number
 ): Promise<NearbyCommunityResponse[]> {
   const { data } = await api.get<NearbyCommunityResponse[]>(
     "/communities/nearby",
-    { params: { cep } }
+    { params: { lat, lng, radiusKm } }
   );
   return data;
 }

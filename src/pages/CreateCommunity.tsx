@@ -4,36 +4,60 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
+import { LocationMapPicker } from "../components/LocationMapPicker";
 import { Navbar } from "../components/Navbar";
 import { useCondominium } from "../hooks/useCondominium";
 import * as CondominiumService from "../services/condominium.service";
-
-function formatPostalCode(value: string): string {
-  const digits = value.replace(/\D/g, "").slice(0, 8);
-  if (digits.length <= 5) return digits;
-  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
-}
 
 export function CreateCommunity() {
   const nav = useNavigate();
   const { refresh, setActiveCommunityId } = useCondominium();
   const [name, setName] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
-  const [postalCode, setPostalCode] = useState("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [locationDenied, setLocationDenied] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  function handlePostalCodeChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const v = e.target.value;
-    setPostalCode(formatPostalCode(v));
+  async function onUseLocation() {
+    if (!navigator.geolocation) {
+      setError("Seu navegador não suporta geolocalização. Defina a localização no mapa.");
+      setLocationDenied(true);
+      return;
+    }
+    setError(null);
+    setLocationLoading(true);
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 60000,
+        });
+      });
+      setLatitude(position.coords.latitude);
+      setLongitude(position.coords.longitude);
+      setLocationDenied(false);
+    } catch {
+      setError("Não foi possível usar sua localização. Defina no mapa abaixo.");
+      setLocationDenied(true);
+    } finally {
+      setLocationLoading(false);
+    }
+  }
+
+  function onMapPositionChange(lat: number, lng: number) {
+    setLatitude(lat);
+    setLongitude(lng);
   }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    const normalizedCep = postalCode.replace(/\D/g, "");
-    if (normalizedCep.length !== 8) {
-      setError("CEP deve ter 8 dígitos.");
+    if (latitude == null || longitude == null) {
+      setError("Defina a localização da comunidade (use sua localização ou o mapa).");
       return;
     }
     setBusy(true);
@@ -41,17 +65,21 @@ export function CreateCommunity() {
       const c = await CondominiumService.createCommunity({
         name: name.trim(),
         isPrivate,
-        postalCode: normalizedCep,
+        latitude,
+        longitude,
       });
       await refresh();
       setActiveCommunityId(c.id);
       nav("/communities", { replace: true });
-    } catch (err: any) {
-      setError(err?.response?.data?.error ?? "Falha ao criar comunidade.");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setError(msg ?? "Falha ao criar comunidade.");
     } finally {
       setBusy(false);
     }
   }
+
+  const canSubmit = name.trim() && latitude != null && longitude != null;
 
   return (
     <div className="min-h-screen bg-bg pb-24">
@@ -107,21 +135,37 @@ export function CreateCommunity() {
               </p>
             </div>
 
-            <Input
-              label="CEP (localização)"
-              placeholder="00000-000"
-              value={postalCode}
-              onChange={handlePostalCodeChange}
-              maxLength={9}
-              required
-            />
+            <div>
+              <div className="mb-2 text-sm font-medium text-text">Localização da comunidade</div>
+              <p className="mb-2 text-xs text-muted">
+                Use sua localização ou arraste o pin no mapa para definir.
+              </p>
+              <Button
+                type="button"
+                variant="ghost"
+                className="mb-3 w-full"
+                disabled={locationLoading}
+                onClick={onUseLocation}
+              >
+                {locationLoading ? "Obtendo localização..." : "Usar minha localização"}
+              </Button>
+              {locationDenied && (
+                <LocationMapPicker
+                  initialPosition={
+                    latitude != null && longitude != null ? [latitude, longitude] : null
+                  }
+                  onPositionChange={onMapPositionChange}
+                  height={280}
+                />
+              )}
+            </div>
 
             {error ? (
               <p className="text-sm text-danger">{error}</p>
             ) : null}
 
             <div className="flex gap-3">
-              <Button type="submit" disabled={busy} className="flex-1">
+              <Button type="submit" disabled={busy || !canSubmit} className="flex-1">
                 {busy ? "Criando..." : "Criar comunidade"}
               </Button>
               <Link to="/gate">

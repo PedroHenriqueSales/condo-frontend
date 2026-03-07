@@ -146,7 +146,11 @@ export function NotificationsPage() {
                 n.type === "ACCESS_CODE_GRANTED" && n.accessCode
                   ? () => nav(`/gate?code=${encodeURIComponent(n.accessCode!)}`)
                   : undefined;
-              const goTo = goToAd ?? goToGateWithCode;
+              const goToCommunityAdmin =
+                n.type === "ACCESS_CODE_REQUEST" && n.communityId != null
+                  ? () => nav(`/communities/${n.communityId}/admin`)
+                  : undefined;
+              const goTo = goToAd ?? goToGateWithCode ?? goToCommunityAdmin;
               return (
                 <li key={n.id}>
                   <button

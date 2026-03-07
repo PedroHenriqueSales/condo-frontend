@@ -4,12 +4,15 @@ import { useNavigate, useSearchParams, useLocation, Link } from "react-router-do
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
+import { LocationMapPicker } from "../components/LocationMapPicker";
 import { Navbar } from "../components/Navbar";
 import { BottomNav } from "../components/BottomNav";
 import { useAuth } from "../hooks/useAuth";
 import { useCondominium } from "../hooks/useCondominium";
 import * as CondominiumService from "../services/condominium.service";
 import type { NearbyCommunityResponse } from "../services/contracts";
+
+const RADIUS_OPTIONS_KM = [1, 2, 5, 10, 15] as const;
 
 export function CondominiumGate() {
   const nav = useNavigate();
@@ -35,7 +38,10 @@ export function CondominiumGate() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState<"join" | null>(null);
 
-  const [cepInput, setCepInput] = useState("");
+  const [userLat, setUserLat] = useState<number | null>(null);
+  const [userLng, setUserLng] = useState<number | null>(null);
+  const [locationDenied, setLocationDenied] = useState(false);
+  const [radiusKm, setRadiusKm] = useState<number>(5);
   const [nearbyList, setNearbyList] = useState<NearbyCommunityResponse[]>([]);
   const [nearbyLoading, setNearbyLoading] = useState(false);
   const [nearbyLocationLoading, setNearbyLocationLoading] = useState(false);
@@ -43,7 +49,6 @@ export function CondominiumGate() {
   const [requestedCommunityIds, setRequestedCommunityIds] = useState<Set<number>>(new Set());
   const [requestBusy, setRequestBusy] = useState<number | null>(null);
   const [hasSearchedNearby, setHasSearchedNearby] = useState(false);
-  const [showCepFallback, setShowCepFallback] = useState(false);
 
   useEffect(() => {
     if (codeFromUrl) setAccessCode(codeFromUrl);
@@ -95,41 +100,17 @@ export function CondominiumGate() {
   }
 
   const hasCommunities = communities.length > 0;
-
-  /** Obtém CEP a partir de coordenadas (Nominatim). Retorna só dígitos ou null. */
-  async function getCepFromCoords(lat: number, lon: number): Promise<string | null> {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`,
-        { headers: { Accept: "application/json", "User-Agent": "CondApp/1.0 (comunidades proximas)" } }
-      );
-      if (!res.ok) return null;
-      const data = (await res.json()) as { address?: { postcode?: string } };
-      const postcode = data?.address?.postcode;
-      if (!postcode || typeof postcode !== "string") return null;
-      const digits = postcode.replace(/\D/g, "");
-      return digits.length >= 5 ? digits.slice(0, 8) : null;
-    } catch {
-      return null;
-    }
-  }
-
-  async function fetchNearbyByCep(cep: string) {
-    setNearbyError(null);
-    setHasSearchedNearby(true);
-    const list = await CondominiumService.getNearbyCommunities(cep);
-    setNearbyList(list);
-  }
+  const hasUserPosition = userLat != null && userLng != null;
 
   async function onUseLocation() {
     if (!navigator.geolocation) {
-      setNearbyError("Seu navegador não suporta geolocalização. Informe seu CEP abaixo.");
-      setShowCepFallback(true);
+      setNearbyError("Seu navegador não suporta geolocalização. Defina sua localização no mapa.");
+      setLocationDenied(true);
       return;
     }
     setNearbyError(null);
     setNearbyLocationLoading(true);
-    setShowCepFallback(false);
+    setLocationDenied(false);
     try {
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
@@ -138,40 +119,35 @@ export function CondominiumGate() {
           maximumAge: 300000,
         });
       });
-      const cep = await getCepFromCoords(position.coords.latitude, position.coords.longitude);
-      if (cep) {
-        setCepInput(cep.length === 8 ? cep.replace(/(\d{5})(\d{3})/, "$1-$2") : cep);
-        setNearbyLoading(true);
-        await fetchNearbyByCep(cep);
-      } else {
-        setNearbyError("Não foi possível obter o CEP da sua localização. Informe seu CEP abaixo.");
-        setShowCepFallback(true);
-      }
+      setUserLat(position.coords.latitude);
+      setUserLng(position.coords.longitude);
     } catch (err: unknown) {
       const code = err && typeof err === "object" && "code" in err ? (err as { code: number }).code : null;
       if (code === 1) {
-        setNearbyError("Localização não autorizada. Informe seu CEP abaixo para buscar.");
+        setNearbyError("Localização não autorizada. Defina sua localização no mapa abaixo.");
       } else {
-        setNearbyError("Não foi possível usar sua localização. Informe seu CEP abaixo.");
+        setNearbyError("Não foi possível usar sua localização. Defina no mapa abaixo.");
       }
-      setShowCepFallback(true);
+      setLocationDenied(true);
     } finally {
       setNearbyLocationLoading(false);
-      setNearbyLoading(false);
     }
+  }
+
+  function onMapPositionChange(lat: number, lng: number) {
+    setUserLat(lat);
+    setUserLng(lng);
   }
 
   async function onSearchNearby(e: FormEvent) {
     e.preventDefault();
-    const cep = cepInput.replace(/\D/g, "").trim();
-    if (cep.length < 5) {
-      setNearbyError("Informe um CEP válido (mínimo 5 dígitos).");
-      return;
-    }
+    if (userLat == null || userLng == null) return;
     setNearbyError(null);
     setNearbyLoading(true);
+    setHasSearchedNearby(true);
     try {
-      await fetchNearbyByCep(cep);
+      const list = await CondominiumService.getNearbyCommunities(userLat, userLng, radiusKm);
+      setNearbyList(list);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setNearbyError(msg ?? "Não foi possível buscar comunidades próximas.");
@@ -199,7 +175,7 @@ export function CondominiumGate() {
 
   return (
     <div className="min-h-screen bg-bg pb-24">
-      {hasCommunities ? <Navbar /> : null}
+      <Navbar />
       <div className="mx-auto max-w-3xl px-4 py-10">
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
@@ -273,55 +249,89 @@ export function CondominiumGate() {
               >
                 {nearbyLocationLoading ? "Obtendo localização..." : "Usar minha localização"}
               </Button>
-              {(showCepFallback || nearbyError) ? (
-                <p className="text-xs text-muted">Ou informe seu CEP abaixo.</p>
-              ) : null}
+              {locationDenied && (
+                <>
+                  <p className="text-xs text-muted">Defina sua localização no mapa (arraste o pin ou clique).</p>
+                  <LocationMapPicker
+                    initialPosition={
+                      userLat != null && userLng != null ? [userLat, userLng] : null
+                    }
+                    onPositionChange={onMapPositionChange}
+                    height={220}
+                  />
+                </>
+              )}
             </div>
-            <form className="mt-3 space-y-3" onSubmit={onSearchNearby}>
-              <Input
-                label={showCepFallback || nearbyError ? "CEP" : "Ou informe seu CEP"}
-                placeholder="00000-000"
-                value={cepInput}
-                onChange={(e) => setCepInput(e.target.value.replace(/\D/g, "").slice(0, 8))}
-                maxLength={8}
-              />
-              <Button type="submit" variant="ghost" className="w-full" disabled={nearbyLoading || nearbyLocationLoading}>
-                {nearbyLoading ? "Buscando..." : "Buscar por CEP"}
-              </Button>
-            </form>
+            {hasUserPosition && (
+              <form className="mt-3 space-y-3" onSubmit={onSearchNearby}>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text">Raio de busca</label>
+                  <div className="flex flex-wrap gap-2">
+                    {RADIUS_OPTIONS_KM.map((km) => (
+                      <button
+                        key={km}
+                        type="button"
+                        onClick={() => setRadiusKm(km)}
+                        className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
+                          radiusKm === km
+                            ? "border-primary bg-primary/15 text-primary-strong"
+                            : "border-border bg-surface/50 text-text hover:bg-surface"
+                        }`}
+                      >
+                        {km} km
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <Button
+                  type="submit"
+                  variant="ghost"
+                  className="w-full"
+                  disabled={nearbyLoading || nearbyLocationLoading}
+                >
+                  {nearbyLoading ? "Buscando..." : "Buscar comunidades"}
+                </Button>
+              </form>
+            )}
             {nearbyError ? (
               <p className="mt-2 text-xs text-danger">{nearbyError}</p>
             ) : null}
-              {nearbyList.length > 0 ? (
-                <ul className="mt-4 space-y-2">
-                  {nearbyList.map((c) => {
-                    const requested = requestedCommunityIds.has(c.id);
-                    const isBusy = requestBusy === c.id;
-                    return (
-                      <li
-                        key={c.id}
-                        className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-black/10 bg-black/5 px-3 py-2 dark:border-white/10 dark:bg-white/5"
+            {nearbyList.length > 0 ? (
+              <ul className="mt-4 space-y-2">
+                {nearbyList.map((c) => {
+                  const requested = requestedCommunityIds.has(c.id);
+                  const isBusy = requestBusy === c.id;
+                  return (
+                    <li
+                      key={c.id}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-black/10 bg-black/5 px-3 py-2 dark:border-white/10 dark:bg-white/5"
+                    >
+                      <div>
+                        <span className="text-sm font-medium">{c.name}</span>
+                        {c.distanceKm != null && (
+                          <span className="ml-2 text-xs text-muted">
+                            {c.distanceKm < 1
+                              ? `${Math.round(c.distanceKm * 1000)} m`
+                              : `${c.distanceKm.toFixed(1).replace(".", ",")} km`}
+                          </span>
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        disabled={requested || isBusy}
+                        onClick={() => onRequestAccessCode(c.id)}
                       >
-                        <div>
-                          <span className="text-sm font-medium">{c.name}</span>
-                          <span className="ml-2 text-xs text-muted">{c.postalCode.replace(/(\d{5})(\d{3})/, "$1-$2")}</span>
-                        </div>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          disabled={requested || isBusy}
-                          onClick={() => onRequestAccessCode(c.id)}
-                        >
-                          {requested ? "Solicitação enviada" : isBusy ? "Enviando..." : "Solicitar código"}
-                        </Button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : hasSearchedNearby && !nearbyLoading && nearbyList.length === 0 && !nearbyError ? (
-                <p className="mt-2 text-xs text-muted">Nenhuma comunidade pública próxima encontrada.</p>
-              ) : null}
+                        {requested ? "Solicitação enviada" : isBusy ? "Enviando..." : "Solicitar código"}
+                      </Button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : hasSearchedNearby && !nearbyLoading && nearbyList.length === 0 && !nearbyError ? (
+              <p className="mt-2 text-xs text-muted">Nenhuma comunidade pública neste raio.</p>
+            ) : null}
           </Card>
 
           <Card>

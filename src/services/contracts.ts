@@ -5,6 +5,8 @@ export interface CommunityResponse {
   accessCode: string;
   isPrivate?: boolean;
   postalCode?: string;
+  latitude?: number;
+  longitude?: number;
   createdAt: string;
   createdById: number;
   createdByName?: string;
@@ -27,13 +29,15 @@ export interface MemberSummary {
 export interface CreateCommunityRequest {
   name: string;
   isPrivate: boolean;
-  postalCode: string;
+  latitude: number;
+  longitude: number;
 }
 
 export interface UpdateCommunityRequest {
   name: string;
   isPrivate?: boolean;
-  postalCode?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface JoinCommunityRequest {
@@ -52,7 +56,10 @@ export interface JoinRequestResponse {
 export interface NearbyCommunityResponse {
   id: number;
   name: string;
-  postalCode: string;
+  latitude?: number;
+  longitude?: number;
+  /** Distância em km do ponto de busca. */
+  distanceKm?: number;
 }
 
 /** Pedido de exibição do código de acesso (para admin). */

@@ -121,10 +121,10 @@ export function CommunityDetail() {
                   <dd className="text-text">{community.isPrivate ? "Privada" : "Aberta"}</dd>
                 </div>
               )}
-              {community.postalCode && (
+              {community.latitude != null && community.longitude != null && (
                 <div>
-                  <dt className="text-muted">CEP</dt>
-                  <dd className="text-text">{community.postalCode}</dd>
+                  <dt className="text-muted">Localização</dt>
+                  <dd className="text-text">Definida (usada na busca por proximidade)</dd>
                 </div>
               )}
               {community.createdByName != null && (

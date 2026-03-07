@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
+import { LocationMapPicker } from "../components/LocationMapPicker";
 import { Navbar } from "../components/Navbar";
 import { BottomNav } from "../components/BottomNav";
 import { ShareCommunityModal } from "../components/ShareCommunityModal";
@@ -13,12 +14,6 @@ import type {
   CommunityResponse,
   JoinRequestResponse,
 } from "../services/contracts";
-
-function formatPostalCode(value: string): string {
-  const digits = value.replace(/\D/g, "").slice(0, 8);
-  if (digits.length <= 5) return digits;
-  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
-}
 
 export function CommunityAdmin() {
   const { id } = useParams<{ id: string }>();
@@ -35,8 +30,8 @@ export function CommunityAdmin() {
   const [editNameValue, setEditNameValue] = useState("");
   const [editingType, setEditingType] = useState(false);
   const [editTypeValue, setEditTypeValue] = useState(false);
-  const [editingPostalCode, setEditingPostalCode] = useState(false);
-  const [editPostalCodeValue, setEditPostalCodeValue] = useState("");
+  const [editLocationLat, setEditLocationLat] = useState<number | null>(null);
+  const [editLocationLng, setEditLocationLng] = useState<number | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [memberMenuOpen, setMemberMenuOpen] = useState<number | null>(null);
   const memberMenuRef = useRef<HTMLDivElement>(null);
@@ -194,24 +189,33 @@ export function CommunityAdmin() {
     }
   }
 
-  async function saveCommunityData(payload: { name: string; isPrivate?: boolean; postalCode?: string }) {
+  async function saveCommunityData(payload: {
+    name: string;
+    isPrivate?: boolean;
+    latitude?: number;
+    longitude?: number;
+  }) {
     if (!community) return;
     setActionBusy("save-data");
     try {
       const updated = await CondominiumService.updateCommunityName(communityId, {
         name: payload.name,
         ...(payload.isPrivate !== undefined && { isPrivate: payload.isPrivate }),
-        ...(payload.postalCode !== undefined && payload.postalCode !== "" && { postalCode: payload.postalCode.replace(/\D/g, "") }),
+        ...(payload.latitude !== undefined &&
+          payload.longitude !== undefined && {
+            latitude: payload.latitude,
+            longitude: payload.longitude,
+          }),
       });
       setCommunity(updated);
       setEditingName(false);
       setEditNameValue("");
       setEditingType(false);
-      setEditingPostalCode(false);
-      setEditPostalCodeValue("");
+      setEditLocationLat(null);
+      setEditLocationLng(null);
       if (updated.isPrivate !== community.isPrivate) loadRequests();
-    } catch (err: any) {
-      setError(err?.response?.data?.error ?? "Falha ao salvar.");
+    } catch (err: unknown) {
+      setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "Falha ao salvar.");
     } finally {
       setActionBusy(null);
     }
@@ -244,30 +248,28 @@ export function CommunityAdmin() {
     await saveCommunityData({
       name: community.name,
       isPrivate: editTypeValue,
-      postalCode: community.postalCode ?? "",
+      ...(community.latitude != null &&
+        community.longitude != null && {
+          latitude: community.latitude,
+          longitude: community.longitude,
+        }),
     });
     setEditingType(false);
   }
 
-  async function handleSavePostalCode() {
-    const raw = editPostalCodeValue.replace(/\D/g, "");
-    if (!community || raw.length !== 8) {
-      setEditingPostalCode(false);
-      setEditPostalCodeValue("");
-      return;
-    }
+  function onMapLocationChange(lat: number, lng: number) {
+    setEditLocationLat(lat);
+    setEditLocationLng(lng);
+  }
+
+  async function handleSaveLocation() {
+    if (!community || editLocationLat == null || editLocationLng == null) return;
     await saveCommunityData({
       name: community.name,
       isPrivate: community.isPrivate ?? false,
-      postalCode: raw,
+      latitude: editLocationLat,
+      longitude: editLocationLng,
     });
-    setEditingPostalCode(false);
-    setEditPostalCodeValue("");
-  }
-
-  function startEditingPostalCode() {
-    setEditPostalCodeValue(community?.postalCode ? formatPostalCode(community.postalCode) : "");
-    setEditingPostalCode(true);
   }
 
   function startEditingName() {
@@ -463,44 +465,39 @@ export function CommunityAdmin() {
                 </dd>
               </div>
               <div>
-                <dt className="text-muted">CEP</dt>
+                <dt className="text-muted">Localização</dt>
                 <dd className="font-medium">
-                  {editingPostalCode ? (
-                    <div className="flex flex-wrap items-center gap-2">
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={editPostalCodeValue}
-                        onChange={(e) => setEditPostalCodeValue(formatPostalCode(e.target.value))}
-                        className="h-9 w-32 rounded-lg border border-border bg-surface px-2 text-text"
-                        placeholder="00000-000"
-                        maxLength={9}
-                        autoFocus
-                      />
-                      <Button variant="primary" size="sm" disabled={actionBusy !== null} onClick={handleSavePostalCode}>
-                        {actionBusy === "save-data" ? "Salvando..." : "Salvar"}
-                      </Button>
+                  <p className="mb-2 text-xs text-muted">
+                    Arraste o pin no mapa para alterar a localização da comunidade (usada na busca por proximidade).
+                  </p>
+                  <LocationMapPicker
+                    center={
+                      community.latitude != null && community.longitude != null
+                        ? [community.latitude, community.longitude]
+                        : [-23.55, -46.63]
+                    }
+                    initialPosition={
+                      community.latitude != null && community.longitude != null
+                        ? [community.latitude, community.longitude]
+                        : null
+                    }
+                    onPositionChange={onMapLocationChange}
+                    height={240}
+                  />
+                  {editLocationLat != null &&
+                    editLocationLng != null &&
+                    (community.latitude !== editLocationLat || community.longitude !== editLocationLng) && (
                       <Button
-                        size="sm"
-                        variant="ghost"
-                        disabled={actionBusy !== null}
-                        onClick={() => { setEditingPostalCode(false); setEditPostalCodeValue(""); }}
-                      >
-                        Cancelar
-                      </Button>
-                    </div>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      {community.postalCode ? formatPostalCode(community.postalCode) : "—"}
-                      <button
                         type="button"
-                        className="text-xs font-medium text-primary-strong hover:underline"
-                        onClick={startEditingPostalCode}
+                        variant="primary"
+                        size="sm"
+                        className="mt-2"
+                        disabled={actionBusy !== null}
+                        onClick={handleSaveLocation}
                       >
-                        Editar
-                      </button>
-                    </span>
-                  )}
+                        {actionBusy === "save-data" ? "Salvando..." : "Salvar localização"}
+                      </Button>
+                    )}
                 </dd>
               </div>
               <div>
