@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AdSenseBanner } from "../components/AdSenseBanner";
 import { AdPlaceholder } from "../components/AdPlaceholder";
 import { Badge } from "../components/Badge";
 import { Button } from "../components/Button";
@@ -368,8 +369,9 @@ export function Feed() {
         {error ? <div className="mt-4 text-sm text-danger">{error}</div> : null}
 
         <div className="mt-4 grid gap-3 min-w-0">
-          {items.map((ad) => (
-            <Card key={ad.id} className="min-w-0 overflow-hidden p-0">
+          {items.map((ad, index) => (
+            <React.Fragment key={ad.id}>
+              <Card className="min-w-0 overflow-hidden p-0">
               <button
                 type="button"
                 className="w-full min-w-0 rounded-2xl text-left hover:bg-surface/60"
@@ -472,6 +474,10 @@ export function Feed() {
                 </div>
               </button>
             </Card>
+              {(index + 1) % 4 === 0 ? (
+                <AdSenseBanner key={`adsense-${ad.id}-${index}`} />
+              ) : null}
+            </React.Fragment>
           ))}
 
           {!loading && items.length === 0 ? (
