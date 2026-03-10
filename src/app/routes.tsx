@@ -22,6 +22,16 @@ import { LegalPage } from "../pages/LegalPage";
 import { NotificationsPage } from "../pages/Notifications";
 import { ResetPassword } from "../pages/ResetPassword";
 import { VerifyEmail } from "../pages/VerifyEmail";
+import { RequireSystemAdmin } from "../components/RequireSystemAdmin";
+import { AdminLayout } from "../pages/admin/AdminLayout";
+import { AdminDashboard } from "../pages/admin/AdminDashboard";
+import { AdminCommunities } from "../pages/admin/AdminCommunities";
+import { AdminAds } from "../pages/admin/AdminAds";
+import { AdminUsers } from "../pages/admin/AdminUsers";
+import { AdminReports } from "../pages/admin/AdminReports";
+import { AdminMap } from "../pages/admin/AdminMap";
+import { AdminSettings } from "../pages/admin/AdminSettings";
+import { AdminStatus } from "../pages/admin/AdminStatus";
 import * as AuthService from "../services/auth.service";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -156,6 +166,25 @@ export function AppRoutes() {
       <Route path="/communities/:id/admin" element={<RequireAuth><RequireCommunity><CommunityAdmin /></RequireCommunity></RequireAuth>} />
       <Route path="/my-account" element={<RequireAuth><RequireCommunity><MyAccount /></RequireCommunity></RequireAuth>} />
       <Route path="/notifications" element={<RequireAuth><RequireCommunity><NotificationsPage /></RequireCommunity></RequireAuth>} />
+      <Route
+        path="/admin"
+        element={
+          <RequireAuth>
+            <RequireSystemAdmin>
+              <AdminLayout />
+            </RequireSystemAdmin>
+          </RequireAuth>
+        }
+      >
+        <Route index element={<AdminDashboard />} />
+        <Route path="communities" element={<AdminCommunities />} />
+        <Route path="ads" element={<AdminAds />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="reports" element={<AdminReports />} />
+        <Route path="map" element={<AdminMap />} />
+        <Route path="settings" element={<AdminSettings />} />
+        <Route path="status" element={<AdminStatus />} />
+      </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -205,6 +205,8 @@ export interface UserProfileResponse {
   whatsapp?: string;
   address?: string;
   emailVerified?: boolean;
+  /** Acesso ao painel administrativo do sistema */
+  systemAdmin?: boolean;
 }
 
 export interface UpdateProfileRequest {
