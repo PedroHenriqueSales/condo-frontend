@@ -28,6 +28,7 @@ export function MyAccount() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [systemAdmin, setSystemAdmin] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -39,6 +40,7 @@ export function MyAccount() {
         setEmail(profile.email);
         setWhatsapp(profile.whatsapp ?? "");
         setAddress(profile.address ?? "");
+        setSystemAdmin(profile.systemAdmin === true);
       } catch (err: any) {
         setError(err?.response?.data?.error ?? "Falha ao carregar perfil.");
       } finally {
@@ -175,6 +177,24 @@ export function MyAccount() {
             </a>
           </p>
         </Card>
+
+        {systemAdmin &&
+          import.meta.env.VITE_ENABLE_ADMIN_PANEL !== "false" &&
+          typeof window !== "undefined" &&
+          !(window as { Capacitor?: unknown }).Capacitor && (
+            <Card className="mt-6">
+              <div className="text-sm font-semibold text-text">Administração</div>
+              <p className="mt-1 text-sm text-muted">
+                Acesso ao painel administrativo do sistema (apenas na versão web).
+              </p>
+              <Link
+                to="/admin"
+                className="mt-3 inline-block font-medium text-primary hover:underline"
+              >
+                Abrir painel admin →
+              </Link>
+            </Card>
+          )}
 
         <div className="mt-8 border-t border-border pt-6">
           <p className="mb-2 text-sm text-muted">
