@@ -164,7 +164,7 @@ export async function forceRemoveAd(adId: number): Promise<void> {
 }
 
 export type AdType = "SALE_TRADE" | "RENT" | "SERVICE" | "DONATION" | "RECOMMENDATION";
-export type AdStatus = "ACTIVE" | "PAUSED" | "CLOSED" | "REMOVED";
+export type AdStatus = "ACTIVE" | "PAUSED" | "RESERVED" | "SOLD" | "CLOSED" | "REMOVED";
 
 export interface AdminAdListItem {
   id: number;

@@ -98,7 +98,7 @@ export interface RegisterRequest {
 
 // Ads
 export type AdType = "SALE_TRADE" | "RENT" | "SERVICE" | "DONATION" | "RECOMMENDATION";
-export type AdStatus = "ACTIVE" | "PAUSED" | "CLOSED" | "REMOVED";
+export type AdStatus = "ACTIVE" | "PAUSED" | "RESERVED" | "SOLD" | "CLOSED" | "REMOVED";
 
 export interface AdResponse {
   id: number;
@@ -106,6 +106,8 @@ export interface AdResponse {
   description?: string;
   type: AdType;
   price?: number;
+  /** Preço anterior quando houve redução (para exibição riscada ao lado do novo valor). */
+  previousPrice?: number;
   status: AdStatus;
   userId: number;
   userName?: string;
@@ -121,6 +123,8 @@ export interface AdResponse {
   currentUserRating?: number | null;
   /** Preenchido quando suspenso automaticamente por denúncias */
   suspendedByReportsAt?: string | null;
+  /** Preenchido quando o anúncio é marcado como vendido. */
+  soldAt?: string | null;
 }
 
 // Denúncias

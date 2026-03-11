@@ -402,8 +402,17 @@ export function Feed() {
                         {ad.type === "DONATION" ? (
                           <span className="mt-1 inline-block text-xs text-muted">Doação</span>
                         ) : ad.price != null ? (
-                          <span className="mt-1 inline-block text-sm font-semibold text-price">
-                            {formatPriceCompact(Number(ad.price))}
+                          <span className="mt-1 inline-flex items-baseline gap-1 text-sm font-semibold text-price">
+                            {ad.previousPrice != null && ad.previousPrice > ad.price ? (
+                              <>
+                                <span className="text-xs text-muted line-through">
+                                  {formatPriceCompact(Number(ad.previousPrice))}
+                                </span>
+                                <span>{formatPriceCompact(Number(ad.price))}</span>
+                              </>
+                            ) : (
+                              <span>{formatPriceCompact(Number(ad.price))}</span>
+                            )}
                           </span>
                         ) : (
                           <span className="mt-1 inline-block text-xs text-muted">A consultar</span>

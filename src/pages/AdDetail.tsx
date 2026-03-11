@@ -241,8 +241,17 @@ export function AdDetail() {
                 ) : ad.type === "DONATION" ? (
                   <span className="text-sm text-muted">Doação</span>
                 ) : ad.price != null ? (
-                  <span className="whitespace-nowrap text-lg font-semibold text-price">
-                    {formatPrice(Number(ad.price))}
+                  <span className="flex items-baseline gap-2 whitespace-nowrap text-lg font-semibold text-price">
+                    {ad.previousPrice != null && ad.previousPrice > ad.price ? (
+                      <>
+                        <span className="text-sm text-muted line-through">
+                          {formatPrice(Number(ad.previousPrice))}
+                        </span>
+                        <span>{formatPrice(Number(ad.price))}</span>
+                      </>
+                    ) : (
+                      <span>{formatPrice(Number(ad.price))}</span>
+                    )}
                   </span>
                 ) : (
                   <span className="text-sm text-muted">Valor a consultar</span>

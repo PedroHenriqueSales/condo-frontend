@@ -87,6 +87,21 @@ export async function closeAd(adId: number): Promise<AdResponse> {
   return data;
 }
 
+export async function reserveAd(adId: number): Promise<AdResponse> {
+  const { data } = await api.patch<AdResponse>(`/ads/${adId}/reserve`);
+  return data;
+}
+
+export async function unreserveAd(adId: number): Promise<AdResponse> {
+  const { data } = await api.patch<AdResponse>(`/ads/${adId}/unreserve`);
+  return data;
+}
+
+export async function markAsSold(adId: number): Promise<AdResponse> {
+  const { data } = await api.patch<AdResponse>(`/ads/${adId}/sold`);
+  return data;
+}
+
 export async function deleteAd(adId: number): Promise<void> {
   await api.delete(`/ads/${adId}`);
 }
