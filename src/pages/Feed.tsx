@@ -371,7 +371,13 @@ export function Feed() {
         <div className="mt-4 grid gap-3 min-w-0">
           {items.map((ad, index) => (
             <React.Fragment key={ad.id}>
-              <Card className="min-w-0 overflow-hidden p-0">
+              <Card
+                className={`min-w-0 overflow-hidden p-0 ${
+                  ad.status === "SOLD"
+                    ? "border-l-4 border-l-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10"
+                    : ""
+                }`}
+              >
               <button
                 type="button"
                 className="w-full min-w-0 rounded-2xl text-left hover:bg-surface/60"
