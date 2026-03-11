@@ -256,6 +256,16 @@ export function AdDetail() {
                 ) : (
                   <span className="text-sm text-muted">Valor a consultar</span>
                 )}
+                {ad.status === "RESERVED" ? (
+                  <span className="mt-1 inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-100">
+                    Reservado
+                  </span>
+                ) : null}
+                {ad.status === "SOLD" ? (
+                  <span className="mt-1 inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-100">
+                    Vendido
+                  </span>
+                ) : null}
               </div>
             </div>
 

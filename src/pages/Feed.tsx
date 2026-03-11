@@ -379,7 +379,17 @@ export function Feed() {
               >
                 {ad.type !== "RECOMMENDATION" ? (
                   <div className="flex flex-col sm:flex-row sm:items-stretch">
-                    <div className="aspect-[4/3] w-full flex-shrink-0 overflow-hidden rounded-t-2xl rounded-b-xl bg-surface sm:w-40 sm:rounded-b-none sm:rounded-l-2xl sm:rounded-tr-none">
+                    <div className="relative aspect-[4/3] w-full flex-shrink-0 overflow-hidden rounded-t-2xl rounded-b-xl bg-surface sm:w-40 sm:rounded-b-none sm:rounded-l-2xl sm:rounded-tr-none">
+                      {ad.status === "RESERVED" ? (
+                        <div className="absolute left-0 top-0 rounded-br-xl bg-amber-500/95 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-card">
+                          Reservado
+                        </div>
+                      ) : null}
+                      {ad.status === "SOLD" ? (
+                        <div className="absolute left-0 top-0 rounded-br-xl bg-emerald-600/95 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-card">
+                          Vendido
+                        </div>
+                      ) : null}
                       {ad.imageUrls?.length ? (
                         <img
                           src={resolveImageUrl(ad.imageUrls[0])}
@@ -402,18 +412,30 @@ export function Feed() {
                         {ad.type === "DONATION" ? (
                           <span className="mt-1 inline-block text-xs text-muted">Doação</span>
                         ) : ad.price != null ? (
-                          <span className="mt-1 inline-flex items-baseline gap-1 text-sm font-semibold text-price">
-                            {ad.previousPrice != null && ad.previousPrice > ad.price ? (
-                              <>
-                                <span className="text-xs text-muted line-through">
-                                  {formatPriceCompact(Number(ad.previousPrice))}
-                                </span>
+                          <>
+                            <span className="mt-1 inline-flex items-baseline gap-1 text-sm font-semibold text-price">
+                              {ad.previousPrice != null && ad.previousPrice > ad.price ? (
+                                <>
+                                  <span className="text-xs text-muted line-through">
+                                    {formatPriceCompact(Number(ad.previousPrice))}
+                                  </span>
+                                  <span>{formatPriceCompact(Number(ad.price))}</span>
+                                </>
+                              ) : (
                                 <span>{formatPriceCompact(Number(ad.price))}</span>
-                              </>
-                            ) : (
-                              <span>{formatPriceCompact(Number(ad.price))}</span>
-                            )}
-                          </span>
+                              )}
+                            </span>
+                            {ad.status === "RESERVED" ? (
+                              <div className="mt-1 text-xs font-medium text-amber-700 dark:text-amber-200">
+                                Este item está reservado no momento.
+                              </div>
+                            ) : null}
+                            {ad.status === "SOLD" ? (
+                              <div className="mt-1 text-xs font-medium text-emerald-700 dark:text-emerald-200">
+                                Este item já foi vendido.
+                              </div>
+                            ) : null}
+                          </>
                         ) : (
                           <span className="mt-1 inline-block text-xs text-muted">A consultar</span>
                         )}
