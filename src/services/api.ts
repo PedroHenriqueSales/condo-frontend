@@ -37,9 +37,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-const AUTH_STATE_KEY = "aquidolado.authState";
-
-api.interceptors.response.use(
+const AUTH_STATE_KEY = "aquidolado.authState";api.interceptors.response.use(
   (res) => res,
   (err) => {
     const status = err?.response?.status;

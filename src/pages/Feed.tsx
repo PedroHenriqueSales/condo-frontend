@@ -17,6 +17,7 @@ import { resolveImageUrl } from "../utils/imageUrl";
 import { buildContactUrl, buildRecommendationContactUrl } from "../utils/whatsapp";
 import * as AdsService from "../services/ads.service";
 import * as MetricsService from "../services/metrics.service";
+import * as PublicService from "../services/public.service";
 
 type UiTab = "TODOS" | "VENDA" | "ALUGUEL" | "SERVICOS" | "DOACAO" | "INDICACOES";
 
@@ -94,6 +95,7 @@ export function Feed() {
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [adsEnabled, setAdsEnabled] = useState(false);
 
   const getDefaultSort = useCallback((currentTab: UiTab): string => {
     return currentTab === "INDICACOES" ? "title,asc" : "createdAt,desc";
@@ -220,6 +222,25 @@ export function Feed() {
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adType, adTypes, activeCommunityId, search, sortOrder]);
+
+  useEffect(() => {
+    let active = true;
+
+    PublicService.getPublicFeatures()
+      .then((features) => {
+        if (!active) return;
+        setAdsEnabled(features.adsEnabled === true);
+      })
+      .catch(() => {
+        if (!active) return;
+        // Fail-safe: sem confirmação positiva, anúncios permanecem ocultos.
+        setAdsEnabled(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Fechar menu de ordenação ao clicar fora
   useEffect(() => {
@@ -511,7 +532,7 @@ export function Feed() {
                 </div>
               </button>
             </Card>
-              {(index + 1) % 4 === 0 ? (
+              {adsEnabled && (index + 1) % 4 === 0 ? (
                 <AdSenseBanner key={`adsense-${ad.id}-${index}`} />
               ) : null}
             </React.Fragment>

@@ -81,6 +81,10 @@ export interface AuthResponse {
   emailVerified?: boolean;
 }
 
+export interface PublicFeaturesResponse {
+  adsEnabled: boolean;
+}
+
 export interface LoginRequest {
   email: string;
   password: string;
