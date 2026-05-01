@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AdSenseBanner } from "../components/AdSenseBanner";
 import { AdPlaceholder } from "../components/AdPlaceholder";
 import { Badge } from "../components/Badge";
 import { Button } from "../components/Button";
@@ -16,6 +17,7 @@ import { resolveImageUrl } from "../utils/imageUrl";
 import { buildContactUrl, buildRecommendationContactUrl } from "../utils/whatsapp";
 import * as AdsService from "../services/ads.service";
 import * as MetricsService from "../services/metrics.service";
+import * as PublicService from "../services/public.service";
 
 type UiTab = "TODOS" | "VENDA" | "ALUGUEL" | "SERVICOS" | "DOACAO" | "INDICACOES";
 
@@ -93,6 +95,7 @@ export function Feed() {
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [adsEnabled, setAdsEnabled] = useState(false);
 
   const getDefaultSort = useCallback((currentTab: UiTab): string => {
     return currentTab === "INDICACOES" ? "title,asc" : "createdAt,desc";
@@ -219,6 +222,25 @@ export function Feed() {
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adType, adTypes, activeCommunityId, search, sortOrder]);
+
+  useEffect(() => {
+    let active = true;
+
+    PublicService.getPublicFeatures()
+      .then((features) => {
+        if (!active) return;
+        setAdsEnabled(features.adsEnabled === true);
+      })
+      .catch(() => {
+        if (!active) return;
+        // Fail-safe: sem confirmação positiva, anúncios permanecem ocultos.
+        setAdsEnabled(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Fechar menu de ordenação ao clicar fora
   useEffect(() => {
@@ -368,8 +390,15 @@ export function Feed() {
         {error ? <div className="mt-4 text-sm text-danger">{error}</div> : null}
 
         <div className="mt-4 grid gap-3 min-w-0">
-          {items.map((ad) => (
-            <Card key={ad.id} className="min-w-0 overflow-hidden p-0">
+          {items.map((ad, index) => (
+            <React.Fragment key={ad.id}>
+              <Card
+                className={`min-w-0 overflow-hidden p-0 ${
+                  ad.status === "SOLD"
+                    ? "border-l-4 border-l-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10"
+                    : ""
+                }`}
+              >
               <button
                 type="button"
                 className="w-full min-w-0 rounded-2xl text-left hover:bg-surface/60"
@@ -377,7 +406,17 @@ export function Feed() {
               >
                 {ad.type !== "RECOMMENDATION" ? (
                   <div className="flex flex-col sm:flex-row sm:items-stretch">
-                    <div className="aspect-[4/3] w-full flex-shrink-0 overflow-hidden rounded-t-2xl rounded-b-xl bg-surface sm:w-40 sm:rounded-b-none sm:rounded-l-2xl sm:rounded-tr-none">
+                    <div className="relative aspect-[4/3] w-full flex-shrink-0 overflow-hidden rounded-t-2xl rounded-b-xl bg-surface sm:w-40 sm:rounded-b-none sm:rounded-l-2xl sm:rounded-tr-none">
+                      {ad.status === "RESERVED" ? (
+                        <div className="absolute left-0 top-0 rounded-br-xl bg-amber-500/95 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-card">
+                          Reservado
+                        </div>
+                      ) : null}
+                      {ad.status === "SOLD" ? (
+                        <div className="absolute left-0 top-0 rounded-br-xl bg-emerald-600/95 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-card">
+                          Vendido
+                        </div>
+                      ) : null}
                       {ad.imageUrls?.length ? (
                         <img
                           src={resolveImageUrl(ad.imageUrls[0])}
@@ -400,9 +439,30 @@ export function Feed() {
                         {ad.type === "DONATION" ? (
                           <span className="mt-1 inline-block text-xs text-muted">Doação</span>
                         ) : ad.price != null ? (
-                          <span className="mt-1 inline-block text-sm font-semibold text-price">
-                            {formatPriceCompact(Number(ad.price))}
-                          </span>
+                          <>
+                            <span className="mt-1 inline-flex items-baseline gap-1 text-sm font-semibold text-price">
+                              {ad.previousPrice != null && ad.previousPrice > ad.price ? (
+                                <>
+                                  <span className="text-xs text-muted line-through">
+                                    {formatPriceCompact(Number(ad.previousPrice))}
+                                  </span>
+                                  <span>{formatPriceCompact(Number(ad.price))}</span>
+                                </>
+                              ) : (
+                                <span>{formatPriceCompact(Number(ad.price))}</span>
+                              )}
+                            </span>
+                            {ad.status === "RESERVED" ? (
+                              <div className="mt-1 text-xs font-medium text-amber-700 dark:text-amber-200">
+                                Este item está reservado no momento.
+                              </div>
+                            ) : null}
+                            {ad.status === "SOLD" ? (
+                              <div className="mt-1 text-xs font-medium text-emerald-700 dark:text-emerald-200">
+                                Este item já foi vendido.
+                              </div>
+                            ) : null}
+                          </>
                         ) : (
                           <span className="mt-1 inline-block text-xs text-muted">A consultar</span>
                         )}
@@ -472,6 +532,10 @@ export function Feed() {
                 </div>
               </button>
             </Card>
+              {adsEnabled && (index + 1) % 4 === 0 ? (
+                <AdSenseBanner key={`adsense-${ad.id}-${index}`} />
+              ) : null}
+            </React.Fragment>
           ))}
 
           {!loading && items.length === 0 ? (
