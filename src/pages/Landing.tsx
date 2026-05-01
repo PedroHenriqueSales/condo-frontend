@@ -152,6 +152,44 @@ export function Landing() {
           </div>
         </section>
 
+        {/* Instalar como app */}
+        <section className="border-t border-border bg-surface/20 py-16 sm:py-20">
+          <div className="mx-auto max-w-4xl px-4">
+            <h2 className="text-center text-2xl font-bold text-text sm:text-3xl">
+              Como transformar em app
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-center text-muted">
+              Você pode instalar o Aqui na tela inicial do celular e usar como aplicativo, sem precisar abrir a loja.
+            </p>
+            <div className="mt-12 grid gap-6 sm:grid-cols-2">
+              <div className="rounded-2xl border border-border bg-card/60 p-6">
+                <h3 className="font-semibold text-text">Android (Chrome)</h3>
+                <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-muted">
+                  <li>Abra o Aqui no navegador Chrome.</li>
+                  <li>Toque no menu de três pontos no canto superior.</li>
+                  <li>Escolha "Instalar app" ou "Adicionar à tela inicial".</li>
+                  <li>Confirme em "Instalar".</li>
+                </ol>
+                <p className="mt-3 text-xs text-muted">
+                  Depois disso, o ícone do Aqui aparece na sua tela inicial como um app.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-border bg-card/60 p-6">
+                <h3 className="font-semibold text-text">iPhone e iPad (Safari)</h3>
+                <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-muted">
+                  <li>Abra o Aqui no Safari.</li>
+                  <li>Toque no botão de compartilhar (quadrado com seta para cima).</li>
+                  <li>Toque em "Adicionar à Tela de Início".</li>
+                  <li>Confirme em "Adicionar".</li>
+                </ol>
+                <p className="mt-3 text-xs text-muted">
+                  O atalho será criado na tela inicial e abrirá o Aqui em modo de app.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* CTA final */}
         <section className="border-t border-border bg-surface/20 py-16 sm:py-20">
           <div className="mx-auto max-w-2xl px-4 text-center">
